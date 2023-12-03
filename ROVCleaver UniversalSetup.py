@@ -1254,9 +1254,6 @@ def process_format_files(filelist_wks):
     logger.info('process format files')
 
     cumulative_missing_counties_list = []
-    # for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
-    #         in islice(filelist_wks, 1, None):
-    # islice starts at row index 1 not 0 to skip header; *_ discards unused cols after notes
 
     for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
             in filelist_wks.iter_rows(min_row=2, values_only=True):
