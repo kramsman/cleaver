@@ -4,6 +4,7 @@
     Allows moving and sorting rows.
     Some repetitious code - like pivot tables 1-5 - are looped.
 """
+# add this comment to push
 
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
@@ -1257,9 +1258,6 @@ def process_format_files(filelist_wks):
 
     for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
             in filelist_wks.iter_rows(min_row=2, values_only=True):
-
-    for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
-                in filelist_wks.iter_rows(min_row=2, values_only=True):
 
         if str(format_flag).strip().lower() == "x":
             ip = process_format_file(fn, pull_group, custom_field, ROV_SETUP['rawdata_path'],
