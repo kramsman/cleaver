@@ -4,8 +4,26 @@
     Allows moving and sorting rows.
     Some repetitious code - like pivot tables 1-5 - are looped.
 """
-# add this comment to push
 
+
+# Temporarily save curl text to enter in terminal
+# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
+
+# copy private to ROVCleaver_Prod w $HOME
+# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output $HOME/Library/CloudStorage/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/x.py
+
+# ROVCleaver_prod = https://www.dropbox.com/scl/fo/1pp2mg69019h2dijxvbke/h?rlkey=l6cs53fnqw4c2iqp6crpfjl24&dl=0
+# works on public
+# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py --output /Users/Denise/Downloads/dest.py
+
+# wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
+# wget --directory-prefix=/var/cache/foobar/ [...]
+
+# copied from terminal
+#  wget -P /Users/Denise/Downloads https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
+#  wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=GHSAT0AAAAAACLDGV6B4MYVBVQD2DP7LE5OZLQUEHA -P /Users/Denise/Downloads -O x.py
+#  wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
+# ------
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
 # TODO: put filetype in to select file and specify xlsx for Setup.
