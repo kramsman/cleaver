@@ -4,6 +4,8 @@
     Allows moving and sorting rows.
     Some repetitious code - like pivot tables 1-5 - are looped.
 """
+# 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
+# group_split
 
 
 # Temporarily save curl text to enter in terminal
