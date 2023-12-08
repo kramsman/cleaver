@@ -91,8 +91,10 @@ col_headers, col_lists = read_sheet_cols_into_lists(factory_parts)
 
 factory_combos = list(itertools.product(*col_lists))
 
-factory_combos2 = [["-".join(tuple1)] + list(tuple1) for tuple1 in factory_combos]
-factory_combos2.insert(0, ["factory"] + col_headers)
+# factory_combos2 = [["-".join(tuple1)] + list(tuple1) for tuple1 in factory_combos]
+# factory_combos2 = [["-".join(tuple1)], ["-".join(list(tuple1)[:-1])] + list(tuple1) for tuple1 in factory_combos]
+factory_combos2 = [["-".join(tuple1)] + ["-".join(tuple1[:-1])] + list(tuple1) for tuple1 in factory_combos]
+factory_combos2.insert(0, ["campaign", "factory"] + col_headers)
 
 # clear
 # write
