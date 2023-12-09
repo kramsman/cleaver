@@ -6,13 +6,25 @@
 """
 # 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
 # group_split
-#   TODO change splitfield to campaign_var
+#   TODO change splitfield to group_vars
 #   TODO add factory_var
 #   TODO add split_string field to df
 #   TODO check pull_group none to 0
 #   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
-# FIXME Hardcode path to zip and concentration files so cleaver_prod and _test both find them
+# 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
+# TODO: put filetype in to select file and specify xlsx for Setup.
+# TODO: change all tkinter & pymsgbox to simplegui
+
+# 12/xx/23 errors in imported code are identified in popup box.  fixed: : list of imported code (first_code,
+# etc) doesn't print on console if error found (raises first).
+# TODO redo formatcopy using pathlib / remove os.path.join
+# TODO can we skip padding variable lists?  zip will work on shortest one
+# FIXME make sure Format merge works - which fields missing are ok?
+# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
+#   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
+# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
+
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
@@ -34,17 +46,6 @@
 # ------
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
-# TODO: put filetype in to select file and specify xlsx for Setup.
-# TODO: change all tkinter & pymsgbox to simplegui
-
-# FIXME: list of imported code (first_code, etc) doesn't print on console if error found (raises first). Maybe use
-#  try/except and print file (not compile) to screen if error?
-# TODO redo formatcopy using pathlib / remove os.path.join
-# TODO can we skip padding variable lists?  zip will work on shortest one
-# FIXME make sure Format merge works - which fields missing are ok?
-# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
-#   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
-# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
 
 import ast
 import collections
@@ -646,7 +647,7 @@ def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_w
             df_pt.to_excel(single_piv_writer, sheet_name=sheet_name2, startrow=5)
 
 
-def pivot_reports(df, output_wks, input_fn, dict_address_concentration):
+def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration):
     """
     :param df: input dataframe
     :param output_wks: output spreadsheet
@@ -673,16 +674,40 @@ def pivot_reports(df, output_wks, input_fn, dict_address_concentration):
                         sheet_name='RawData by State-County', single_piv_writer=writer, second_pivot_by_count=False)
 
     if ROV_SETUP['add_filename_column_flag']:
-        single_pivot_report(df, index_fields=['filename'], value_fields=['address'], sheet_name='RawData by Filename',
+        single_pivot_report(df, index_fields=['filename'], value_fields=['address'],
+                            sheet_name='RawData by Filename',
                             single_piv_writer=writer, second_pivot_by_count=False)
 
-    single_pivot_report(df, index_fields=['remove'], value_fields=['address'], sheet_name='Removed Reasons',
+    single_pivot_report(df, index_fields=['remove'], value_fields=['address'],
+                        sheet_name='Removed Reasons',
                         single_piv_writer=writer, second_pivot_by_count=False)
 
     if ROV_SETUP['splitfield'] != "":
         single_pivot_report(df_clean, index_fields=ROV_SETUP['splitfield'], value_fields=['address'],
                             sheet_name='Clean by ' + ROV_SETUP['splitfield'][:22],
                             single_piv_writer=writer, second_pivot_by_count=True)
+
+        # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
+        # adjusted
+
+        # added counties report
+        # TODO does this need to be a separate df?  would it mess up other sorts otherwise?
+        sorted_df = df[['statecounty', 'pull_group']]\
+            .sort_values(['pull_group', 'statecounty', ], ascending=[True, True])
+        added_counties = sorted_df.drop_duplicates(subset=['statecounty'], keep='first')
+        added_counties.to_excel(writer, sheet_name='Counties by pull_group', startrow=5)
+
+        # added factories
+        sorted_df = df[['factory_vars_string', 'pull_group']]\
+            .sort_values(['pull_group', 'factory_vars_string', ], ascending=[True, True])
+        added_counties = sorted_df.drop_duplicates(subset=['factory_vars_string'], keep='first')
+        added_counties.to_excel(writer, sheet_name='Factory_vars by pull_group', startrow=5)
+
+        # added groups (factory + county)
+        sorted_df = df[['group_vars_string', 'pull_group']]\
+            .sort_values(['pull_group', 'group_vars_string', ], ascending=[True, True])
+        added_counties = sorted_df.drop_duplicates(subset=['group_vars_string'], keep='first')
+        added_counties.to_excel(writer, sheet_name='Group_vars by pull_group', startrow=5)
 
     # address concentration
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
@@ -753,7 +778,7 @@ def pivot_reports(df, output_wks, input_fn, dict_address_concentration):
         ws['A3'].font = Font(b=True, size=12)
         ws["A4"] = datetime.now().strftime('%m/%d/%Y')
 
-    logger.debug('out of countyCheck pivots')
+    logger.debug('out of pivots and other reports')
 
     writer.close()
 
@@ -1179,16 +1204,19 @@ def create_dicts():
 
     # create county dict returning various formats with
     # GA-CHATHAM as key: [0] is filename format; [1] print; [2] state-mixed
+    # ROV_SETUP['dict_statecounty_to_alt_formats'] = zip_file_to_county_dict(
+    #     ROV_SETUP['exe_path'] / 'zip-codes-database-DELUXE-BUSINESS.csv',
+    #     ROV_SETUP['exe_path'] / 'Unique_County_List.xlsx')
     ROV_SETUP['dict_statecounty_to_alt_formats'] = zip_file_to_county_dict(
-        ROV_SETUP['exe_path'] / 'zip-codes-database-DELUXE-BUSINESS.csv',
-        ROV_SETUP['exe_path'] / 'Unique_County_List.xlsx')
+        MAIN_ZIP_FILE,
+        MULTI_COUNTY_ZIP_FILE)
 
     logger.debug('Ran Counties_to_xls')
 
     if ROV_SETUP['run_county_check_code_flag']:
         with open(ROV_SETUP['exe_path'] / ZIP_TO_COUNTY_LIST_FILE, "r") as dict_file:
             ROV_SETUP['dict_zip_to_countylist'] = ast.literal_eval(dict_file.read())
-            logger.debug("Imported " + ZIP_TO_COUNTY_LIST_FILE)
+            logger.debug("Imported " + ZIP_TO_COUNTY_LIST_FILE.name)
 
     concentrated_addresses_data = range_to_list(ROV_SETUP['concentrated_addresses_sheet'], 2,
                                                 len(ROV_SETUP['concentrated_addresses_sheet']['A']), 1, 7)
@@ -1491,7 +1519,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
 
     # Create summary sheet of Rawdata, Formatted and Removed
     pivot_file = ROV_SETUP['format_path'] / "Summary" / ("SUMMARY " + str(PurePath(fn).stem) + ".xlsx")
-    pivot_reports(ip, pivot_file, fn, ROV_SETUP['dict_concentrated_addresses'])
+    pivot_and_other_reports(ip, pivot_file, fn, ROV_SETUP['dict_concentrated_addresses'])
 
     logger.debug("Leaving process_format_file")
     return ip
@@ -2028,10 +2056,10 @@ def main():
             # run pivot reports on combined
             logger.debug('Ready to run pivots')  # these prompts help if error in imported code
             file = ROV_SETUP['combined_path'] / ('Summary of ' + ROV_SETUP['OPFile'].stem + ".xlsx")
-            pivot_reports(df,
-                          file,
-                          ROV_SETUP['OPFile'].stem + '.csv',
-                          ROV_SETUP['dict_concentrated_addresses'])
+            pivot_and_other_reports(df,
+                                    file,
+                                    ROV_SETUP['OPFile'].stem + '.csv',
+                                    ROV_SETUP['dict_concentrated_addresses'])
 
             # V16.1 moved writeing of combined file to after dedupe
             # Write out combined file
