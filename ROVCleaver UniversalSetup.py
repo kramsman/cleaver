@@ -1279,6 +1279,9 @@ def process_format_files(filelist_wks):
     for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
             in filelist_wks.iter_rows(min_row=2, values_only=True):
 
+        if pull_group is None:  # FIXME 0 should work if not set, not being used.  Unintended consequences?
+            pull_group = 0
+
         if str(format_flag).strip().lower() == "x":
             ip = process_format_file(fn, pull_group, custom_field, ROV_SETUP['rawdata_path'],
                                      ROV_SETUP['format_path'],
