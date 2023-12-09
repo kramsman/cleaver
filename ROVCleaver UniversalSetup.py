@@ -83,12 +83,14 @@ log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO
 # INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
 INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/").expanduser()
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
-MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard/Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
+                             "PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 # MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
-MULTI_COUNTY_ZIP_FILE = pathlib.Path("zip-codes-database-MULTI-COUNTY.csv").expanduser()
+MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv").expanduser()
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
-ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("Zip_To_County_List_dict.py").expanduser()
+ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
+                                       "PythonProgs/ROVCleaver_Prod/Zip_To_County_List_dict.py").expanduser()
 
 PROP_CONCENTRATION = 50
 ZIP_CONCENTRATION = 10
