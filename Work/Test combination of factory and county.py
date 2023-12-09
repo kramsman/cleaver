@@ -98,10 +98,16 @@ factory_combos2.insert(0, ["campaign", "factory"] + col_headers)
 
 # clear
 # write
-try:
-    del wb_in["factory_combined"]
-except:
-    pass
+# try:
+#     del wb_in["factory_combined"]
+# except:
+#     pass
+
+# if 'factory_combined' in wb_in.sheetnames:
+#     print(f"Sheet 'factory_combined' exists in '{wb_str.name}'.  Rename, delete and start again.")
+#     # prompt for overwrite and delete i Y
+#     exit()
+
 wb_in.create_sheet(title="factory_combined")
 factory_combined = wb_in["factory_combined"]
 for row in factory_combos2:
