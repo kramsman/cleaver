@@ -12,6 +12,7 @@
 #   TODO check pull_group none to 0
 #   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
+# FIXME Hardcode path to zip and concentration files so cleaver_prod and _test both find them
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
@@ -81,10 +82,14 @@ log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO
 
 # INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
 INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/").expanduser()
-MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
-MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
-ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
-# 1011: ['hampden', 'hampshire'])
+# MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
+MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard/Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+# MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
+MULTI_COUNTY_ZIP_FILE = pathlib.Path("zip-codes-database-MULTI-COUNTY.csv").expanduser()
+# ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
+# file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
+ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("Zip_To_County_List_dict.py").expanduser()
+
 PROP_CONCENTRATION = 50
 ZIP_CONCENTRATION = 10
 
@@ -490,9 +495,10 @@ def zip_file_to_county_dict(zip_csv_path: Union[str, os.PathLike], xlsx_path: Un
         columns={'ZipCode': 'zip', 'State': 'state', 'County': 'county', 'CountyMixedCase': 'county_mixedcase'},
         inplace=True)
 
-    # military states like AA and AE have no county so remove
+    # remove military states like AA and AE because they have no county
     main_zip_file = main_zip_file.loc[main_zip_file['county'].str.strip() != ""]
 
+    # 'county' already has city in it and assumes county so good for statecounty.  Add 'county' for printing.
     # remove characters like ,- space
     main_zip_file['countyclean'] = main_zip_file['county'].apply(clean_field, case_convert='keep')
     main_zip_file['statecounty'] = main_zip_file['state'] + "-" + main_zip_file['countyclean']
@@ -1912,9 +1918,13 @@ def main():
                     display_exiting=False)
 
         # create py dict file; file defined at top of program
-        create_zip_to_county_list_dict(ROV_SETUP['exe_path'] / MAIN_ZIP_FILE,
-                                       ROV_SETUP['exe_path'] / MULTI_COUNTY_ZIP_FILE,
-                                       ROV_SETUP['exe_path'] / ZIP_TO_COUNTY_LIST_FILE)
+        # TODO check if hardcoded path works with .EXE
+        # create_zip_to_county_list_dict(ROV_SETUP['exe_path'] / MAIN_ZIP_FILE,
+        #                                ROV_SETUP['exe_path'] / MULTI_COUNTY_ZIP_FILE,
+        #                                ROV_SETUP['exe_path'] / ZIP_TO_COUNTY_LIST_FILE)
+        create_zip_to_county_list_dict(MAIN_ZIP_FILE,
+                                       MULTI_COUNTY_ZIP_FILE,
+                                       ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
         pymsgbox.alert("Ran Zip Dict file update", "Update zip files")
 
