@@ -6,7 +6,12 @@
 """
 # 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
 # group_split
-
+#   TODO change splitfield to campaign_var
+#   TODO add factory_var
+#   TODO add split_string field to df
+#   TODO check pull_group none to 0
+#   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
+#    to add but skip if already in list?
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
