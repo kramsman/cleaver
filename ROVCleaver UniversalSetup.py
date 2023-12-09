@@ -803,7 +803,7 @@ def address_concentration_open_browser(df):
         pass
 
 
-def fields_to_list(base_list, new_fields):
+def add_fields_to_list(base_list, new_fields):
     """ adds new fields to base lists.  exits if already in list."""
     new_fields_lst = [field.strip().lower() for field in new_fields.split(",")]
     same_fields = [field.strip().lower() for field in new_fields_lst if field in base_list]
@@ -879,29 +879,29 @@ def split_files_for_sincere(lim):
                  f"\n\n{', '.join(fields_missing_from_combinefile)}"
                  )
 
-    if ROV_SETUP['splitfield'] == '':  # no split field specified so write out one file with name "Combined"
+    if not ROV_SETUP['group_vars']:  # no split field specified so write out one file with name "Combined"
         split_filename = ROV_SETUP['expectedstate'] + '-' + "Combined " + op_stem
         chunk_split_file(df_combo_w_no_remove, lim, ROV_SETUP['split_path_hold'], split_filename)
 
     else:
-        if ROV_SETUP['splitfield'].lower() == 'county':
-            splitfield = 'statecounty'
-        else:
-            splitfield = ROV_SETUP['splitfield']
-        unique_split_values = df_combo_w_no_remove[splitfield].unique()
+        # if ROV_SETUP['splitfield'].lower() == 'county':
+        #     splitfield = 'statecounty'
+        # else:
+        #     splitfield = ROV_SETUP['splitfield']
+        unique_split_values = df_combo_w_no_remove['group_vars_string'].unique()
         unique_split_values.sort()
 
         # for each - write out a csv file.
-        for splitfield_value in unique_split_values:
+        for group_vars_string_value in unique_split_values:
             # print("split " + splitfield_value)
-            df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove[splitfield] == splitfield_value]
+            df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove['group_vars_string'] == group_vars_string_value]
 
-            if ROV_SETUP['splitfield'].lower() == 'county':
-                split_filename = ROV_SETUP['dict_statecounty_to_alt_formats'][splitfield_value][2]
-                # get the format of county we want to use for filename using county lookup
-            else:
-                split_filename = ROV_SETUP['expectedstate'] + '-' + splitfield_value
-            split_filename = split_filename + "- " + op_stem
+            # if ROV_SETUP['splitfield'].lower() == 'county':
+            #     split_filename = ROV_SETUP['dict_statecounty_to_alt_formats'][group_vars_string_value][2]
+            #     # get the format of county we want to use for filename using county lookup
+            # else:
+            #     split_filename = ROV_SETUP['expectedstate'] + '-' + group_vars_string_value
+            split_filename = group_vars_string_value + "- " + op_stem
 
             # write out file, broken into chinks if needed
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
@@ -998,7 +998,7 @@ def get_setup_file_name(initial_campaign_dir):
 
     # Use this flag when testing - False allows hardcoding input from alternate starting directory
     # noinspection PyUnreachableCode
-    if True:
+    if False:
         # show an "Open" dialog box and return the path to the selected file
         # V13.1 parameterize start directory and remove '/Users/Denise' reference
         # ROV.setup_file_name = askopenfilename(
@@ -1014,7 +1014,7 @@ def get_setup_file_name(initial_campaign_dir):
     else:
         # Hardcode in TEST INPUT FILE directory for repetitive testing
         setup_file_name = pathlib.Path(
-            "~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/BEK Test UniversalSetup/ROVCleaver "
+            "~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_on_Dropbox/TestCampaign/ROVCleaver "
             "UniversalSetup.xlsx").expanduser()
 
         exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
@@ -1042,7 +1042,7 @@ def get_setup_file_name(initial_campaign_dir):
 #         bad_path_exit(ROV_SETUP['rawdata_path'])
 
 
-def exit_for_unwanted_setup_options():
+def check_for_unwanted_setup_options():
     """ verifies setup options when program is run allowing to exit and edit setup
     """
     logger.info('Checking setup options')
@@ -1123,25 +1123,28 @@ def create_field_lists():
     # ROV_SETUP['splitfile_field_list'] = [field.strip().lower() for field in ROV_SETUP['splitfile_field_list']]
 
     if ROV_SETUP['run_county_check_code_flag']:  # V15.0
-        fields_to_list(ROV_SETUP['formatfile_field_list'], "orig_county,clean_county,zip_county_list,statecounty,"
+        add_fields_to_list(ROV_SETUP['formatfile_field_list'], "orig_county,clean_county,zip_county_list,statecounty,"
                                                   "mismatch_county,"
                                                   "numzip")
 
     # add 'filename' field if requested
     if ROV_SETUP['add_filename_column_flag']:  # V15.0
-        fields_to_list(ROV_SETUP['formatfile_field_list'], "filename")
+        add_fields_to_list(ROV_SETUP['formatfile_field_list'], "filename")
 
     # Always add 'remove' field - makes reporting easier and will almost always be used
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'remove')
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'rownum')  # V15.0
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'dupe_key')  # V16.0
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'dupe_id_field')  # V16.0
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'pull_group')
-    fields_to_list(ROV_SETUP['formatfile_field_list'], 'custom_field')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'remove')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'rownum')  # V15.0
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'dupe_key')  # V16.0
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'dupe_id_field')  # V16.0
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'pull_group')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'custom_field')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'campaign_vars_string')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'factory_vars_string')
+    add_fields_to_list(ROV_SETUP['formatfile_field_list'], 'group_vars_string')
 
     if ROV_SETUP['add_random_number_column_flag']:
         # add field randnum so we can sort FORMAT files by county and randnum
-        fields_to_list(ROV_SETUP['formatfile_field_list'], "randnum")  # V15.0
+        add_fields_to_list(ROV_SETUP['formatfile_field_list'], "randnum")  # V15.0
 
     # Check that no fields are specified on output that are not on input  # V15.0 commented out -
     fields_missing_from_input = set(ROV_SETUP['combinefile_field_list']) - \
@@ -1415,6 +1418,11 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
 
         # This is the function from the sheet with any parameters it needs
         logger.debug('Ran middle_code')  # these prompts help if error in imported code
+
+    # set campaign, factory and group var strings - after middle so created vars are set
+    # ip['campaign_vars_string'] = ip[campaign_vars].agg('-'.join, axis=1)
+    ip['factory_vars_string'] = ip[ROV_SETUP['factory_vars']].agg('-'.join, axis=1)
+    ip['group_vars_string'] = ip[ROV_SETUP['group_vars']].agg('-'.join, axis=1)
 
     # if requested, RUN code to remove unwanted records
     if ROV_SETUP['run_last_code_flag']:
@@ -1944,7 +1952,7 @@ def main():
             bad_path_create(ROV_SETUP['format_path'] / "Duplicates")
 
             # allow to exit if desired, eg flag not correct, imported code not right
-            exit_for_unwanted_setup_options()
+            check_for_unwanted_setup_options()
 
             # Loop through all files in filelist to be formatted
             process_format_files(ROV_SETUP['filelist_sheet'])
@@ -2099,6 +2107,14 @@ def format_setup_vars():
     ROV_SETUP['inputfile_orig_list'] = pad_list(ROV_SETUP['xl_inputfile_orig_list'], max_len, pad_val="")
     ROV_SETUP['inputfile_renamed_list'] = pad_list(ROV_SETUP['xl_inputfile_renamed_list'], max_len, pad_val="")
     ROV_SETUP['inputfile_type_list'] = pad_list(ROV_SETUP['xl_inputfile_type_list'], max_len, pad_val="")
+
+    # ROV_SETUP['campaign_vars'] = [fld.strip() for fld
+    #                      in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
+    ROV_SETUP['factory_vars'] = [fld.strip() for fld
+                         in ROV_SETUP['xl_factory_vars'].split(',') if fld != '']
+    ROV_SETUP['group_vars'] = [ROV_SETUP['splitfield']] + ROV_SETUP['factory_vars']
+    # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
+    #  available? when are they added to list?
 
     ROV_SETUP['concentrated_addresses_wb'] = load_workbook(filename=ROV_SETUP['concentrated_addresses_file'])
     ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
