@@ -6,15 +6,16 @@
 """
 # 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
 # group_split
-#   TODO change splitfield to group_vars
-#   TODO add factory_var
-#   TODO add split_string field to df
+#   changed splitfield to group_vars
+#   added factory_var
+# 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
+
+# FIXME report in xls w factory, campaign and pieces, pullgrpus? address counts?
+# TODO: put filetype in to select file and specify xlsx for Setup.
+# TODO: change all tkinter & pymsgbox to simplegui
 #   TODO check pull_group none to 0
 #   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
-# 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
-# TODO: put filetype in to select file and specify xlsx for Setup.
-# TODO: change all tkinter & pymsgbox to simplegui
 
 # 12/xx/23 errors in imported code are identified in popup box.  fixed: : list of imported code (first_code,
 # etc) doesn't print on console if error found (raises first).
@@ -24,7 +25,7 @@
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
 # TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
-
+# TODO: get gideon's opinion on list of vars over cells or in one separated by comma or mixed
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
@@ -699,9 +700,9 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
                         sheet_name='Removed Reasons',
                         single_piv_writer=writer, second_pivot_by_count=False)
 
-    if ROV_SETUP['splitfield'] != "":
-        single_pivot_report(df_clean, index_fields=ROV_SETUP['splitfield'], value_fields=['address'],
-                            sheet_name='Clean by ' + ROV_SETUP['splitfield'][:22],
+    if ROV_SETUP['group_vars']:
+        single_pivot_report(df_clean, index_fields=ROV_SETUP['group_vars'], value_fields=['address'],
+                            sheet_name='Clean by ' + ",".join(ROV_SETUP['group_vars'])[:22],
                             single_piv_writer=writer, second_pivot_by_count=True)
 
     # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
@@ -709,8 +710,8 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     report_by_pull_group(df, 'statecounty', 'Counties by pull_group')
 
     # list added campaigns.  These need to be added in factory tables
-    if ROV_SETUP['splitfield']:
-        report_by_pull_group(df, ROV_SETUP['splitfield'], 'splitfield by pull_group')
+    if ROV_SETUP['campaign_vars']:
+        report_by_pull_group(df, 'campaign_vars_string', 'campaign_vars by pull_group')
 
     # list added factories.  These will need to be added as new factories in Sincere.
     if ROV_SETUP['factory_vars']:
@@ -860,7 +861,7 @@ def add_fields_to_list(base_list, new_fields):
 
 
 def split_files_for_sincere(lim):
-    """ splits main df into files by splitfield for loading into VoterLetters/Sincere.  splits large files into subs
+    """ splits main df into files by group_vars for loading into VoterLetters/Sincere.  splits large files into subs
     with counter if larger than limit.
     """
     logger.info("split files for Sincere")
@@ -929,10 +930,10 @@ def split_files_for_sincere(lim):
         chunk_split_file(df_combo_w_no_remove, lim, ROV_SETUP['split_path_hold'], split_filename)
 
     else:
-        # if ROV_SETUP['splitfield'].lower() == 'county':
+        # if ROV_SETUP['campaign_vars'].lower() == 'county':
         #     splitfield = 'statecounty'
         # else:
-        #     splitfield = ROV_SETUP['splitfield']
+        #     splitfield = ROV_SETUP['campaign_vars']
         unique_split_values = df_combo_w_no_remove['group_vars_string'].unique()
         unique_split_values.sort()
 
@@ -941,7 +942,7 @@ def split_files_for_sincere(lim):
             # print("split " + splitfield_value)
             df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove['group_vars_string'] == group_vars_string_value]
 
-            # if ROV_SETUP['splitfield'].lower() == 'county':
+            # if ROV_SETUP['campaign_vars'].lower() == 'county':
             #     split_filename = ROV_SETUP['dict_statecounty_to_alt_formats'][group_vars_string_value][2]
             #     # get the format of county we want to use for filename using county lookup
             # else:
@@ -1092,7 +1093,9 @@ def check_for_unwanted_setup_options():
     """
     logger.info('Checking setup options')
 
-    if ROV_SETUP['run_county_check_code_flag'] and ROV_SETUP['splitfield'].lower() != 'county':
+    # flag if checking county/zip and county or statecounty not in group_vars
+    if ROV_SETUP['run_county_check_code_flag'] and \
+            set(ROV_SETUP['group_vars']).intersection(set(['county', 'statecounty'])) == set():
         exit_yes_no(("You are checking for zip/county mismatches"
                      "\nbut you are not splitting by county."
                      "\n\n\nIs this what you meant?"))
@@ -1194,7 +1197,6 @@ def create_field_lists():
     # Check that no fields are specified on output that are not on input  # V15.0 commented out -
     fields_missing_from_input = set(ROV_SETUP['combinefile_field_list']) - \
                                 set(ROV_SETUP['formatfile_field_list'])
-    # this doesn't need to check input to format which is what it was
     if fields_missing_from_input:
         exit_yes((f"Field(s) are specified to output on Combine file but are not present on Format.  "
                   f"\n\nMissing field(s) specified are:\n\n"
@@ -1203,9 +1205,15 @@ def create_field_lists():
                   f"{', '.join(ROV_SETUP['formatfile_field_list'])}"
                   ))
 
-    # Check if splitfield is on field list, error if not
-    if ROV_SETUP['splitfield'] != '' and ROV_SETUP['splitfield'].lower() not in ROV_SETUP['formatfile_field_list']:
-        exit_yes((f"Splitfield field '{ROV_SETUP['splitfield']}' is missing from Format file field list.\n\n"
+    # Flag if factory and no campaign
+    if ROV_SETUP['factory_vars'] and not ROV_SETUP['campaign_vars']:
+        exit_yes((f"factory_vars specified '{ROV_SETUP['factory_vars']}' but no campaign_vars.  Switch and rerun.\n\n"
+                  ))
+
+    # Check if group_vars is on field list, error if not
+    if ROV_SETUP['group_vars'] and \
+            not set(ROV_SETUP['group_vars']).issubset(set(ROV_SETUP['formatfile_field_list'])) :
+        exit_yes((f"some of group_vars '{ROV_SETUP['group_vars']}' are missing from Format file field list.\n\n"
                   f"Available fields are:\n{', '.join(ROV_SETUP['formatfile_field_list'])}"
                   ))
 
@@ -1467,8 +1475,9 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
         # This is the function from the sheet with any parameters it needs
         logger.debug('Ran middle_code')  # these prompts help if error in imported code
 
-    # set campaign, factory and group var strings - after middle so created vars are set
-    # ip['campaign_vars_string'] = ip[campaign_vars].agg('-'.join, axis=1)
+    # fill campaign, factory and group var strings with concat of var values separated by '-'; after middle so created
+    # vars are set
+    ip['campaign_vars_string'] = ip[ROV_SETUP['campaign_vars']].agg('-'.join, axis=1)
     ip['factory_vars_string'] = ip[ROV_SETUP['factory_vars']].agg('-'.join, axis=1)
     ip['group_vars_string'] = ip[ROV_SETUP['group_vars']].agg('-'.join, axis=1)
 
@@ -1488,7 +1497,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     ip.drop(ROV_SETUP['inputfile_delete_field_list'], axis=1, inplace=True)
 
     # Sort file by randnum if flag is set
-    if ROV_SETUP['sort_list']:  # true if not empty
+    if ROV_SETUP['sort_list']:  # TODO why are wee even if sorting if not set?  to make remove code faster?
         ip.sort_values(by=['remove', 'zip', 'address', 'randnum'], inplace=True)
 
     # Make sure county is on file, find mismatched counties and return for accumulating
@@ -2062,7 +2071,7 @@ def main():
 
             test_df_clean = df[df['remove'] == '']
 
-            if ROV_SETUP['sort_list']:  # true if not empty
+            if ROV_SETUP['sort_list']:
                 df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
 
             # run pivot reports on combined
@@ -2160,11 +2169,11 @@ def format_setup_vars():
     ROV_SETUP['inputfile_renamed_list'] = pad_list(ROV_SETUP['xl_inputfile_renamed_list'], max_len, pad_val="")
     ROV_SETUP['inputfile_type_list'] = pad_list(ROV_SETUP['xl_inputfile_type_list'], max_len, pad_val="")
 
-    # ROV_SETUP['campaign_vars'] = [fld.strip() for fld
-    #                      in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
+    ROV_SETUP['campaign_vars'] = [fld.strip() for fld
+                                 in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
     ROV_SETUP['factory_vars'] = [fld.strip() for fld
                          in ROV_SETUP['xl_factory_vars'].split(',') if fld != '']
-    ROV_SETUP['group_vars'] = [ROV_SETUP['splitfield']] + ROV_SETUP['factory_vars']
+    ROV_SETUP['group_vars'] = ROV_SETUP['campaign_vars'] + ROV_SETUP['factory_vars']
     # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
     #  available? when are they added to list?
 
@@ -2174,18 +2183,28 @@ def format_setup_vars():
     if ROV_SETUP['run_merge_data_flag']:
         bad_path_exit(ROV_SETUP['rawdata_path'])
 
-    if ROV_SETUP['splitfield'] == '' and ROV_SETUP['sortchoice'] in [1, 2, 3]:
-        exit_yes(f"Sort choice must be '4' if no no split field is specified"
-                 f"\n\nSort choice is: {ROV_SETUP['sortchoice']}")
+    # if not ROV_SETUP['group_vars'] and ROV_SETUP['sortchoice'] in [1, 2, 3]:
+    #     exit_yes(f"Sort choice must be '4' if no no split field is specified"
+    #              f"\n\nSort choice is: {ROV_SETUP['sortchoice']}")
+    # else:
+    #     if ROV_SETUP['sortchoice'] == 1:
+    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
+    #     elif ROV_SETUP['sortchoice'] == 2:
+    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'randnum']
+    #     elif ROV_SETUP['sortchoice'] == 3:
+    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
+    #     else:
+    #         ROV_SETUP['sort_list'] = []
+
+
+    if ROV_SETUP['sortchoice'] == 1:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
+    elif ROV_SETUP['sortchoice'] == 2:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'randnum']
+    elif ROV_SETUP['sortchoice'] == 3:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
     else:
-        if ROV_SETUP['sortchoice'] == 1:
-            ROV_SETUP['sort_list'] = [ROV_SETUP['splitfield'], 'remove', 'zip', 'address', 'randnum']
-        elif ROV_SETUP['sortchoice'] == 2:
-            ROV_SETUP['sort_list'] = [ROV_SETUP['splitfield'], 'remove', 'zip', 'randnum']
-        elif ROV_SETUP['sortchoice'] == 3:
-            ROV_SETUP['sort_list'] = [ROV_SETUP['splitfield'], 'remove', 'randnum']
-        else:
-            ROV_SETUP['sort_list'] = []
+        ROV_SETUP['sort_list'] = []
 
     # combine pivot info into an object we can loop through
     ROV_SETUP['pivot_specs'] = []
