@@ -82,7 +82,7 @@ from loguru import logger
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
 # INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
-INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/").expanduser()
+INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/").expanduser()
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
 MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
                              "PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
@@ -665,6 +665,23 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     writer = pd.ExcelWriter(output_wks, engine='openpyxl')
     df_clean = df[df['remove'] == '']
 
+    def report_by_pull_group(df: pd.DataFrame, rpt_field: str, sheet_name: str) -> None:
+        """ list the new rpt_field occurrences in each pull_group, so we can address/include them in reporting.
+        Output is written to the previously defined excel 'writer'.
+
+        Parameters
+        ----------
+        df : input df.  extract will be sorted in function.
+        rpt_field :  A 'grouped' variablecolumn in df we are reporting on.
+        sheet_name : output sheetname put in report worksbook, usually 'SUMMARY...'
+        """
+
+        sorted_df = df[[rpt_field, 'pull_group']] \
+            .sort_values(['pull_group', rpt_field, ], ascending=[True, True])
+        added_counties = sorted_df.drop_duplicates(subset=[rpt_field], keep='first')
+        added_counties.to_excel(writer, sheet_name=sheet_name, startrow=5)
+
+
     # Create summary sheet of Rawdata, Formatted and Removed
     # for other states, roll all counties in to one called "All Counties'
     df['countysummed'] = np.where(df['state'] == ROV_SETUP['expectedstate'], df['statecounty'], "All Counties")
@@ -687,27 +704,22 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
                             sheet_name='Clean by ' + ROV_SETUP['splitfield'][:22],
                             single_piv_writer=writer, second_pivot_by_count=True)
 
-        # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
-        # adjusted
+    # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
+    # adjusted
+    report_by_pull_group(df, 'statecounty', 'Counties by pull_group')
 
-        # added counties report
-        # TODO does this need to be a separate df?  would it mess up other sorts otherwise?
-        sorted_df = df[['statecounty', 'pull_group']]\
-            .sort_values(['pull_group', 'statecounty', ], ascending=[True, True])
-        added_counties = sorted_df.drop_duplicates(subset=['statecounty'], keep='first')
-        added_counties.to_excel(writer, sheet_name='Counties by pull_group', startrow=5)
+    # list added campaigns.  These need to be added in factory tables
+    if ROV_SETUP['splitfield']:
+        report_by_pull_group(df, ROV_SETUP['splitfield'], 'splitfield by pull_group')
 
-        # added factories
-        sorted_df = df[['factory_vars_string', 'pull_group']]\
-            .sort_values(['pull_group', 'factory_vars_string', ], ascending=[True, True])
-        added_counties = sorted_df.drop_duplicates(subset=['factory_vars_string'], keep='first')
-        added_counties.to_excel(writer, sheet_name='Factory_vars by pull_group', startrow=5)
+    # list added factories.  These will need to be added as new factories in Sincere.
+    if ROV_SETUP['factory_vars']:
+         report_by_pull_group(df, 'factory_vars_string', 'Factory_vars by pull_group')
 
-        # added groups (factory + county)
-        sorted_df = df[['group_vars_string', 'pull_group']]\
-            .sort_values(['pull_group', 'group_vars_string', ], ascending=[True, True])
-        added_counties = sorted_df.drop_duplicates(subset=['group_vars_string'], keep='first')
-        added_counties.to_excel(writer, sheet_name='Group_vars by pull_group', startrow=5)
+    # list added groups (factory + county).  These will be the split files produced.  May need to be added to
+    # old factories.
+    if ROV_SETUP['group_vars']:
+        report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
 
     # address concentration
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
@@ -1047,7 +1059,7 @@ def get_setup_file_name(initial_campaign_dir):
     else:
         # Hardcode in TEST INPUT FILE directory for repetitive testing
         setup_file_name = pathlib.Path(
-            "~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_on_Dropbox/TestCampaign/ROVCleaver "
+            "~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_on_Dropbox/WorkCampaign/ROVCleaver "
             "UniversalSetup.xlsx").expanduser()
 
         exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
@@ -1809,12 +1821,12 @@ def convert_xlsx_to_csvs():
     str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
                                             "XLSX Directory",
                                             INITIAL_CAMPAIGN_DIR)
-    # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
+    # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/TestXlsToCsv/Rawdata"
 
     str_csv_dir = get_dir_name("Select a DIRECTORY where converted CSVs will be placed",
                                             "CSV Directory",
                                             INITIAL_CAMPAIGN_DIR)
-    # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
+    # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/TestXlsToCsv/csv"
 
     xls_dir = pathlib.Path(str_xls_dir)
     csv_dir = pathlib.Path(str_csv_dir)
