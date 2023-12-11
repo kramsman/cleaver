@@ -705,6 +705,21 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
                             sheet_name='Clean by ' + ",".join(ROV_SETUP['group_vars'])[:22],
                             single_piv_writer=writer, second_pivot_by_count=True)
 
+    # add filtered sheet w factory and campaigns for filling sincere campaign table
+    if ROV_SETUP['factory_vars']:
+        df_pt = pd.pivot_table(df_clean,
+                                index=["factory_vars_string", "group_vars_string" ],
+                                aggfunc = 'count',
+                                values="address",
+                                margins = False).reset_index()
+        df_pt.to_excel(writer, sheet_name='Campaigns by Factories', startrow=5)
+        writer.book['Campaigns by Factories'].auto_filter.ref = 'B6'
+        writer.book['Campaigns by Factories'].auto_filter.add_filter_column(0, [])
+        writer.book['Campaigns by Factories']["D3"] = "Sum of Shown"
+        writer.book['Campaigns by Factories']["D4"] = "= AGGREGATE(9,1,D6:D999)"
+        writer.book['Campaigns by Factories']["E3"] = "Sum of All"
+        writer.book['Campaigns by Factories']["E4"] = "=SUM(D6:D999)"
+
     # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
     # adjusted
     report_by_pull_group(df, 'statecounty', 'Counties by pull_group')
@@ -715,12 +730,13 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
 
     # list added factories.  These will need to be added as new factories in Sincere.
     if ROV_SETUP['factory_vars']:
-         report_by_pull_group(df, 'factory_vars_string', 'Factory_vars by pull_group')
+        report_by_pull_group(df, 'factory_vars_string', 'Factory_vars by pull_group')
 
     # list added groups (factory + county).  These will be the split files produced.  May need to be added to
     # old factories.
     if ROV_SETUP['group_vars']:
         report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
+
 
     # address concentration
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
@@ -912,6 +928,8 @@ def split_files_for_sincere(lim):
                  )
 
     df_combo_w_no_remove = df_combo_w_no_remove[df_combo_w_no_remove["remove"] == ""]
+    logger.info(f"Split will process {len(df_combo_w_no_remove)} clean addresses.")
+
     exit_yes_no(f"Split will process {len(df_combo_w_no_remove)} clean addresses.",
                 'SPLIT RECORDS',
                 display_exiting=False)
@@ -1497,7 +1515,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     ip.drop(ROV_SETUP['inputfile_delete_field_list'], axis=1, inplace=True)
 
     # Sort file by randnum if flag is set
-    if ROV_SETUP['sort_list']:  # TODO why are wee even if sorting if not set?  to make remove code faster?
+    if ROV_SETUP['sort_list']:  # TODO why are we even if sorting if not set?  to make remove code faster?
         ip.sort_values(by=['remove', 'zip', 'address', 'randnum'], inplace=True)
 
     # Make sure county is on file, find mismatched counties and return for accumulating
