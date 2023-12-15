@@ -23,4 +23,3 @@ def last_code_func(df, removedict, expectedstate):
     df.loc[df['state'] != expectedstate, 'remove'] = "State"
     df.loc[df['dupe_id_field'].isin(['L','D','O']), 'remove'] = "Duplicate other than first"  # usually keep 'F', 'X' of choices: (F)irst, (L)ast, other (D)upe, (O)ther [not used], 'X':not dupe
     df.loc[df['carol'] == True, 'remove'] = "Assigned to Carol"
-    df.loc[(df['remove'] == '') & (df['pull_group'] != 3), 'remove'] = "Clean but pull group not 3"
