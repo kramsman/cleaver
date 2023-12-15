@@ -25,3 +25,6 @@ def middle_code_func(df):
     df.loc[df['sex'].str.strip() =='', 'sex'] = "."
     df['carol'] = df['pull_group'].map(lambda x: (True if x == 1 else False) )
     df['early_addresses'] = df['custom_field'].map(lambda x: (True if x in ['d','e'] else False) )
+    df['age_group'] = df['age'].map(lambda x: ('Young' if x <50 else 'Senior') )
+    df['race'] = df['rownum'].map(lambda x: ('Hispanic' if x % 2==0 else 'Black') )
+    df.loc[df['filename'] == '2023 HD58 - BIPOC.csv', 'race'] = "Asian"

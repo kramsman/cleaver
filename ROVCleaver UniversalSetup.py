@@ -10,7 +10,6 @@
 #   added factory_var
 # 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
 
-# FIXME report in xls w factory, campaign and pieces, pullgrpus? address counts?
 # TODO: put filetype in to select file and specify xlsx for Setup.
 # TODO: change all tkinter & pymsgbox to simplegui
 #   TODO check pull_group none to 0
@@ -22,10 +21,10 @@
 # TODO redo formatcopy using pathlib / remove os.path.join
 # TODO can we skip padding variable lists?  zip will work on shortest one
 # FIXME make sure Format merge works - which fields missing are ok?
-# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
-#   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
-# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
-# TODO: get gideon's opinion on list of vars over cells or in one separated by comma or mixed
+# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max. what if only some files from
+#  pull_goups are marked to include?
+# TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
+# FIXME move remove dupes after last_code like max_pull_group
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
@@ -150,6 +149,8 @@ def is_number(s: str) -> bool:
     """  Used as check, particularly before trying to set zip to numeric for lookup.
     expects param to be a string to trap all types of data.   """
     if s == np.NAN:  # this is needed- np.nan are int which are numbers
+        return False
+    elif s is None:
         return False
     try:
         float(s)
@@ -1008,7 +1009,6 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
     df['numzip'] = df['zip'].map(lambda x: (int(x) if is_number(x) else 0))
 
     # TODO: below mixed state counties with counties and makes it impossible to produce simple summaries of data
-    # TODO: add recode of all non-expected state to 'all counties in non-expected state'
     # replace county with standard version so it matches filename, etc (value [0] is clean, mixed-case)
     df['county'] = df['statecounty'].map(lambda x: dict_statecounty.get(x, [x+'-statecounty not found'])[0])
 
@@ -1359,7 +1359,7 @@ def process_format_files(filelist_wks):
     cumulative_missing_counties_list = []
 
     for fn, format_flag, combine_flag, update_fn, update_fields, pull_group, custom_field, notes, *_ \
-            in filelist_wks.iter_rows(min_row=2, values_only=True):
+            in filelist_wks.iter_rows(min_row=4, values_only=True):
 
         if pull_group is None:  # FIXME 0 should work if not set, not being used.  Unintended consequences?
             pull_group = 0
@@ -1509,6 +1509,11 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
         ROV_SETUP['last_code_to_import_module'].last_code_func(ip, ROV_SETUP['dict_concentrated_addresses'],
                                                             ROV_SETUP['expectedstate'])
         # This is the function from the sheet with any parameters it needs
+
+        # set remove based on max_pull_group if use_max_pull_group is set
+        if ROV_SETUP['use_max_pull_group']:
+            ip.loc[(ip['remove'] == '') & (ip['pull_group'] != ROV_SETUP['max_pull_group']), 'remove'] = \
+                f"Clean but pull group not equal to {ROV_SETUP['max_pull_group']}"
 
         logger.debug('Ran last_code')  # these prompts help if error in imported code
 
@@ -1691,14 +1696,15 @@ def combine_formatfiles(orig_df, copy_formatfile_list_sheet):
     return orig_df
 
 
-def combine_files():
+def process_format_files_into_combine():
     """ combines all files specified in Setup > filelist into one and runs pivots """
-    logger.info('starting combine_files')
+    logger.info('starting process_format_files_into_combine')
 
     df_combined = pd.DataFrame()  # empty dataframe
 
-    for fn, format_flag, combine_flag, update_fn, update_fields_cell, *_ in islice(ROV_SETUP['filelist_sheet'], 1, None):
-        # islice starts in row 2 (index 1)
+    for fn, format_flag, combine_flag, update_fn, update_fields_cell, *_ \
+            in islice(ROV_SETUP['filelist_sheet'], 3, None):
+        # islice starts in row 3 to skip header and 2 variable defs
 
         if str(combine_flag.value).strip().lower() == "x":
             logger.debug(f"Ready to combine file '{fn.value}'")
@@ -2052,7 +2058,8 @@ def main():
             if ROV_SETUP['run_last_code_flag']:
                 display_imported_code(ROV_SETUP['last_code_sheet'], ROV_SETUP['last_code'])
 
-            df = combine_files()  # V16.1 no longer writes out file
+            # combine format files into combine if marked with 'x'
+            df = process_format_files_into_combine()
 
             if ROV_SETUP['id_dupes']:
                 logger.debug(f"{ROV_SETUP['dupe_key_formula']=}")
@@ -2100,7 +2107,7 @@ def main():
                                     ROV_SETUP['OPFile'].stem + '.csv',
                                     ROV_SETUP['dict_concentrated_addresses'])
 
-            # V16.1 moved writeing of combined file to after dedupe
+            # V16.1 moved writing of combined file to after dedupe
             # Write out combined file
             combine_file = ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv')
 
@@ -2132,6 +2139,14 @@ def init_setup_dict():
     ROV_SETUP['setup_sheet'] = ROV_SETUP['setup_wb']["Setup"]
 
     ROV_SETUP['filelist_sheet'] = ROV_SETUP['setup_wb']["FileList"]
+    ROV_SETUP['use_max_pull_group'] = convert_bool(ROV_SETUP['setup_wb']["FileList"]['B1'].value)
+    if ROV_SETUP['use_max_pull_group']:  # only read max_pull_group if using it for check
+        ROV_SETUP['max_pull_group'] = ROV_SETUP['setup_wb']["FileList"]['B2'].value
+        if not is_number(ROV_SETUP['max_pull_group']):
+            msg = f"max_pull_group must be number but it is '{ROV_SETUP['max_pull_group']}'"
+            logger.error(msg)
+            exit_yes(msg)
+
     ROV_SETUP['copy_formatfile_filelist_sheet'] = ROV_SETUP['setup_wb']["FormatCopies"]
 
     # root_path is
@@ -2155,13 +2170,13 @@ def init_setup_dict():
 
     # Check heading fields in filelist sheet of setup file to make sure it didn't move/change
     check_file_headers(ROV_SETUP['filelist_sheet'],
-                       [('A1', 'file'),
-                        ('B1', 'formatfile'),
-                        ('C1', 'concatfile'),
-                        ('D1', 'updatefile'),
-                        ('E1', 'updatefilenames'),
-                        ('F1', 'pull_group'),
-                        ('G1', 'custom_field'),
+                       [('A3', 'file'),
+                        ('B3', 'formatfile'),
+                        ('C3', 'concatfile'),
+                        ('D3', 'updatefile'),
+                        ('E3', 'updatefilenames'),
+                        ('F3', 'pull_group'),
+                        ('G3', 'custom_field'),
                         ])
     a = 1
 
@@ -2265,10 +2280,25 @@ def read_setup_vars(field_col):
     # exit()
 
     # returns a tuple of 0-indexed cell references.  row[0] = 1, first_row[0] is 'A'. use .value to get value in cell.
-    for row in islice(list(ROV_SETUP['setup_sheet'].rows), 1, None):
+    for row in islice(list(ROV_SETUP['setup_sheet'].rows), 0, None):
         # print(f"{row[1].value=}")
         row_list = row_to_list(row)
         read_setup_var(row_list)
+
+
+def convert_bool(bool_val):
+    """ bool('FALSE') return True so need better """
+    if isinstance(bool_val, bool):
+        return_val = bool_val
+    else:
+        if bool_val is None or bool_val.lower() not in ['true', 'false']:
+            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
+                             'convert_bool code')
+        elif bool_val.lower() == 'true':
+            return_val = True
+        else:
+            return_val = False
+    return return_val
 
 
 def read_setup_var(row_data):
@@ -2285,19 +2315,19 @@ def read_setup_var(row_data):
     def return_func(var_type, str_case='l', str_strip='b', **kwargs):
         """ returns a function to convert a string to the passed type """
 
-        def convert_bool(bool_val):
-            """ bool('FALSE') return True so need better """
-            if isinstance(bool_val, bool):
-                return_val = bool_val
-            else:
-                if bool_val is None or bool_val.lower() not in ['true', 'false']:
-                    raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-                                     'convert_bool code')
-                elif bool_val.lower() == 'true':
-                    return_val = True
-                else:
-                    return_val = False
-            return return_val
+        # def convert_bool(bool_val):
+        #     """ bool('FALSE') return True so need better """
+        #     if isinstance(bool_val, bool):
+        #         return_val = bool_val
+        #     else:
+        #         if bool_val is None or bool_val.lower() not in ['true', 'false']:
+        #             raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
+        #                              'convert_bool code')
+        #         elif bool_val.lower() == 'true':
+        #             return_val = True
+        #         else:
+        #             return_val = False
+        #     return return_val
 
         def my_expanduser(file_str):
             """ apply path and expanduser when expanduser does not take argument"""
