@@ -1662,6 +1662,8 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
 
     """
 
+# window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
+
     if buttons is None:
         buttons = ["OK", "Exit"]
 
@@ -1690,6 +1692,8 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     elif rows < row_min:
         rows = row_min
 #horizontal_scroll=h_scroll,
+    # sg.theme('SystemDefault1')
+    sg.theme('Default1')
     layout = [
         [sg.Text(title, font=("Arial", 18))],
         [sg.Multiline(txt, autoscroll=False,  expand_x=True,no_scrollbar=noscroll,
