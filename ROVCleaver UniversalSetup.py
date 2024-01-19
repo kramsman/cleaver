@@ -39,6 +39,9 @@
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
 # TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
+# TODO try pandas convert_dtypes https://stackoverflow.com/questions/69476296/how-to-use-pandas-convert-dtypes
+# TODO try the DataFrame’s .info() to see if anything is missing within your data.
+
 
 import ast
 import collections
@@ -74,10 +77,11 @@ from loguru import logger
 
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
-# INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
-INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/").expanduser()
-MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
-MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
+INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
+# INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/").expanduser()
+MAIN_ZIP_FILE = pathlib.Path('~/Dropbox/Postcard '
+                             'Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv').expanduser()
+MULTI_COUNTY_ZIP_FILE = pathlib.Path('~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv').expanduser()
 ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # 1011: ['hampden', 'hampshire'])
 PROP_CONCENTRATION = 50
@@ -1042,7 +1046,8 @@ def exit_for_unwanted_setup_options():
     """
     logger.info('Checking setup options')
 
-    if ROV_SETUP['run_county_check_code_flag'] and ROV_SETUP['splitfield'].lower() != 'county':
+    if ROV_SETUP['run_county_check_code_flag'] and ROV_SETUP['splitfield'].lower() not in ['county','statecounty']:
+    # if ROV_SETUP['run_county_check_code_flag'] and ROV_SETUP['splitfield'].lower() != 'county':
         exit_yes_no(("You are checking for zip/county mismatches"
                      "\nbut you are not splitting by county."
                      "\n\n\nIs this what you meant?"))
@@ -1164,8 +1169,8 @@ def create_dicts():
     # create county dict returning various formats with
     # GA-CHATHAM as key: [0] is filename format; [1] print; [2] state-mixed
     ROV_SETUP['dict_statecounty_to_alt_formats'] = zip_file_to_county_dict(
-        ROV_SETUP['exe_path'] / 'zip-codes-database-DELUXE-BUSINESS.csv',
-        ROV_SETUP['exe_path'] / 'Unique_County_List.xlsx')
+        MAIN_ZIP_FILE,
+        MULTI_COUNTY_ZIP_FILE)
 
     logger.debug('Ran Counties_to_xls')
 
@@ -1193,7 +1198,8 @@ def create_dicts():
     if ROV_SETUP['skip_selected_zip_match_flag']:
         zip_skip_range = range_to_list(ROV_SETUP['skip_selected_zip_sheet'], 2, len(ROV_SETUP['skip_selected_zip_sheet']['A']), 1, 2)
         ROV_SETUP['zipskip_list'] = [(cnty.lower(), int(zipcode)) for cnty, zipcode in zip_skip_range]
-
+    else:
+        ROV_SETUP['zipskip_list'] = []  # passed to subs so need a value
 
 def display_imported_code(sheet_name, py_file_name):
     """ reads python code contained in a workbook sheet, writes it to a py file, displays the contents on screen,
