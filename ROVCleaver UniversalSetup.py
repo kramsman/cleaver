@@ -940,7 +940,7 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
     df.loc[(df['state'] != ROV_SETUP['expectedstate']), 'statecounty'] = "All_Counties"
     # df['clean_county'] = df['county'].apply(clean_field)  #  this is a repeat of line above
 
-    df['numzip'] = df['zip'].map(lambda x: (int(x) if is_number(x) else 0))
+    df['numzip'] = df['zip'].map(lambda x: (int(float(x)) if is_number(x) else 0))
 
     # TODO: below mixed state counties with counties and makes it impossible to produce simple summaries of data
     # TODO: add recode of all non-expected state to 'all counties in non-expected state'
