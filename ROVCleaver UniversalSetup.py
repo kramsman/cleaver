@@ -43,6 +43,15 @@
 # TODO try the DataFrame’s .info() to see if anything is missing within your data.
 
 
+# log like this to capture stack
+# logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
+#
+# try:
+#     x = 1 / 0
+# except Exception as e:
+#     logger.exception(e)
+
+
 import ast
 import collections
 import datetime
@@ -859,7 +868,8 @@ def split_files_for_sincere(lim):
 
     try:
         df_combo_w_no_remove = pd.read_csv(combinedfile_w_path, header=0, keep_default_na=False)
-    except:
+    except Exception as e:
+        logger.exception(e)
         exit_yes("Unable to read  the Combinedfile in the split step.  Was 'Combine' run?"
                  f"\n\nMissing file:\n\n{combinedfile_w_path}"
                  )
@@ -1226,6 +1236,7 @@ def display_imported_code(sheet_name, py_file_name):
                         f"The text of the line is: '{e.text.strip()}'.  "
                         f"Fix and rerun.")
             logger.info(msg)
+            logger.exception(e)
             bek_text_box(msg,'Import Code Error','')
             raise Exception
 
@@ -1497,7 +1508,8 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
             shutil.copy(os.path.expanduser(source), destination)
             logger.info(f"File '{source}' copied successfully to\n'{destination}'.")
             # print("File " + source + " copied successfully to\n" + destination + ".")
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             exit_yes((f"File not copied:\n\n {source} \n\nto\n\n {destination}"
                       ))
 
@@ -1641,7 +1653,8 @@ def combine_files():
     # delete fields specified in setup
     try:
         df_combined.drop(ROV_SETUP['combinefile_fields_to_delete_list'], axis=1, inplace=True)
-    except KeyError:
+    except KeyError as e:
+        logger.exception(e)
         fields_missing_from_formatfile = set(ROV_SETUP['combinefile_fields_to_delete_list']) - set(df_combined.columns)
         exit_yes("Formatfile is missing the following fields to delete when creating Combinefile:"
                  f"\n\n{', '.join(fields_missing_from_formatfile)}"
@@ -1842,11 +1855,12 @@ def main():
         logfile = log_path / (Path(__file__).name + ".log")
         try:
             os.remove(logfile)
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             pass
 
-        logger.add(open(logfile, 'w'), level=log_level)
-        logger.add(sys.stdout, level='INFO')
+        logger.add(open(logfile, 'w'), level=log_level, backtrace=True, diagnose=True)
+        logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
 
 
     logger.info("starting main")
@@ -2178,7 +2192,8 @@ def read_setup_var(row_data):
         """ check len of tuple where single value might not have a len and throw error (like bool)"""
         try:
             len(tuple)
-        except:
+        except Exception as e:
+            logger.exception(e)
             return -99
         return len(tuple)
 
@@ -2258,7 +2273,8 @@ def read_setup_var(row_data):
         """ check if var_string in proper format; raise exception if not."""
         try:
             vars_temp = eval(vars_string)
-        except:
+        except Exception as e:
+            logger.exception(e)
             logger.info(f"Field_vals '{vars_string}' is not a valid format.  check missing quotes.")
             raise Exception  # FIXME print this f"Field_vals '{vars_string}' is not a valid format.  check missing
             # quotes."
