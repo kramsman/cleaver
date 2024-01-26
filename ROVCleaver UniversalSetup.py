@@ -41,6 +41,8 @@
 # TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
 # TODO try pandas convert_dtypes https://stackoverflow.com/questions/69476296/how-to-use-pandas-convert-dtypes
 # TODO try the DataFrame’s .info() to see if anything is missing within your data.
+# TODO run df descriptive utility report to show missing, etc?
+# TODO use dataframe convert_dtypes to set types better than default 'object'?
 
 
 # log like this to capture stack
