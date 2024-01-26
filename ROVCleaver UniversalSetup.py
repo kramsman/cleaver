@@ -1783,14 +1783,15 @@ def convert_xlsx_to_csvs():
     str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
                                             "XLSX Directory",
                                             INITIAL_CAMPAIGN_DIR)
+    xls_dir = pathlib.Path(str_xls_dir)
+
     # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
 
     str_csv_dir = get_dir_name("Select a DIRECTORY where converted CSVs will be placed",
                                             "CSV Directory",
-                                            INITIAL_CAMPAIGN_DIR)
+                                            xls_dir.parents[1])
     # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
 
-    xls_dir = pathlib.Path(str_xls_dir)
     csv_dir = pathlib.Path(str_csv_dir)
 
     # get list of files with xls or xlsx
@@ -1833,9 +1834,9 @@ def convert_xlsx_to_csvs():
 
     # read each xlsx into dataframe with options and write out with same name
     for file_info in xls_wo_csv:
-        logger.debug(f"Reading {file_info['xls_name']}")
+        logger.info(f"Reading {file_info['xls_name']}")
         df = pd.read_excel(file_info['xls_w_path'])
-        logger.debug(f"Writing {(file_info['xls_stem'] + '.csv')}")
+        logger.info(f"Writing {(file_info['xls_stem'] + '.csv')}")
         df.to_csv(csv_dir / (file_info['xls_stem'] + '.csv'), index=False)
         logger.debug('')
 
