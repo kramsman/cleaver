@@ -315,12 +315,12 @@ def identify_duplicates(df, key, dupe_id_field):
     """
     logger.info("Identifying duplicates")
 
-    any_dupe_bool = df.duplicated([key], keep=False)  # all dupes as true/false
+    any_dupe_bool = df.duplicated([key], keep=False)  # id all dupes using true/false
     # 'First' returns true for non-dupes as well as 'real' firsts, so must 'and' with all dupes
-    first_bool = ~df.duplicated([key], keep='first') & any_dupe_bool  # first AND dupe as true
-    last_bool = ~df.duplicated([key], keep='last') & any_dupe_bool  # last AND dupe as true
+    first_bool = ~df.duplicated([key], keep='first') & any_dupe_bool  # id firsts where first AND dupe as true
+    last_bool = ~df.duplicated([key], keep='last') & any_dupe_bool  # id lasts where last AND dupe as true
 
-    # set different values to first and last so we can identify them as well as other dupes later
+    # set different numeric values for first and last so we can identify them as well as other dupes later
     first_numeric = np.where(first_bool, 2, 0)
     last_numeric = np.where(last_bool, 1, 0)
     any_dupe_numeric = np.where(any_dupe_bool, 1, 0)
