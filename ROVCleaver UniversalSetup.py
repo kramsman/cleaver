@@ -46,6 +46,31 @@
 # ------
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
+# TODO: put filetype in to select file and specify xlsx for Setup.
+# TODO: change all tkinter & pymsgbox to simplegui
+
+# FIXME: list of imported code (first_code, etc) doesn't print on console if error found (raises first). Maybe use
+#  try/except and print file (not compile) to screen if error?
+# TODO redo formatcopy using pathlib / remove os.path.join
+# TODO can we skip padding variable lists?  zip will work on shortest one
+# FIXME make sure Format merge works - which fields missing are ok?
+# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
+#   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
+# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
+# TODO try pandas convert_dtypes https://stackoverflow.com/questions/69476296/how-to-use-pandas-convert-dtypes
+# TODO try the DataFrame’s .info() to see if anything is missing within your data.
+# TODO run df descriptive utility report to show missing, etc?
+# TODO use dataframe convert_dtypes to set types better than default 'object'?
+
+
+# log like this to capture stack
+# logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
+#
+# try:
+#     x = 1 / 0
+# except Exception as e:
+#     logger.exception(e)
+
 
 import ast
 import collections
@@ -905,7 +930,7 @@ def split_files_for_sincere(lim):
                 df_chunk = df[low_record: hi_record + 1]
                 df_chunk.to_csv(split_file, index=False, columns=ROV_SETUP['splitfile_field_list'])
                 # print("   split sub file ", file_counter)
-                logger.debug(f" -'{split_filename + ' file-' + str(file_counter)}' written, {len(df_chunk)} "
+                logger.info(f" -'{split_filename + ' file-' + str(file_counter)}' written, {len(df_chunk)} "
                       f"addresses.")
 
     if lim == 0:
@@ -923,7 +948,8 @@ def split_files_for_sincere(lim):
 
     try:
         df_combo_w_no_remove = pd.read_csv(combinedfile_w_path, header=0, keep_default_na=False)
-    except:
+    except Exception as e:
+        logger.exception(e)
         exit_yes("Unable to read  the Combinedfile in the split step.  Was 'Combine' run?"
                  f"\n\nMissing file:\n\n{combinedfile_w_path}"
                  )
@@ -1006,7 +1032,7 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
     df.loc[(df['state'] != ROV_SETUP['expectedstate']), 'statecounty'] = "All_Counties"
     # df['clean_county'] = df['county'].apply(clean_field)  #  this is a repeat of line above
 
-    df['numzip'] = df['zip'].map(lambda x: (int(x) if is_number(x) else 0))
+    df['numzip'] = df['zip'].map(lambda x: (int(float(x)) if is_number(x) else 0))
 
     # TODO: below mixed state counties with counties and makes it impossible to produce simple summaries of data
     # replace county with standard version so it matches filename, etc (value [0] is clean, mixed-case)
@@ -1215,6 +1241,7 @@ def create_field_lists():
     # Check that no fields are specified on output that are not on input  # V15.0 commented out -
     fields_missing_from_input = set(ROV_SETUP['combinefile_field_list']) - \
                                 set(ROV_SETUP['formatfile_field_list'])
+    # this doesn't need to check input to format which is what it was
     if fields_missing_from_input:
         exit_yes((f"Field(s) are specified to output on Combine file but are not present on Format.  "
                   f"\n\nMissing field(s) specified are:\n\n"
@@ -1242,9 +1269,6 @@ def create_dicts():
 
     # create county dict returning various formats with
     # GA-CHATHAM as key: [0] is filename format; [1] print; [2] state-mixed
-    # ROV_SETUP['dict_statecounty_to_alt_formats'] = zip_file_to_county_dict(
-    #     ROV_SETUP['exe_path'] / 'zip-codes-database-DELUXE-BUSINESS.csv',
-    #     ROV_SETUP['exe_path'] / 'Unique_County_List.xlsx')
     ROV_SETUP['dict_statecounty_to_alt_formats'] = zip_file_to_county_dict(
         MAIN_ZIP_FILE,
         MULTI_COUNTY_ZIP_FILE)
@@ -1275,7 +1299,8 @@ def create_dicts():
     if ROV_SETUP['skip_selected_zip_match_flag']:
         zip_skip_range = range_to_list(ROV_SETUP['skip_selected_zip_sheet'], 2, len(ROV_SETUP['skip_selected_zip_sheet']['A']), 1, 2)
         ROV_SETUP['zipskip_list'] = [(cnty.lower(), int(zipcode)) for cnty, zipcode in zip_skip_range]
-
+    else:
+        ROV_SETUP['zipskip_list'] = []  # passed to subs so need a value
 
 def display_imported_code(sheet_name, py_file_name):
     """ reads python code contained in a workbook sheet, writes it to a py file, displays the contents on screen,
@@ -1302,6 +1327,7 @@ def display_imported_code(sheet_name, py_file_name):
                         f"The text of the line is: '{e.text.strip()}'.  "
                         f"Fix and rerun.")
             logger.info(msg)
+            logger.exception(e)
             bek_text_box(msg,'Import Code Error','')
             raise Exception
 
@@ -1584,7 +1610,8 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
             shutil.copy(os.path.expanduser(source), destination)
             logger.info(f"File '{source}' copied successfully to\n'{destination}'.")
             # print("File " + source + " copied successfully to\n" + destination + ".")
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             exit_yes((f"File not copied:\n\n {source} \n\nto\n\n {destination}"
                       ))
 
@@ -1729,7 +1756,8 @@ def process_format_files_into_combine():
     # delete fields specified in setup
     try:
         df_combined.drop(ROV_SETUP['combinefile_fields_to_delete_list'], axis=1, inplace=True)
-    except KeyError:
+    except KeyError as e:
+        logger.exception(e)
         fields_missing_from_formatfile = set(ROV_SETUP['combinefile_fields_to_delete_list']) - set(df_combined.columns)
         exit_yes("Formatfile is missing the following fields to delete when creating Combinefile:"
                  f"\n\n{', '.join(fields_missing_from_formatfile)}"
@@ -1749,6 +1777,8 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     buttons :
 
     """
+
+# window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
 
     if buttons is None:
         buttons = ["OK", "Exit"]
@@ -1778,6 +1808,8 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     elif rows < row_min:
         rows = row_min
 #horizontal_scroll=h_scroll,
+    # sg.theme('SystemDefault1')
+    sg.theme('Default1')
     layout = [
         [sg.Text(title, font=("Arial", 18))],
         [sg.Multiline(txt, autoscroll=False,  expand_x=True,no_scrollbar=noscroll,
@@ -1854,12 +1886,14 @@ def convert_xlsx_to_csvs():
     str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
                                             "XLSX Directory",
                                             INITIAL_CAMPAIGN_DIR)
-    # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/TestXlsToCsv/Rawdata"
+    xls_dir = pathlib.Path(str_xls_dir)
+
+    # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
 
     str_csv_dir = get_dir_name("Select a DIRECTORY where converted CSVs will be placed",
                                             "CSV Directory",
-                                            INITIAL_CAMPAIGN_DIR)
-    # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/TestXlsToCsv/csv"
+                                            xls_dir.parents[1])
+    # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
 
     xls_dir = pathlib.Path(str_xls_dir)
     csv_dir = pathlib.Path(str_csv_dir)
@@ -1904,9 +1938,9 @@ def convert_xlsx_to_csvs():
 
     # read each xlsx into dataframe with options and write out with same name
     for file_info in xls_wo_csv:
-        logger.debug(f"Reading {file_info['xls_name']}")
+        logger.info(f"Reading {file_info['xls_name']}")
         df = pd.read_excel(file_info['xls_w_path'])
-        logger.debug(f"Writing {(file_info['xls_stem'] + '.csv')}")
+        logger.info(f"Writing {(file_info['xls_stem'] + '.csv')}")
         df.to_csv(csv_dir / (file_info['xls_stem'] + '.csv'), index=False)
         logger.debug('')
 
@@ -1926,10 +1960,11 @@ def main():
         logfile = log_path / (Path(__file__).name + ".log")
         try:
             os.remove(logfile)
-        except Exception:
+        except Exception as e:
+            logger.exception(e)
             pass
 
-        logger.add(open(logfile, 'w'), level=log_level)
+        logger.add(open(logfile, 'w'), level=log_level, backtrace=True, diagnose=True)
         logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
 
 
@@ -2290,25 +2325,40 @@ def read_setup_vars(field_col):
     # exit()
 
     # returns a tuple of 0-indexed cell references.  row[0] = 1, first_row[0] is 'A'. use .value to get value in cell.
-    for row in islice(list(ROV_SETUP['setup_sheet'].rows), 0, None):
+    for row in islice(list(ROV_SETUP['setup_sheet'].rows), 1, None):
         # print(f"{row[1].value=}")
         row_list = row_to_list(row)
         read_setup_var(row_list)
 
 
-def convert_bool(bool_val):
-    """ bool('FALSE') return True so need better """
-    if isinstance(bool_val, bool):
-        return_val = bool_val
-    else:
-        if bool_val is None or bool_val.lower() not in ['true', 'false']:
-            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-                             'convert_bool code')
-        elif bool_val.lower() == 'true':
-            return_val = True
-        else:
-            return_val = False
-    return return_val
+def read_setup_var(row_data):
+    """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+    logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
+    def len_tuple(tuple):
+        """ check len of tuple where single value might not have a len and throw error (like bool)"""
+        try:
+            len(tuple)
+        except Exception as e:
+            logger.exception(e)
+            return -99
+        return len(tuple)
+
+    def return_func(var_type, str_case='l', str_strip='b', **kwargs):
+        """ returns a function to convert a string to the passed type """
+
+        def convert_bool(bool_val):
+            """ bool('FALSE') return True so need better """
+            if isinstance(bool_val, bool):
+                return_val = bool_val
+            else:
+                if bool_val is None or bool_val.lower() not in ['true', 'false']:
+                    raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
+                                     'convert_bool code')
+                elif bool_val.lower() == 'true':
+                    return_val = True
+                else:
+                    return_val = False
+            return return_val
 
 
 def read_setup_var(row_data):
@@ -2398,7 +2448,8 @@ def read_setup_var(row_data):
         """ check if var_string in proper format; raise exception if not."""
         try:
             vars_temp = eval(vars_string)
-        except:
+        except Exception as e:
+            logger.exception(e)
             logger.info(f"Field_vals '{vars_string}' is not a valid format.  check missing quotes.")
             raise Exception  # FIXME print this f"Field_vals '{vars_string}' is not a valid format.  check missing
             # quotes."
