@@ -81,7 +81,7 @@ from loguru import logger
 
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
-# INITIAL_CAMPAIGN_DIR = os.path.expanduser(r"/Users/Denise/Dropbox/Postcard Files/InputFiles/Campaigns")
+# INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
 INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/").expanduser()
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
 MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
@@ -316,7 +316,7 @@ def identify_duplicates(df, key, dupe_id_field):
     logger.info("Identifying duplicates")
 
     any_dupe_bool = df.duplicated([key], keep=False)  # id all dupes using true/false
-    # 'First' returns true for non-dupes as well as 'real' firsts, so must 'and' with all dupes
+    # 'first' returns true for non-dupes as well as 'real' firsts, so must 'and' with all dupes
     first_bool = ~df.duplicated([key], keep='first') & any_dupe_bool  # id firsts where first AND dupe as true
     last_bool = ~df.duplicated([key], keep='last') & any_dupe_bool  # id lasts where last AND dupe as true
 
@@ -325,7 +325,7 @@ def identify_duplicates(df, key, dupe_id_field):
     last_numeric = np.where(last_bool, 1, 0)
     any_dupe_numeric = np.where(any_dupe_bool, 1, 0)
     dupe_numeric = any_dupe_numeric + first_numeric + last_numeric  # sets each to different value
-    dupe_alpha = [{0: 'X', 1: 'D', 2: 'L', 3: 'F', 4: 'O'}[element] for element in dupe_numeric]  #
+    dupe_alpha = [{0: '-', 1: 'D', 2: 'L', 3: 'F', 4: 'O'}[element] for element in dupe_numeric]  #
     # note that setting non-dupe, 0, to blank above removes them from list so can not be merged into df
     if len(dupe_alpha) != len(df):
         logger.info(f"*** assigning duplicate identifier error:  "
@@ -1062,7 +1062,7 @@ def get_setup_file_name(initial_campaign_dir):
 
     # Use this flag when testing - False allows hardcoding input from alternate starting directory
     # noinspection PyUnreachableCode
-    if False:
+    if True:
         # show an "Open" dialog box and return the path to the selected file
         # V13.1 parameterize start directory and remove '/Users/Denise' reference
         # ROV.setup_file_name = askopenfilename(
@@ -1930,7 +1930,7 @@ def main():
             pass
 
         logger.add(open(logfile, 'w'), level=log_level)
-        logger.add(sys.stdout, level='INFO')
+        logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
 
 
     logger.info("starting main")
@@ -2206,6 +2206,16 @@ def format_setup_vars():
                                  in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
     ROV_SETUP['factory_vars'] = [fld.strip() for fld
                          in ROV_SETUP['xl_factory_vars'].split(',') if fld != '']
+
+    # check if overlapping variables
+    overlap_fields = set(ROV_SETUP['campaign_vars']).intersection(set(ROV_SETUP['factory_vars']))
+    if overlap_fields:
+        msg = (f"The following variable(s) overlap between the factory and campaign splits:"\
+                    f"\n\n{', '.join(overlap_fields)}"
+              )
+        logger.error(msg)
+        exit_yes(msg)
+
     ROV_SETUP['group_vars'] = ROV_SETUP['campaign_vars'] + ROV_SETUP['factory_vars']
     # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
     #  available? when are they added to list?
