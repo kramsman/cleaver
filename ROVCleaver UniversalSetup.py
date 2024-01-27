@@ -852,7 +852,7 @@ def split_files_for_sincere(lim):
                 df_chunk = df[low_record: hi_record + 1]
                 df_chunk.to_csv(split_file, index=False, columns=ROV_SETUP['splitfile_field_list'])
                 # print("   split sub file ", file_counter)
-                logger.debug(f" -'{split_filename + ' file-' + str(file_counter)}' written, {len(df_chunk)} "
+                logger.info(f" -'{split_filename + ' file-' + str(file_counter)}' written, {len(df_chunk)} "
                       f"addresses.")
 
     if lim == 0:
