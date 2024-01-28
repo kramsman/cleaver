@@ -94,6 +94,8 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+os.environ["APPDATA"] = ""
+from pandasgui import show
 import pymsgbox
 from openpyxl import load_workbook
 from openpyxl.styles import Font
@@ -107,12 +109,15 @@ from loguru import logger
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
 # INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
-INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/WorkCampaigns/").expanduser()
+INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
+
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
 MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
                              "PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+
 # MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
 MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv").expanduser()
+
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
 ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
@@ -352,11 +357,14 @@ def identify_duplicates(df, key, dupe_id_field):
     dupe_numeric = any_dupe_numeric + first_numeric + last_numeric  # sets each to different value
     dupe_alpha = [{0: '-', 1: 'D', 2: 'L', 3: 'F', 4: 'O'}[element] for element in dupe_numeric]  #
     # note that setting non-dupe, 0, to blank above removes them from list so can not be merged into df
+
     if len(dupe_alpha) != len(df):
         logger.info(f"*** assigning duplicate identifier error:  "
               f"Orig dataframe has {len(df)} rows but merged list has {len(dupe_alpha)}")
         raise Exception
     df[dupe_id_field] = dupe_alpha
+
+    # show(df)  # pandasgui
 
     return
 
@@ -2097,28 +2105,13 @@ def main():
             df = process_format_files_into_combine()
 
             if ROV_SETUP['id_dupes']:
-                logger.debug(f"{ROV_SETUP['dupe_key_formula']=}")
+                logger.info(f"{ROV_SETUP['dupe_key_formula']=}")
                 df['dupe_key'] = eval(ROV_SETUP['dupe_key_formula'])
 
-                # sort for dupe check
-                # sort_fields, ascending_vals = split_tuples(ROV.dupe_key_sort_tuples)
-                # df.sort_values(by=['carol', 'dupe_key'], ascending=[False,True], inplace=True)
                 df.sort_values(by=[k for k, v in ROV_SETUP['dupe_key_sort_tuples']],
                                ascending=[v for k, v in ROV_SETUP['dupe_key_sort_tuples']], inplace=True)
 
                 identify_duplicates(df, 'dupe_key', 'dupe_id_field')
-
-                if ROV_SETUP['run_last_code_flag']:
-                    # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
-                    # assignment, random number from being overwritten.
-                    # last_code can be run in combine since it's only setting remove code.
-                    logger.debug('Ready to run last_code (remove code)')  # these prompts help if error in imported code
-
-                    ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
-                                                                  ROV_SETUP['expectedstate'])
-                    # This is the function from the sheet with any parameters it needs
-
-                    logger.debug('Ran last_code')  # these prompts help if error in imported code
 
                 dupfile = ROV_SETUP['combined_path'] / ('DUPLICATES in ' + ROV_SETUP['OPFile'].stem + ".csv")
 
@@ -2126,10 +2119,26 @@ def main():
                 df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
 
                 logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
-                # df[df['dupe_id_field'] != 'X'].to_excel(dupfile, index=False)
                 df[df['dupe_id_field'] != 'X'].to_csv(dupfile, index=False)
 
-            test_df_clean = df[df['remove'] == '']
+            if ROV_SETUP['run_last_code_flag']:
+                # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
+                # assignment, random number from being overwritten.
+                # last_code can be run in combine since it's only setting remove code.
+                logger.debug('Ready to run last_code (remove code)')  # these prompts help if error in imported code
+
+                ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
+                                                              ROV_SETUP['expectedstate'])
+                # This is the function from the sheet with any parameters it needs
+
+                logger.debug('Ran last_code')
+
+            # set remove based on max_pull_group if use_max_pull_group is set
+            if ROV_SETUP['use_max_pull_group']:
+                df.loc[(df['remove'] == '') & (df['pull_group'] != ROV_SETUP['max_pull_group']), 'remove'] = \
+                    f"Clean but pull group not equal to {ROV_SETUP['max_pull_group']}"
+
+            # test_df_clean = df[df['remove'] == '']
 
             if ROV_SETUP['sort_list']:
                 df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
@@ -2331,6 +2340,22 @@ def read_setup_vars(field_col):
         read_setup_var(row_list)
 
 
+def convert_bool(bool_val):
+    """ bool('FALSE') return True so need better """
+    if isinstance(bool_val, bool):
+        return_val = bool_val
+    else:
+        if bool_val is None or bool_val.lower() not in ['true', 'false']:
+            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
+                             'convert_bool code')
+        elif bool_val.lower() == 'true':
+            return_val = True
+        else:
+            return_val = False
+    return return_val
+
+
+
 def read_setup_var(row_data):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
     logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
@@ -2346,19 +2371,6 @@ def read_setup_var(row_data):
     def return_func(var_type, str_case='l', str_strip='b', **kwargs):
         """ returns a function to convert a string to the passed type """
 
-        def convert_bool(bool_val):
-            """ bool('FALSE') return True so need better """
-            if isinstance(bool_val, bool):
-                return_val = bool_val
-            else:
-                if bool_val is None or bool_val.lower() not in ['true', 'false']:
-                    raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-                                     'convert_bool code')
-                elif bool_val.lower() == 'true':
-                    return_val = True
-                else:
-                    return_val = False
-            return return_val
 
 
 def read_setup_var(row_data):
