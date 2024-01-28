@@ -12,7 +12,6 @@
 
 # TODO: put filetype in to select file and specify xlsx for Setup.
 # TODO: change all tkinter & pymsgbox to simplegui
-#   TODO check pull_group none to 0
 #   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
 
@@ -21,10 +20,7 @@
 # TODO redo formatcopy using pathlib / remove os.path.join
 # TODO can we skip padding variable lists?  zip will work on shortest one
 # FIXME make sure Format merge works - which fields missing are ok?
-# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max. what if only some files from
-#  pull_goups are marked to include?
 # TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
-# FIXME move remove dupes after last_code like max_pull_group
 
 # Temporarily save curl text to enter in terminal
 # curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
@@ -59,8 +55,6 @@
 # TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
 # TODO try pandas convert_dtypes https://stackoverflow.com/questions/69476296/how-to-use-pandas-convert-dtypes
 # TODO try the DataFrame’s .info() to see if anything is missing within your data.
-# TODO run df descriptive utility report to show missing, etc?
-# TODO use dataframe convert_dtypes to set types better than default 'object'?
 
 
 # log like this to capture stack
@@ -94,8 +88,8 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-os.environ["APPDATA"] = ""
-from pandasgui import show
+# os.environ["APPDATA"] = ""
+# from pandasgui import show
 import pymsgbox
 from openpyxl import load_workbook
 from openpyxl.styles import Font
@@ -328,8 +322,8 @@ def calling_func(level=0):
     """ returns the various levels of calling function.  0 is current, 1 is caller of current, etc """
     try:
         func = f"'{inspect.stack()[level][3]}', line #: {inspect.stack()[level][2]}"
-    except Exception:
-        logger.debug("here")
+    except Exception as e:
+        logger.exception(e)
         func = f"** error ** inspect level too deep: {str(level)} called from {inspect.stack()[level][3]}"
     return func
 
@@ -716,7 +710,6 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         added_counties = sorted_df.drop_duplicates(subset=[rpt_field], keep='first')
         added_counties.to_excel(writer, sheet_name=sheet_name, startrow=5)
 
-
     # Create summary sheet of Rawdata, Formatted and Removed
     # for other states, roll all counties in to one called "All Counties'
     df['countysummed'] = np.where(df['state'] == ROV_SETUP['expectedstate'], df['statecounty'], "All Counties")
@@ -742,10 +735,10 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     # add filtered sheet w factory and campaigns for filling sincere campaign table
     if ROV_SETUP['factory_vars']:
         df_pt = pd.pivot_table(df_clean,
-                                index=["factory_vars_string", "group_vars_string" ],
-                                aggfunc = 'count',
+                                index=["factory_vars_string", "group_vars_string"],
+                                aggfunc='count',
                                 values="address",
-                                margins = False).reset_index()
+                                margins=False).reset_index()
         df_pt.to_excel(writer, sheet_name='Campaigns by Factories', startrow=5)
         writer.book['Campaigns by Factories'].auto_filter.ref = 'B6'
         writer.book['Campaigns by Factories'].auto_filter.add_filter_column(0, [])
@@ -770,7 +763,6 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     # old factories.
     if ROV_SETUP['group_vars']:
         report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
-
 
     # address concentration
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
@@ -1336,7 +1328,7 @@ def display_imported_code(sheet_name, py_file_name):
                         f"Fix and rerun.")
             logger.info(msg)
             logger.exception(e)
-            bek_text_box(msg,'Import Code Error','')
+            bek_text_box(msg, 'Import Code Error', '')
             raise Exception
 
         # create a compiled object to list the lines to be executed for debugging with ine nums and comments/blanks
@@ -1366,7 +1358,6 @@ def display_imported_code(sheet_name, py_file_name):
                 f"{code_lines}",
                 f"Check '{py_file_name}' Code",
                 display_exiting=False)
-
 
 
 def check_file_headers(ws, vals):
@@ -1431,7 +1422,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     pull_group :
     custom_field :
     """
-    logger.info(f"Creating formatted file for: '{fn}'" )
+    logger.info(f"Creating formatted file for: '{fn}'")
 
     start_time = datetime.now()
 
@@ -1820,7 +1811,7 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     sg.theme('Default1')
     layout = [
         [sg.Text(title, font=("Arial", 18))],
-        [sg.Multiline(txt, autoscroll=False,  expand_x=True,no_scrollbar=noscroll,
+        [sg.Multiline(txt, autoscroll=False, expand_x=True, no_scrollbar=noscroll,
                       expand_y=True, enable_events=True)],
         [sg.Button(text) for text in buttons],
     ]
@@ -1975,7 +1966,6 @@ def main():
         logger.add(open(logfile, 'w'), level=log_level, backtrace=True, diagnose=True)
         logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
 
-
     logger.info("starting main")
 
     # shows all cols for dataframe head instead of truncating to first and last few
@@ -1996,7 +1986,7 @@ def main():
     #                           'Choose Action',
     #                           ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
 
-    choice = bek_text_box("What do you want to do?","Choose an Action",
+    choice = bek_text_box("What do you want to do?", "Choose an Action",
                               '',
                               ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
 
@@ -2254,8 +2244,8 @@ def format_setup_vars():
     # check if overlapping variables
     overlap_fields = set(ROV_SETUP['campaign_vars']).intersection(set(ROV_SETUP['factory_vars']))
     if overlap_fields:
-        msg = (f"The following variable(s) overlap between the factory and campaign splits:"\
-                    f"\n\n{', '.join(overlap_fields)}"
+        msg = (f"The following variable(s) overlap between the factory and campaign splits:"
+               f"\n\n{', '.join(overlap_fields)}"
               )
         logger.error(msg)
         exit_yes(msg)
@@ -2282,7 +2272,6 @@ def format_setup_vars():
     #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
     #     else:
     #         ROV_SETUP['sort_list'] = []
-
 
     if ROV_SETUP['sortchoice'] == 1:
         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
@@ -2355,10 +2344,11 @@ def convert_bool(bool_val):
     return return_val
 
 
-
 def read_setup_var(row_data):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+
     logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
+
     def len_tuple(tuple):
         """ check len of tuple where single value might not have a len and throw error (like bool)"""
         try:
@@ -2372,10 +2362,11 @@ def read_setup_var(row_data):
         """ returns a function to convert a string to the passed type """
 
 
-
 def read_setup_var(row_data):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+
     logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
+
     def len_tuple(tuple):
         """ check len of tuple where single value might not have a len and throw error (like bool)"""
         try:
@@ -2387,19 +2378,6 @@ def read_setup_var(row_data):
     def return_func(var_type, str_case='l', str_strip='b', **kwargs):
         """ returns a function to convert a string to the passed type """
 
-        # def convert_bool(bool_val):
-        #     """ bool('FALSE') return True so need better """
-        #     if isinstance(bool_val, bool):
-        #         return_val = bool_val
-        #     else:
-        #         if bool_val is None or bool_val.lower() not in ['true', 'false']:
-        #             raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-        #                              'convert_bool code')
-        #         elif bool_val.lower() == 'true':
-        #             return_val = True
-        #         else:
-        #             return_val = False
-        #     return return_val
 
         def my_expanduser(file_str):
             """ apply path and expanduser when expanduser does not take argument"""
