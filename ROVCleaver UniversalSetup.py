@@ -105,20 +105,22 @@ from bekutils import get_file_name
 
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
-# INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
-INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
+INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
+# INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
 
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
 MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
-                             "PythonProgs/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+                             "PythonPrograms/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 
 # MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
-MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv").expanduser()
+MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard "
+                                     "Files/PythonPrograms/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv"
+                                     "").expanduser()
 
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
 ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
-                                       "PythonProgs/ROVCleaver_Prod/Zip_To_County_List_dict.py").expanduser()
+                                       "PythonPrograms/ROVCleaver_Prod/Zip_To_County_List_dict.py").expanduser()
 
 PROP_CONCENTRATION = 50
 ZIP_CONCENTRATION = 10
@@ -1107,7 +1109,7 @@ def get_setup_file_name(initial_campaign_dir):
     else:
         # Hardcode in TEST INPUT FILE directory for repetitive testing
         setup_file_name = pathlib.Path(
-            "~/Dropbox/Postcard Files/PythonProgs/ROVCleaver_on_Dropbox/WorkCampaign/ROVCleaver "
+            "~/Dropbox/Postcard Files/PythonPrograms/ROVCleaver_on_Dropbox/WorkCampaign/ROVCleaver "
             "UniversalSetup.xlsx").expanduser()
 
         exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
