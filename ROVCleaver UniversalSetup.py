@@ -100,6 +100,9 @@ from openpyxl.utils.cell import column_index_from_string
 import json
 from loguru import logger
 
+from bekutils import exe_path
+from bekutils import get_file_name
+
 log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
 # INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
@@ -1121,7 +1124,7 @@ def get_setup_file_name(initial_campaign_dir):
                   ))
 
     return setup_file_name
-
+#
 
 # def assign_rov_variables():
 #     """ assigns variables from cells in setup sheet and places them in global object.  set some global variables"""
@@ -1851,32 +1854,32 @@ def get_dir_name(box_title, title2, initial_dir):
     return dir_name
 
 
-def get_file_name(box_title, title2, initial_dir):
-    """ show an "Open" dialog box and return the selected file name. Replaced askopenfilename with pyeasygui
-    :param title2: heading of the box
-    :type title2: text next to input field
-    """
-    logger.debug('here')
-    # "Select Sincere address export file 'all-parent-campaign-requests-yyyy-mm-dd.csv'"
-    layout = [
-        [sg.Text(title2, font=("Arial", 18))],
-        [
-         sg.Input(key="-IN-", expand_x=True),
-         sg.FileBrowse(initial_folder=os.path.expanduser(initial_dir))
-         ],
-        [sg.Button("Choose")],
-    ]
-
-    # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
-    event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-                              size=(1000, 150), use_custom_titlebar=True).read(close=True)
-    # sg.Window.close()
-
-    file_name = values['-IN-']
-    if file_name == "":
-        exit_yes("No file name chosen")
-
-    return file_name
+# def get_file_name(box_title, title2, initial_dir):
+#     """ show an "Open" dialog box and return the selected file name. Replaced askopenfilename with pyeasygui
+#     :param title2: heading of the box
+#     :type title2: text next to input field
+#     """
+#     logger.debug('here')
+#     # "Select Sincere address export file 'all-parent-campaign-requests-yyyy-mm-dd.csv'"
+#     layout = [
+#         [sg.Text(title2, font=("Arial", 18))],
+#         [
+#          sg.Input(key="-IN-", expand_x=True),
+#          sg.FileBrowse(initial_folder=os.path.expanduser(initial_dir))
+#          ],
+#         [sg.Button("Choose")],
+#     ]
+#
+#     # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
+#     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
+#                               size=(1000, 150), use_custom_titlebar=True).read(close=True)
+#     # sg.Window.close()
+#
+#     file_name = values['-IN-']
+#     if file_name == "":
+#         exit_yes("No file name chosen")
+#
+#     return file_name
 
 
 def convert_xlsx_to_csvs():
@@ -1972,15 +1975,16 @@ def main():
     pd.set_option('display.max_columns', None)
 
     # need path of exe/script for location of zip csv files
-    if getattr(sys, 'frozen', False):
-        EXE_PATH = pathlib.Path(sys.executable).parent
-    elif __file__:
-        EXE_PATH = pathlib.Path(__file__).parent
-    else:
-        EXE_PATH = None
-    logger.debug(f"({EXE_PATH=}")
+    # if getattr(sys, 'frozen', False):
+    #     EXE_PATH = pathlib.Path(sys.executable).parent
+    # elif __file__:
+    #     EXE_PATH = pathlib.Path(__file__).parent
+    # else:
+    #     EXE_PATH = None
+    # logger.debug(f"({EXE_PATH=}")
 
-    ROV_SETUP['exe_path'] = EXE_PATH
+    ROV_SETUP['EXE_PATH'] = exe_path()
+    EXE_PATH = exe_path()
 
     # choice = pymsgbox.confirm("What do you want to do?",
     #                           'Choose Action',
