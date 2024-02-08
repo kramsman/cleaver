@@ -110,17 +110,17 @@ INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaig
 
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
 MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
-                             "PythonPrograms/ROVCleaver_Prod/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+                             "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 
 # MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
 MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard "
-                                     "Files/PythonPrograms/ROVCleaver_Prod/zip-codes-database-MULTI-COUNTY.csv"
+                                     "Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv"
                                      "").expanduser()
 
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
 ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
-                                       "PythonPrograms/ROVCleaver_Prod/Zip_To_County_List_dict.py").expanduser()
+                                       "PythonPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
 PROP_CONCENTRATION = 50
 ZIP_CONCENTRATION = 10
@@ -1281,7 +1281,7 @@ def create_dicts():
     logger.debug('Ran Counties_to_xls')
 
     if ROV_SETUP['run_county_check_code_flag']:
-        with open(ROV_SETUP['exe_path'] / ZIP_TO_COUNTY_LIST_FILE, "r") as dict_file:
+        with open(ZIP_TO_COUNTY_LIST_FILE, "r") as dict_file:
             ROV_SETUP['dict_zip_to_countylist'] = ast.literal_eval(dict_file.read())
             logger.debug("Imported " + ZIP_TO_COUNTY_LIST_FILE.name)
 
@@ -1542,8 +1542,8 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
 
         # set remove based on max_pull_group if use_max_pull_group is set
         if ROV_SETUP['use_max_pull_group']:
-            ip.loc[(ip['remove'] == '') & (ip['pull_group'] != ROV_SETUP['max_pull_group']), 'remove'] = \
-                f"Clean but pull group not equal to {ROV_SETUP['max_pull_group']}"
+            ip.loc[(ip['remove'] == '') & (ip['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
+                f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
 
         logger.debug('Ran last_code')  # these prompts help if error in imported code
 
@@ -2131,8 +2131,8 @@ def main():
 
             # set remove based on max_pull_group if use_max_pull_group is set
             if ROV_SETUP['use_max_pull_group']:
-                df.loc[(df['remove'] == '') & (df['pull_group'] != ROV_SETUP['max_pull_group']), 'remove'] = \
-                    f"Clean but pull group not equal to {ROV_SETUP['max_pull_group']}"
+                df.loc[(df['remove'] == '') & (df['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
+                    f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
 
             # test_df_clean = df[df['remove'] == '']
 
@@ -2190,6 +2190,7 @@ def init_setup_dict():
     ROV_SETUP['copy_formatfile_filelist_sheet'] = ROV_SETUP['setup_wb']["FormatCopies"]
 
     # root_path is
+    ROV_SETUP['exe_path'] = exe_path()
     ROV_SETUP['root_path'] = ROV_SETUP['setup_file_name'].parent  # dir containing the setup file
     ROV_SETUP['root_path_one_level_up'] = ROV_SETUP['root_path'].parent
     ROV_SETUP['rawdata_path'] = ROV_SETUP['root_path'] / 'Rawdata'
