@@ -2222,6 +2222,21 @@ def init_setup_dict():
     a = 1
 
 
+def convert_bool(bool_val):
+    """ bool('FALSE') return True so need better """
+    if isinstance(bool_val, bool):
+        return_val = bool_val
+    else:
+        if bool_val is None or bool_val.lower() not in ['true', 'false']:
+            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
+                             'convert_bool code')
+        elif bool_val.lower() == 'true':
+            return_val = True
+        else:
+            return_val = False
+    return return_val
+
+
 def format_setup_vars():
     """ reformat vars in setup_dict and erase temporary (starting with xl_)"""
     logger.debug(f"in format_setup_vars top {id(ROV_SETUP)=}")
@@ -2335,38 +2350,6 @@ def read_setup_vars(field_col):
         row_list = row_to_list(row)
         read_setup_var(row_list)
 
-
-def convert_bool(bool_val):
-    """ bool('FALSE') return True so need better """
-    if isinstance(bool_val, bool):
-        return_val = bool_val
-    else:
-        if bool_val is None or bool_val.lower() not in ['true', 'false']:
-            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-                             'convert_bool code')
-        elif bool_val.lower() == 'true':
-            return_val = True
-        else:
-            return_val = False
-    return return_val
-
-
-def read_setup_var(row_data):
-    """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
-
-    logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
-
-    def len_tuple(tuple):
-        """ check len of tuple where single value might not have a len and throw error (like bool)"""
-        try:
-            len(tuple)
-        except Exception as e:
-            logger.exception(e)
-            return -99
-        return len(tuple)
-
-    def return_func(var_type, str_case='l', str_strip='b', **kwargs):
-        """ returns a function to convert a string to the passed type """
 
 
 def read_setup_var(row_data):
