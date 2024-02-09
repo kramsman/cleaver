@@ -2054,6 +2054,7 @@ def main():
 
         # new for uniformat
         init_setup_dict()
+        # setup_backward_compatability()
         read_setup_vars(FIELD_DEF_COL_NUMERIC)
         format_setup_vars()
 
@@ -2235,6 +2236,22 @@ def convert_bool(bool_val):
         else:
             return_val = False
     return return_val
+
+
+def setup_backward_compatability():
+    """ check for missing values in the setup file and set/msg user accordingly"""
+
+    # if use_pull_flag and max_pull_group not in file we can not set variables and continue because first row of
+    # filelist sheet will be off.
+
+    # Below code doesn not work because would have to be run before init_setup_dict() (where paths are set),
+    # but headers in filelist are also checked there.
+    if ROV_SETUP['setup_wb']["FileList"]['A1'].value != "remove using max_pull_group":
+        msg = f"Cell 'A1' in filelist must be 'remove using max_pull_group' but it " \
+              f"is '{ROV_SETUP['setup_wb']['FileList']['A1'].value}'.\n\n"\
+                "You must a more recent setup file"
+        logger.error(msg)
+        exit_yes(msg)
 
 
 def format_setup_vars():
