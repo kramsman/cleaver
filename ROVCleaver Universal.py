@@ -11,51 +11,23 @@
 # 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
 
 # TODO: put filetype in to select file and specify xlsx for Setup.
-# TODO: change all tkinter & pymsgbox to simplegui
+# TODO: change all tkinter to simplegui
 #   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
 
 # 12/xx/23 errors in imported code are identified in popup box.  fixed: : list of imported code (first_code,
 # etc) doesn't print on console if error found (raises first).
-# TODO redo formatcopy using pathlib / remove os.path.join
-# TODO can we skip padding variable lists?  zip will work on shortest one
-# FIXME make sure Format merge works - which fields missing are ok?
-# TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
 
-# Temporarily save curl text to enter in terminal
-# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output /Users/Denise/Downloads/dest.py
-
-# copy private to ROVCleaver_Prod w $HOME
-# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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 --output $HOME/Library/CloudStorage/Dropbox/Postcard Files/PythonProgs/ROVCleaver_Prod/x.py
-
-# ROVCleaver_prod = https://www.dropbox.com/scl/fo/1pp2mg69019h2dijxvbke/h?rlkey=l6cs53fnqw4c2iqp6crpfjl24&dl=0
-# works on public
-# curl https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py --output /Users/Denise/Downloads/dest.py
-
-# wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
-# wget --directory-prefix=/var/cache/foobar/ [...]
-
-# copied from terminal
-#  wget -P /Users/Denise/Downloads https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
-#  wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=GHSAT0AAAAAACLDGV6B4MYVBVQD2DP7LE5OZLQUEHA -P /Users/Denise/Downloads -O x.py
-#  wget https://raw.githubusercontent.com/kramsman/ROVCleaver/master/ROVCleaver%20UniversalSetup.py?token=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
-# ------
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
 # TODO: put filetype in to select file and specify xlsx for Setup.
-# TODO: change all tkinter & pymsgbox to simplegui
 
-# FIXME: list of imported code (first_code, etc) doesn't print on console if error found (raises first). Maybe use
-#  try/except and print file (not compile) to screen if error?
 # TODO redo formatcopy using pathlib / remove os.path.join
 # TODO can we skip padding variable lists?  zip will work on shortest one
 # FIXME make sure Format merge works - which fields missing are ok?
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
-# TODO calc max_pll_group and pass to first, middle, last.  code remove if < max.
-# TODO try pandas convert_dtypes https://stackoverflow.com/questions/69476296/how-to-use-pandas-convert-dtypes
-# TODO try the DataFrame’s .info() to see if anything is missing within your data.
-# FIXME use setup_loguru
+# TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
 
 
 # log like this to capture stack
@@ -75,16 +47,13 @@ import inspect
 import itertools
 import math  # for ceil function
 import os
-import pathlib
 import re
 import shutil  # to copy file from other dirs
 import webbrowser
 from datetime import datetime
 from itertools import islice  # to skip 1st row of iterated spreadsheet
-from pathlib import *
-from tkinter import Tk  # from tkinter import Tk for Python 3.x
+from pathlib import Path
 from typing import Union
-# from tkinter.filedialog import askopenfilename
 
 import numpy as np
 import pandas as pd
@@ -94,7 +63,6 @@ import pymsgbox
 from openpyxl import load_workbook
 from openpyxl.styles import Font
 import PySimpleGUI as sg
-import sys
 from openpyxl.utils.cell import coordinate_from_string
 from openpyxl.utils.cell import column_index_from_string
 import json
@@ -103,19 +71,15 @@ from loguru import logger
 from bekutils import exe_path
 from bekutils import get_file_name
 from bekutils import setup_loguru
-# from bekutils import conc_addr
-# from bekutils import conc_addr_desc
-# from bekutils import conc_addr_remove_desc
 from bekutils import is_number
 from bekutils import exit_yes
 from bekutils import exit_yes_no
 from bekutils import clean_field
-from bekutils import check_ws_headers
 from bekutils import autosize_xls_cols
 from bekutils import bad_file_exit
 from bekutils import bad_path_exit
 from bekutils import bad_path_create
-from bekutils import calling_func
+# from bekutils import calling_func
 from bekutils import find_header_row_in_file
 from bekutils import read_file_to_df
 from bekutils import get_dir_name
@@ -127,21 +91,21 @@ from bekutils import conc_addr_remove_desc
 setup_loguru("DEBUG", "DEBUG")
 # log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
-INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
-# INITIAL_CAMPAIGN_DIR = pathlib.Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
+INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
+# INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
 
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
-MAIN_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
+MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
                              "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 
 # MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
-MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard "
+MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard "
                                      "Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv"
                                      "").expanduser()
 
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
-ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
+ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
                                        "PythonPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
 # PROP_CONCENTRATION = 50
@@ -168,78 +132,6 @@ def pad_list(my_list, to_len, pad_val=""):
     return padded_list
 
 
-# def exit_yes_no(msg, title=None, display_exiting=False):
-#     """ makes this choice to continue one line"""
-#     if not title:
-#         title = "Exit?"
-#     choice = pymsgbox.confirm(msg, title, ['Yes', 'No'])
-#     if choice == "No":
-#         if display_exiting:
-#             pymsgbox.alert("Exiting", "Alert")
-#         logger.debug("here'")
-#         exit()
-#
-#
-# def exit_yes(msg: str, title: str = None, *, errmsg: str = None) -> None:
-#     """ exits program after giving user a popup window and raising an error. """
-#     msg = (msg + "\n\n\nExiting." +
-#            f"\n\nCalled from {calling_func(level=3)}"
-#            f"\nCalled from {calling_func(level=2)}"
-#            f"\nCalled from {calling_func(level=1)}"
-#            )
-#     if not errmsg:
-#         errmsg = msg.replace("\n", " ")  # dont fill the console with linefeeds
-#     if not title:
-#         title = "** Exiting Program **"
-#     logger.debug("here")
-#     pymsgbox.alert(msg, title)
-#     raise Exception(errmsg)
-#
-#
-# def is_number(s: str) -> bool:
-#     """  Used as check, particularly before trying to set zip to numeric for lookup.
-#     expects param to be a string to trap all types of data.   """
-#     if s == np.NAN:  # this is needed- np.nan are int which are numbers
-#         return False
-#     elif s is None:
-#         return False
-#     try:
-#         float(s)
-#         return True
-#     except ValueError:
-#         return False
-
-
-# def clean_path(original_path):
-#     """ Return a path cleaned: adds ~ to start, returns path object using os.path """
-#     new_path = original_path
-#     if new_path[1] != '~':
-#         new_path = "~" + new_path
-#     if original_path[-1] != '/':
-#         new_path = new_path + '/'
-#     new_path = os.path.expanduser(new_path)
-#     return new_path
-
-
-# def max_used_col(ws, rw):
-#     """ Returns the column number (1 indexed) maximum non-none column in the input row of a sheet. """
-#     mxcol = 0
-#     for cell in reversed(ws[rw]):
-#         if cell.value is not None:
-#             mxcol = cell.col_idx
-#             break
-#     return mxcol
-
-
-# def max_used_col_in_row(row):
-#     """ Returns the column number (1 indexed) maximum non-none column in the input row of a sheet. """
-#     for index, cell in enumerate(reversed(row)):
-#         if cell is not None:
-#             break
-#     # return cell.col_idx
-#     return cell.index
-
-
 def row_to_list(row):
     """ Returns the column number (1 indexed) maximum non-none column in the input row of a sheet. """
     for index, cell in enumerate(reversed(row)):
@@ -253,6 +145,7 @@ def range_to_list(ws, start_row, end_row, start_col, end_col):
     """ converts range of cells to a list of values
     V2.0 Worksheet to list. if one col, multi lists in list rather than one list of elements.  Best?
     """
+
     # tried using openpyl's cells = setup['A18': 'E19'] but parsing letter cols would be ugly so iterate rows.
     # openpyxl does not offer cells((r,c),(r,c)) using numerics
     final_list = []
@@ -270,90 +163,13 @@ def range_to_list(ws, start_row, end_row, start_col, end_col):
     return final_list
 
 
-# def clean_field(fld, case_convert='lower'):
-#     """
-#     returns a string in lower, strip, no space, no -, no ., no '
-#     can be used with dataframe like IP['clean2'] = IP['B'].apply(clean_field, convert_case='keep')
-#     1/28/23 added optional parameter convert_case defaulting to lower, as was done before, but allowing 'upper' or
-#     'keep'.
-#     """
-#     return_fld = str(fld).strip().replace(" ", "").replace("'", "").replace(".", "").replace("-", "")
-#     if case_convert == 'lower':
-#         return_fld = return_fld.lower()
-#     elif case_convert == 'upper':
-#         return_fld = return_fld.upper()
-#     elif case_convert == 'keep':
-#         pass
-#     else:
-#         exit_yes(f"wrong value fed to clean_field parameter case_convert, '{case_convert}' - exiting")
-#     return return_fld
-#
-
-# def autosize_xls_cols(ws):
-#     """ BEKs routine that works on the wks rather than df.  Datetime format set to width of 10. """
-#     dims = {}
-#     for row in ws.rows:
-#         for cell in row:
-#             if cell.value:
-#                 if cell.data_type == 'd':
-#                     date_width = 10
-#                 else:
-#                     date_width = len(str(cell.value))
-#                 dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), date_width))
-#
-#     for col, value in dims.items():
-#         ws.column_dimensions[col].width = value + 1
-
-
 def replace_boolean_column_vals(df, field_list):
     """ Check field in list for literal TRUE or FALSE because it gets converted to boolean and kills the program"""
+
     for field in field_list:
         if field in df.columns:
             df.loc[(df[field].str.upper() == "TRUE") | (df[field].str.upper() == "FALSE"), field] = ''
 
-
-# def bad_file_exit(file, msg=None):
-#     """ checks for file existence and exits if not found"""
-#     if msg is None:
-#         msg = f"File:\n\n'{file}'\n\ndoes not exist."
-#     if not file.expanduser().exists():
-#         logger.debug("here")
-#         exit_yes(msg)
-#
-#
-# def bad_path_exit(path, msg=None):
-#     """ checks for directory existence and exits if not found"""
-#     if msg is None:
-#         msg = f"Directory:\n\n'{path}'\n\ndoes not exist."
-#     # if not Path(os.path.expanduser(path)).exists():  # need expanduser for ~; only os works (not pathlib)
-#     if not path.expanduser().exists():
-#         # pymsgbox.alert(msg, "** Exiting via bad_path_exit **")
-#         # # FIXME: close TKINTER window here.  https://stackoverflow.com/questions/8009176/function-to-close-the-window-in-tkinter
-#         # exit()
-#         logger.debug("here")
-#         exit_yes(msg)
-#
-#
-# def bad_path_create(path, msg=None):
-#     """ checks for directory existence and creates if not found"""
-#     if msg is None:
-#         msg = ("Directory:\n\n" + str(path) + "\n\ndoes not exist.  Creating." +
-#                "\n\nCalled from " + calling_func(level=2))
-#     if not os.path.isdir(path):
-#         logger.debug("here")
-#         pymsgbox.alert(msg, "Adding Directory via bad_path_create")
-#         os.makedirs(path)
-#
-
-# def calling_func(level=0):
-#     """ returns the various levels of calling function.  0 is current, 1 is caller of current, etc """
-#     try:
-#         func = f"'{inspect.stack()[level][3]}', line #: {inspect.stack()[level][2]}"
-#     except Exception as e:
-#         logger.exception(e)
-#         func = f"** error ** inspect level too deep: {str(level)} called from {inspect.stack()[level][3]}"
-#     return func
-#
 
 def identify_duplicates(df, key, dupe_id_field):
     """
@@ -364,6 +180,7 @@ def identify_duplicates(df, key, dupe_id_field):
     key : field checked as duplicate
     dupe_id_field : field in df filled with identifiers above
     """
+
     logger.info("Identifying duplicates")
 
     any_dupe_bool = df.duplicated([key], keep=False)  # id all dupes using true/false
@@ -390,39 +207,11 @@ def identify_duplicates(df, key, dupe_id_field):
     return
 
 
-# def split_tuples(tuple_list):
-#     """
-#     Accepts a list of tuples, ex for sort fields and ascending/descending, checks to make sure all list elements are
-#     tuples, then splits them into list of tuples keys and list of tuple values
-#     Parameters
-#     ----------
-#     tuple_list : list of tuples containing pairs of key/values
-#
-#     Returns
-#     -------
-#     key_list: list of tuples keys
-#     val_list: list of tuple values
-#     """
-#     if tuple_list is None or tuple_list.strip() == '':
-#         return None, None
-#     else:
-#         tuple_list = eval(tuple_list)
-#         tuple_list = list(tuple_list)
-#         # check for list items that are not tuples - user error
-#         tuple_check_list = [True if isinstance(val, tuple) else False
-#                                  for val in tuple_list]
-#         if False in tuple_check_list:
-#             exit_yes('List of tuples contained a non-tuple', 'Error in Tuple List')
-#             raise ValueError
-#         key_list = [my_tuple[0] for my_tuple in tuple_list]
-#         val_list = [my_tuple[1] for my_tuple in tuple_list]
-#
-#         return key_list, val_list
-
-
 def merge_into_format_file(orig_df, update_file, cur_path):
-    # TODO:  THIS NEEDS TO BE RE-WRITTEN AND CHECKED.  Copied and some refactoring but no logi or working checked.
     """ updates fields in format file from update file"""
+
+    # TODO:  THIS NEEDS TO BE RE-WRITTEN AND CHECKED.  Copied and some refactoring but no logi or working checked.
+
     logger.info("Merging into format file")
 
     update_file_w_path = os.path.join(cur_path, update_file)
@@ -471,7 +260,7 @@ def merge_into_format_file(orig_df, update_file, cur_path):
     logger.debug(dups_in_update)  # does this work for df or do we need str() or something to avoid object?
     # write all duplicates to a file so we can take a look if desired
     file_of_dups = ROV_SETUP['format_path'] / "Duplicates" / \
-                   ("UPDATE DUPLICATES " + str(PurePath(update_file).stem) + ".xlsx")
+                   ("UPDATE DUPLICATES " + str(Path(update_file).stem) + ".xlsx")
     dups_in_update.to_excel(file_of_dups, index=False)
 
     # must check for dups because key might not be unique (eg using truncated name)
@@ -502,7 +291,7 @@ def merge_into_format_file(orig_df, update_file, cur_path):
 
         # write dupes in master to file for reviewing
         file_of_dups = ROV_SETUP['format_path'] / "Duplicates" / \
-                       ("MASTER DUPLICATES " + str(PurePath(orig_df).stem) + ".xlsx")
+                       ("MASTER DUPLICATES " + str(Path(orig_df).stem) + ".xlsx")
         # writer = pd.ExcelWriter(file_of_dups)
         orig_dups = orig_df[orig_df.duplicated(subset=['master_key'], keep=False)]
         orig_dups = orig_dups.sort_values("master_key")
@@ -542,6 +331,7 @@ def zip_file_to_county_dict(zip_csv_path: Union[str, os.PathLike], xlsx_path: Un
     dict : dictionary keying state/county to county_filename, countyToPrint, stateMixedCounty writes xlsx of unique
     states-counties
     """
+
     logger.debug("creating dictionary of zip to county")
     zip_rows_to_read = 999_999  # for testing
     # zip_rows_to_read = 999  # for testing
@@ -623,48 +413,10 @@ def create_zip_to_county_list_dict(unique_zips, split_zips, text_file_for_create
     return zip_to_county_list_dict
 
 
-# def find_header_row_in_file(file_with_path, header_string, header_col, sheet_name=None):
-#     """ identifies row with header by searching for header_string in header_col.  Used to skip blank and rows with titles.
-#
-#     Parameters
-#     ----------
-#     file_with_path : input file being read in, csv or xlsx?
-#     header_string : string identifying header row, like 'pdiid'
-#     header_col : alpha col to search for string, 'B' 'AA'
-#     sheet_name : sheet name in input file in case multiple
-#     """
-#     if sheet_name is None:
-#         sheet_name = 0
-#     header_row = None
-#
-#     # If the header identifying field is not in the first 30 rows assume something is wrong in the file
-#     df_temp = read_file_to_df(file_with_path, **{'header': None, 'sheet_name': sheet_name, 'nrows': 30,
-#                                                  'keep_default_na': True, 'dtype': str})
-#
-#     excel_col_num = column_index_from_string(coordinate_from_string(header_col + '1')[0])  # -1 to 0 index
-#
-#     for row in df_temp.itertuples():
-#         if type(row[excel_col_num]) == str:  # cell in input being checked is ok, otherwise blank cells/None cause
-#             # problems in compare
-#             if row[excel_col_num].strip().lower() == header_string.strip().lower():
-#                 header_row = row.Index
-#                 break
-#     if header_row is None:
-#         exit_yes((f"File may be bad.\n\nThe header check string '{header_string}' "
-#                   f"was not found in column '{header_col}' "
-#                   "in the first 30 lines of input file:"
-#                   f"\n\n'{file_with_path}'"
-#                   ))
-#     return header_row
-#
-
 def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_writer, second_pivot_by_count=False):
     """ run one pivot report and write out to worksheet leaving room for titles to be added later """
-    logger.debug(f"here '{sheet_name=}'")
 
-    # ExcelWorkbook = py.load_workbook(FilePath)
-    # writer = pd.ExcelWriter(FilePath, engine='openpyxl')
-    # writer.book = ExcelWorkbook
+    logger.debug(f"here '{sheet_name=}'")
 
     sheet_name2 = 'Cnt,' + sheet_name[:27]
 
@@ -684,8 +436,8 @@ def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_w
         index_fields = [index_fields]  # to generalize to list and not force user to enter []s
     fields_not_in_file = set(index_fields) - set(df.columns)  # some fields not in df
     if fields_not_in_file:
-        pymsgbox.alert("Specified index field on pivot not in dataframe:\n" + ','.join(fields_not_in_file) +
-                       "\n\nAvailable fields are:\n" + ', '.join(set(df.columns)),
+        pymsgbox.alert(f"Specified index field on pivot not in dataframe:\n{','.join(fields_not_in_file)}"
+                       f"\n\nAvailable fields are:\n{', '.join(set(df.columns))}",
                        'Warning:Tabulate field not on file, continuing')
     else:
         df_pt = pd.pivot_table(df,
@@ -710,6 +462,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     :param input_fn: name of file report is being run on, goes in title3 only
     :param dict_address_concentration report concentrated prop description and removal reason
     """
+
     logger.info("creating reports")
 
     writer = pd.ExcelWriter(output_wks, engine='openpyxl')
@@ -800,12 +553,10 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         # tried to eliminate error, "A value is trying to be set on a copy of a slice from a DataFrame", but couldn't so
         # isolated to with .copy() to show all is well
         dfq = df_from_query.copy()
-        # dfq['addrdesc'] = dfq.apply(lambda lam_row: get_addr_concentration(dict_address_concentration,
-        #                                                                    lam_row.state, lam_row.county, lam_row.city,
-        #                                                                    lam_row.address)[0], axis=1)
+
         dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_desc(ROV_SETUP['dict_concentrated_addresses'],
-                                                                           lam_row.state, lam_row.city,
-                                                                          lam_row.address), axis= 1)
+                                                                    lam_row.state, lam_row.city,
+                                                                    lam_row.address), axis=1)
 
         dfq.to_excel(writer, sheet_name=f"Address GT {PROP_CONCENTRATION}",
                      columns=['state', 'city', 'address', 'addr_desc', 'remove', 'address_count', 'county'],
@@ -872,6 +623,7 @@ def create_import_code_from_sheet(sheet_with_python_code, output_file):
     sheet_with_python_code : the sheet containing the python code
     output_file : the .py that will receive the text python code
     """
+
     logger.debug("here")
 
     # sheet_with_python_code = setup_wb[sheet_with_python_code]
@@ -893,6 +645,7 @@ def address_concentration_open_browser(df):
     """ uses address fields from query on address concentration pivot and google search with params to open
     browser windows for each address to decide if addreess should be excluded from carding.
     """
+
     logger.debug("here")
 
     openbrowser = True
@@ -919,6 +672,7 @@ def address_concentration_open_browser(df):
 
 def add_fields_to_list(base_list, new_fields):
     """ adds new fields to base lists.  exits if already in list."""
+
     new_fields_lst = [field.strip().lower() for field in new_fields.split(",")]
     same_fields = [field.strip().lower() for field in new_fields_lst if field in base_list]
 
@@ -934,8 +688,10 @@ def split_files_for_sincere(combined_csv, lim):
 
     Parameters
     ----------
-    combined_csv :
+    lim : mx number of addresses Sincerre can import in one csv file
+    combined_csv : the file which contains all the addresses combined into one
     """
+
     logger.info("split files for Sincere")
 
     def chunk_split_file(df, limit, split_path_hold, split_filename):
@@ -943,6 +699,7 @@ def split_files_for_sincere(combined_csv, lim):
         ROV_SETUP['sub_split_limit'] and postfix name with file-counter.
         split_filename is the root which csv and 'file x' is postfixed to
         """
+
         logger.trace("here")
 
         addresses_to_write = len(df)  # don't use df reference to save time
@@ -959,13 +716,10 @@ def split_files_for_sincere(combined_csv, lim):
                 split_file = split_path_hold / (split_filename + " file-" + str(file_counter) + '.csv')
                 df_chunk = df[low_record: hi_record + 1]
                 df_chunk.to_csv(split_file, index=False, columns=ROV_SETUP['splitfile_field_list'])
-                # print("   split sub file ", file_counter)
-                logger.info(f" -'{split_filename + ' file-' + str(file_counter)}' written, {len(df_chunk)} "
-                      f"addresses.")
+                logger.info(f" -'{split_filename} file- {file_counter}' written, {len(df_chunk)} addresses.")
 
     if lim == 0:
         lim = 99999999
-    # ip_stem = ROV_SETUP['OPFile'].stem
     op_stem = ROV_SETUP['splitfnbase'].stem
 
     # Ask if sorting by zip ok.  Assumes current sort order is how data was sorted under Combine.
@@ -973,8 +727,6 @@ def split_files_for_sincere(combined_csv, lim):
         exit_yes_no("Output is being sorted by zip. OK?",
                     'SORT BY ZIP?',
                     display_exiting=False)
-
-    # combined_csv = ROV_SETUP['combined_path'] / (ip_stem + '.csv')
 
     try:
         df_combo_w_no_remove = pd.read_csv(combined_csv, header=0, keep_default_na=False)
@@ -1017,38 +769,15 @@ def split_files_for_sincere(combined_csv, lim):
             # print("split " + splitfield_value)
             df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove['group_vars_string'] == group_vars_string_value]
 
-            # if ROV_SETUP['campaign_vars'].lower() == 'county':
-            #     split_filename = ROV_SETUP['dict_statecounty_to_alt_formats'][group_vars_string_value][2]
-            #     # get the format of county we want to use for filename using county lookup
-            # else:
-            #     split_filename = ROV_SETUP['expectedstate'] + '-' + group_vars_string_value
             split_filename = group_vars_string_value + "- " + op_stem
 
             # write out file, broken into chinks if needed
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
 
 
-# def get_addr_concentration(dict_addr_rem, state, county, city, address):
-#     # get_addr_remove_OLD has passed dictionary which is causing problems
-#     """
-#     Given location for a concentrated address, return the remove reason (blank if ok) or description based on dictionary
-#     Returns a tuple [0] is description, [1] is reason for removal
-#     :param dict_addr_rem: given a tuple of state, county, city, address, returns a two element list of remove code or description
-#     :param state, county, city, address
-#     """
-#     logger.info("get address concentration")
-#
-#     state = state.lower().strip()
-#     county = county.lower().strip()
-#     city = city.lower().strip()
-#     address = address.lower().strip()
-#     addr_desc_rem_tuple = dict_addr_rem.get(tuple([state, county, city, address]), ['missing', 'missing'])
-#
-#     return addr_desc_rem_tuple
-#
-
 def check_county_to_zips(df, zipskip_list, dict_statecounty):
     """ check county by comparing it to zip lookup.  sets flag for mismatches and saves vars along the way. """
+
     logger.info("check county to zip file")
 
     df['orig_county'] = df['county']
@@ -1060,7 +789,6 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
 
     # collapse all statecounty into "all_counties" for bad states
     df.loc[(df['state'] != ROV_SETUP['expectedstate']), 'statecounty'] = "All_Counties"
-    # df['clean_county'] = df['county'].apply(clean_field)  #  this is a repeat of line above
 
     df['numzip'] = df['zip'].map(lambda x: (int(float(x)) if is_number(x) else 0))
 
@@ -1087,63 +815,29 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
     logger.debug("Done filling zip and county info")
 
 
-# def read_file_to_df(file_with_path, **param_dict):
-#     """reads either xlsx or csv into a dataframe using parms passed in dictionary. Non-applicable parms
-#     are skipped."""
-#     logger.info(f"reading file to dataframe '{file_with_path.stem}'")
-#
-#     if PurePath(file_with_path).suffix.lower() == '.xlsx':
-#         filtered_dict = {k: v for k, v in param_dict.items()
-#                          if k in [p.name for p in inspect.signature(pd.read_excel).parameters.values()]}
-#         df_temp = pd.read_excel(file_with_path, **filtered_dict)
-#     elif file_with_path.suffix.lower() == '.csv':
-#         filtered_dict = {k: v for k, v in param_dict.items()
-#                          if k in [p.name for p in inspect.signature(pd.read_csv).parameters.values()]}
-#         df_temp = pd.read_csv(file_with_path, **filtered_dict)
-#     else:
-#         df_temp = None
-#         logger.debug('here')
-#         exit_yes((f"Bad file type on input - not xlsx or csv."
-#                   f"\n\nFile: '{file_with_path}'"
-#                   ))
-#     return df_temp
-#
-
 def get_setup_file_name(initial_campaign_dir):
-    """ use Tkinter to get name of setup workbook for desired campaign.  checks version of ROVCleaver program to
-    version of setup xlsx using file name
-    """
+    """ use bekutils func to get setup file """
+
     logger.debug('picking setup file')
-    Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
+    # Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
 
     # Use this flag when testing - False allows hardcoding input from alternate starting directory
     # noinspection PyUnreachableCode
     if True:
         # show an "Open" dialog box and return the path to the selected file
-        # V13.1 parameterize start directory and remove '/Users/Denise' reference
-        # ROV.setup_file_name = askopenfilename(
-        #     initialdir=INITIAL_CAMPAIGN_DIR,
-        #     title="Select ROVCleaver setup file SetupFormat" + filename_ver, filetypes=(
-        #         ("Excel files", "*.xlsx *.xls"),))
-
         xl_setup_file_name = get_file_name("Select Setup File",
-                                           f"Select ROVCleaver setup file xlsx. Must have 'UniversalSetup' in "
-                                           f"name",
+                                           f"Select ROVCleaver setup file xlsx. Must have 'UniversalSetup' in name",
                                             initial_campaign_dir)
-        setup_file_name = pathlib.Path(xl_setup_file_name).expanduser()
+        setup_file_name = Path(xl_setup_file_name).expanduser()
     else:
         # Hardcode in TEST INPUT FILE directory for repetitive testing
-        setup_file_name = pathlib.Path(
+        setup_file_name = Path(
             "~/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/WorkCampaign/ROVCleaver UniversalSetup "
             "import clean_field.xlsx").expanduser()
 
         exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
                     'RUN IN TEST?',
                     display_exiting=False)
-        # choice = bek_text_box(f"Running hardcoded Setup file.  OK?\n\n{str(setup_file_name)}",
-        #                       "Choose an Action",
-        #                       '',
-        #                       )
 
     if not 'universalsetup' in str(setup_file_name).lower():
         exit_yes(("The chosen setup file does not contain 'UniversalSetup' in it's name.\n"
@@ -1151,20 +845,12 @@ def get_setup_file_name(initial_campaign_dir):
                   ))
 
     return setup_file_name
-#
-
-# def assign_rov_variables():
-#     """ assigns variables from cells in setup sheet and places them in global object.  set some global variables"""
-#
-#     ### Done inputing fields - make sure specified input paths exist or EXIT
-#     bad_path_exit(ROV_SETUP['rawdata_path'])
-#     if ROV_SETUP['run_merge_data_flag']:
-#         bad_path_exit(ROV_SETUP['rawdata_path'])
 
 
 def check_for_unwanted_setup_options():
     """ verifies setup options when program is run allowing to exit and edit setup
     """
+
     logger.info('Checking setup options')
 
     # flag if checking county/zip and county or statecounty not in group_vars
@@ -1207,6 +893,7 @@ def check_for_unwanted_setup_options():
 
 def create_field_lists():
     """ fill array with default field names of ' ' and add fields required by options selected"""
+
     logger.info('Creating field lists')
 
     # create 'formatfile' field list by replacing blanks with inputfile names and replacing those to be renamed,
@@ -1241,8 +928,6 @@ def create_field_lists():
     ROV_SETUP['combinefile_field_list'] = [field
                                   for field in ROV_SETUP['formatfile_field_list']
                                   if field not in ROV_SETUP['combinefile_fields_to_delete_list']]  # dont use set to keep order
-
-    # ROV_SETUP['splitfile_field_list'] = [field.strip().lower() for field in ROV_SETUP['splitfile_field_list']]
 
     if ROV_SETUP['run_county_check_code_flag']:  # V15.0
         add_fields_to_list(ROV_SETUP['formatfile_field_list'], "orig_county,clean_county,zip_county_list,statecounty,"
@@ -1287,7 +972,7 @@ def create_field_lists():
 
     # Check if group_vars is on field list, error if not
     if ROV_SETUP['group_vars'] and \
-            not set(ROV_SETUP['group_vars']).issubset(set(ROV_SETUP['formatfile_field_list'])) :
+            not set(ROV_SETUP['group_vars']).issubset(set(ROV_SETUP['formatfile_field_list'])):
         exit_yes((f"some of group_vars '{ROV_SETUP['group_vars']}' are missing from Format file field list.\n\n"
                   f"Available fields are:\n{', '.join(ROV_SETUP['formatfile_field_list'])}"
                   ))
@@ -1295,6 +980,7 @@ def create_field_lists():
 
 def create_dicts():
     """ create dicts, lists, need to run """
+
     logger.info('Creating dictionaries')
 
     # create county dict returning various formats with
@@ -1310,16 +996,6 @@ def create_dicts():
             ROV_SETUP['dict_zip_to_countylist'] = ast.literal_eval(dict_file.read())
             logger.debug("Imported " + ZIP_TO_COUNTY_LIST_FILE.name)
 
-    # Clean up and simplify below.  Use conc_addr, conc_addr_desc, conc_addr_remove_desc functions created in bekutils
-    # concentrated_addresses_data = range_to_list(ROV_SETUP['concentrated_addresses_sheet'], 2,
-    #                                             len(ROV_SETUP['concentrated_addresses_sheet']['A']), 1, 7)
-    #
-    # address_desc_list = [
-    #     [tuple([state.strip().lower(), county.strip().lower(), city.strip().lower(), address.strip().lower()]),
-    #      [addressdesc.strip(), removeReason.strip()]]
-    #     for state, county, city, address, removeReason, freq, addressdesc
-    #     in concentrated_addresses_data]  # NOTE: [0] desc, [1] remove
-
     # check headers
     check_ws_headers(ROV_SETUP['concentrated_addresses_sheet'],
                        [('A1', 'State'),
@@ -1330,9 +1006,6 @@ def create_dicts():
                         ('F1', 'cnt'),
                         ('G1', 'Desc'),
                         ])
-
-    # addr_xls = Path("/Users/Denise/Library/CloudStorage/Dropbox/Postcard " \
-    #                 "Files/InputFiles/ROVCleaverAddressRemoveList.xlsx").expanduser()
 
     conc_addr_df = pd.read_excel(ROV_SETUP['concentrated_addresses_file'], sheet_name='Addresses', header=0, )
     conc_addr_df.columns = [str(col).lower() for col in conc_addr_df.columns]
@@ -1362,6 +1035,7 @@ def create_dicts():
     else:
         ROV_SETUP['zipskip_list'] = []  # passed to subs so need a value
 
+
 def display_imported_code(sheet_name, py_file_name):
     """ reads python code contained in a workbook sheet, writes it to a py file, displays the contents on screen,
     and writes it to console for fixing program mistakes
@@ -1371,10 +1045,10 @@ def display_imported_code(sheet_name, py_file_name):
     sheet_name : the sheet in the setup.xlxs where code is found
     py_file_name : the .py text python file where the code is saved
     """
+
     logger.debug('here')
 
     # put the text code in py_file_name
-    # create_import_code_from_sheet(sheet_name, os.path.abspath(py_file_name))
     create_import_code_from_sheet(sheet_name, py_file_name)
 
     with open(ROV_SETUP['exe_path'] / py_file_name, "r") as myfile:  # this copies in the code but does not execute it
@@ -1393,10 +1067,6 @@ def display_imported_code(sheet_name, py_file_name):
 
         # create a compiled object to list the lines to be executed for debugging with ine nums and comments/blanks
         # removed
-
-        # code_lines = [(str(index + 1) + ' ' + line)
-        #               for index, line in enumerate(inspect.getsourcelines(codeobj)[0])]
-        # f"{index + 1:<4   this left justifies index+1
         code_lines = [f"{index + 1:<4}  {line}"
                       for index, line in enumerate(inspect.getsourcelines(codeobj)[0])]
         if len(code_lines) > 40:  # too many to display on screen, disables the 'ok' box
@@ -1410,31 +1080,14 @@ def display_imported_code(sheet_name, py_file_name):
         # Below names module based on py code name, eg 'first_code_to_be_run_module'; puts pointer to module in
         # ROV_SETUP
         # A function from this module (can even have passed parameters) will be called later in the program.
-        ROV_SETUP[pathlib.Path(py_file_name).stem + '_module'] = \
-            importlib.import_module(pathlib.Path(py_file_name).stem)
+        ROV_SETUP[Path(py_file_name).stem + '_module'] = \
+            importlib.import_module(Path(py_file_name).stem)
 
     exit_yes_no(f"'{py_file_name}' to be run - taken from setup sheet: '{sheet_name}'"
                 f"\n\nCode and line numbers printed in python console log, too.\n\n"
                 f"{code_lines}",
                 f"Check '{py_file_name}' Code",
                 display_exiting=False)
-
-
-# def check_ws_headers(ws, vals):
-#     """
-#     Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
-#     eg vals = [('A1', 'use'), ('B1', 'fromFilePath'), ('C1', 'fromfilename'), ....]
-#     """
-#
-#     def chk_header_vals(ws_to_chk, cell, val):
-#         """ error if val not found in wks cell. """
-#         if str(ws_to_chk[cell].value).strip().lower() != str(val).lower():
-#             exit_yes((f"Column heading '{cell}' on Setup sheet '{ws_to_chk.title}' not equal to literal '{val}'."
-#                       f"\n\nIt is '{str(ws_to_chk[cell].value)}'."),
-#                      )
-#
-#     for pairs in vals:
-#         chk_header_vals(ws, pairs[0], pairs[1])
 
 
 def process_format_files(filelist_wks):
@@ -1558,7 +1211,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
         # last_code can be run in combine since it's only setting remove code.
         logger.info('Ready to run first_code')
 
-        ROV_SETUP['first_code_to_import_module'].first_code_func(ip, ROV_SETUP= ROV_SETUP)
+        ROV_SETUP['first_code_to_import_module'].first_code_func(ip, ROV_SETUP=ROV_SETUP)
 
         # This is the function from the sheet with any parameters it needs
         logger.debug('Ran first_code')  # these prompts help if error in imported code
@@ -1573,7 +1226,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
         # last_code can be run in combine since it's only setting remove code.
         logger.debug('Ready to run middle_code')  # these prompts help if error in imported code
 
-        ROV_SETUP['middle_code_to_import_module'].middle_code_func(ip, ROV_SETUP= ROV_SETUP)
+        ROV_SETUP['middle_code_to_import_module'].middle_code_func(ip, ROV_SETUP=ROV_SETUP)
 
         # This is the function from the sheet with any parameters it needs
         logger.debug('Ran middle_code')  # these prompts help if error in imported code
@@ -1593,7 +1246,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
 
         # ROV_SETUP['last_code_to_import_module'].last_code_func(ip, ROV_SETUP['dict_concentrated_addresses'],
         #                                                     ROV_SETUP['expectedstate'])
-        ROV_SETUP['last_code_to_import_module'].last_code_func(ip, ROV_SETUP= ROV_SETUP)
+        ROV_SETUP['last_code_to_import_module'].last_code_func(ip, ROV_SETUP=ROV_SETUP)
         # This is the function from the sheet with any parameters it needs
 
         # set remove based on max_pull_group if use_max_pull_group is set
@@ -1622,18 +1275,16 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
                                             for chkfield in unique_statecounties
                                             if chkfield.upper() not in ROV_SETUP['dict_statecounty_to_alt_formats']]
 
-        # [print(chkfield) for chkfield in unique_statecounties]
-
         missing_counties_list_all_formatfiles.extend(missing_counties_this_formatfile)
 
-    op_file = op_path / ("FORMATTED " + str(PurePath(fn).stem) + ".csv")
+    op_file = op_path / ("FORMATTED " + str(Path(fn).stem) + ".csv")
     # must check if remove flag is set otherwise field remove field is not on df
 
     ip.to_csv(op_file, index=False, columns=ROV_SETUP['formatfile_field_list'])
 
     if ROV_SETUP['run_last_code_flag']:
         # write out the 'removed' file
-        op_file = ROV_SETUP['format_path'] / "Removed" / ("REMOVED " + str(PurePath(fn).stem) + ".csv")
+        op_file = ROV_SETUP['format_path'] / "Removed" / ("REMOVED " + str(Path(fn).stem) + ".csv")
         ip[ip["remove"] != ""].to_csv(op_file, index=False, columns=ROV_SETUP['formatfile_field_list'])
 
     logger.info("\nFormatted file: " + fn)
@@ -1648,7 +1299,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
           " (H:M:S.s)")
 
     # Create summary sheet of Rawdata, Formatted and Removed
-    pivot_file = ROV_SETUP['format_path'] / "Summary" / ("SUMMARY " + str(PurePath(fn).stem) + ".xlsx")
+    pivot_file = ROV_SETUP['format_path'] / "Summary" / (f"SUMMARY {Path(fn).stem}.xlsx")
     pivot_and_other_reports(ip, pivot_file, fn, ROV_SETUP['dict_concentrated_addresses'])
 
     logger.debug("Leaving process_format_file")
@@ -1682,7 +1333,7 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
                         ('C1', 'fromfilename'),
                         ('D1', 'tofilepath'),
                         ('E1', 'tofilename'),
-                        ])
+                     ])
 
     # make sure all files and directories exist for row in ws_filelist:
     for copy_formatfile_flag, from_path, from_fn, to_path, to_fn, *_ in islice(ws_copy_formatfile_filelist, 1, None):
@@ -1795,7 +1446,7 @@ def process_format_files_into_combine():
 
         if str(combine_flag.value).strip().lower() == "x":
             logger.debug(f"Ready to combine file '{fn.value}'")
-            fnstem = pathlib.Path(fn.value).stem
+            fnstem = Path(fn.value).stem
             formatfile_w_path = ROV_SETUP['format_path'] / ('FORMATTED ' + fnstem + '.csv')
 
             bad_file_exit(formatfile_w_path)
@@ -1867,7 +1518,7 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
         rows = row_limit
     elif rows < row_min:
         rows = row_min
-#horizontal_scroll=h_scroll,
+# horizontal_scroll=h_scroll,
     # sg.theme('SystemDefault1')
     sg.theme('Default1')
     layout = [
@@ -1885,68 +1536,13 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     return event
 
 
-# def get_dir_name(box_title, title2, initial_dir):
-#     """ show an "Open" dialog box and return the selected directory. Replaced askdirectory with PySimpleGUI
-#     :param title2:
-#     :type title2:
-#     """
-#     logger.debug('here')
-#
-#     layout = [
-#         [sg.Text(title2, font=("Arial", 18))],
-#         [
-#          sg.Input(key="-IN-", expand_x=True),
-#          sg.FolderBrowse(initial_folder=os.path.expanduser(initial_dir))
-#          ],
-#         [sg.Button("Choose")],
-#     ]
-#
-#     # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
-#     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-#                               size=(1000, 150), use_custom_titlebar=True).read(close=True)
-#
-#     dir_name = values['-IN-']
-#     if dir_name == "":
-#         exit_yes("No directory name chosen")
-#
-#     return dir_name
-#
-
-# def get_file_name(box_title, title2, initial_dir):
-#     """ show an "Open" dialog box and return the selected file name. Replaced askopenfilename with pyeasygui
-#     :param title2: heading of the box
-#     :type title2: text next to input field
-#     """
-#     logger.debug('here')
-#     # "Select Sincere address export file 'all-parent-campaign-requests-yyyy-mm-dd.csv'"
-#     layout = [
-#         [sg.Text(title2, font=("Arial", 18))],
-#         [
-#          sg.Input(key="-IN-", expand_x=True),
-#          sg.FileBrowse(initial_folder=os.path.expanduser(initial_dir))
-#          ],
-#         [sg.Button("Choose")],
-#     ]
-#
-#     # event, values = sg.Window(heading_in_box, layout, size=(600, 100)).read(close=True)
-#     event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-#                               size=(1000, 150), use_custom_titlebar=True).read(close=True)
-#     # sg.Window.close()
-#
-#     file_name = values['-IN-']
-#     if file_name == "":
-#         exit_yes("No file name chosen")
-#
-#     return file_name
-
-
 def convert_xlsx_to_csvs():
     logger.info('starting convert_xlsx_to_csv')
 
     str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
                                             "XLSX Directory",
                                             INITIAL_CAMPAIGN_DIR)
-    xls_dir = pathlib.Path(str_xls_dir)
+    xls_dir = Path(str_xls_dir)
 
     # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
 
@@ -1955,8 +1551,8 @@ def convert_xlsx_to_csvs():
                                             xls_dir.parents[1])
     # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
 
-    xls_dir = pathlib.Path(str_xls_dir)
-    csv_dir = pathlib.Path(str_csv_dir)
+    xls_dir = Path(str_xls_dir)
+    csv_dir = Path(str_csv_dir)
 
     # get list of files with xls or xlsx
     xls_files_w_path = list(xls_dir.glob("*.xls?"))
@@ -1977,11 +1573,6 @@ def convert_xlsx_to_csvs():
     # set of file names (without .xls), csv below
     # xls_stem = {file_info['xls_stem'] for file_info in xls_files_dict}
     csv_stem = {file_info['csv_stem'] for file_info in csv_files_dict}
-
-    # compare list of xls files without csv
-    # xls_stem_wo_csv = xls_stem - csv_stem
-    # compare list of xls files with matching csv
-    # xls_stem_w_csv = xls_stem & csv_stem
 
     # get lists of file_info for xls with and without csvs
     xls_wo_csv = [xls_info for xls_info in xls_files_dict if xls_info['xls_stem'] not in csv_stem]
@@ -2008,59 +1599,25 @@ def convert_xlsx_to_csvs():
 def main():
     """ processes multiple rawdata files using parameters set in a setup spreadsheet
     """
-    # def set_logfile_path(log_path):
-    #     """ set log file path to location based on whether setup file is used or not.  If not, use EXE.
-    #     using loguru could put in downloads (next line)
-    #     but I'm locating it once we know what section
-    #     is running, either with the setup file or the EXE if no setup, eg updating zip file.
-    #     logfile = pathlib.Path.home() / "Downloads" / (Path(__file__).name + ".log")
-    # """
-    #
-    #     logger.remove(0)
-    #     logfile = log_path / (Path(__file__).name + ".log")
-    #     try:
-    #         os.remove(logfile)
-    #     except Exception as e:
-    #         logger.exception(e)
-    #         pass
-    #
-    #     logger.add(open(logfile, 'w'), level=log_level, backtrace=True, diagnose=True)
-    #     logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
 
     logger.info("starting main")
 
     # shows all cols for dataframe head instead of truncating to first and last few
     pd.set_option('display.max_columns', None)
 
-    # need path of exe/script for location of zip csv files
-    # if getattr(sys, 'frozen', False):
-    #     EXE_PATH = pathlib.Path(sys.executable).parent
-    # elif __file__:
-    #     EXE_PATH = pathlib.Path(__file__).parent
-    # else:
-    #     EXE_PATH = None
-    # logger.debug(f"({EXE_PATH=}")
-
     ROV_SETUP['EXE_PATH'] = exe_path()
-    EXE_PATH = exe_path()
-
-    # choice = pymsgbox.confirm("What do you want to do?",
-    #                           'Choose Action',
-    #                           ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
 
     choice = bek_text_box("What do you want to do?", "Choose an Action",
                               '',
                               ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
 
     if choice == 'xlsxs to csvs':
-        # set_logfile_path(EXE_PATH)
         logger.debug("chose 'XLSXs to CSVs'")
 
         convert_xlsx_to_csvs()
         pymsgbox.alert("Ran convert_xlsx to csv", "Convert Xlsxs to CSVs")
 
     elif choice == 'update zip file':
-        # set_logfile_path(EXE_PATH)
         logger.debug("chose 'Update Zip File'")
 
         import textwrap
@@ -2087,11 +1644,6 @@ def main():
                     'Update Zip Files',
                     display_exiting=False)
 
-        # create py dict file; file defined at top of program
-        # TODO check if hardcoded path works with .EXE
-        # create_zip_to_county_list_dict(ROV_SETUP['exe_path'] / MAIN_ZIP_FILE,
-        #                                ROV_SETUP['exe_path'] / MULTI_COUNTY_ZIP_FILE,
-        #                                ROV_SETUP['exe_path'] / ZIP_TO_COUNTY_LIST_FILE)
         create_zip_to_county_list_dict(MAIN_ZIP_FILE,
                                        MULTI_COUNTY_ZIP_FILE,
                                        ZIP_TO_COUNTY_LIST_FILE)
@@ -2105,7 +1657,6 @@ def main():
     else:
 
         ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
-        # set_logfile_path(ROV_SETUP['setup_file_name'].parent)
         logger.debug("in 'else' to pick format, combine, split")
 
         # new for uniformat
@@ -2113,13 +1664,7 @@ def main():
         # setup_backward_compatability()
         read_setup_vars(FIELD_DEF_COL_NUMERIC)
         format_setup_vars()
-
-        logger.debug(f"{ROV_SETUP=}")
-
-        # assign_rov_variables()  # read all the variables from the setup file and put the into ROV object
-
         create_field_lists()  # fill array with default field names of ' ' and add fields required by options selected
-
         create_dicts()  # create dicts and other file set up needed to run
 
         if choice == 'format':
@@ -2182,7 +1727,7 @@ def main():
 
                 # ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
                 #                                               ROV_SETUP['expectedstate'])
-                ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP= ROV_SETUP)
+                ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP=ROV_SETUP)
                 # This is the function from the sheet with any parameters it needs
 
                 logger.debug('Ran last_code')
@@ -2191,8 +1736,6 @@ def main():
             if ROV_SETUP['use_max_pull_group']:
                 df.loc[(df['remove'] == '') & (df['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
                     f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
-
-            # test_df_clean = df[df['remove'] == '']
 
             if ROV_SETUP['sort_list']:
                 df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
@@ -2205,10 +1748,8 @@ def main():
                                     ROV_SETUP['OPFile'].stem + '.csv',
                                     ROV_SETUP['dict_concentrated_addresses'])
 
-            # V16.1 moved writing of combined file to after dedupe
             # Write out combined file
             combine_file = ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv')
-
             df.to_csv(combine_file, index=False)
 
             pd.set_option('display.max_columns', None)
@@ -2219,7 +1760,6 @@ def main():
         elif choice == 'split':
             logger.debug("picked 'Split'")
 
-            # V11.1 moved to check only where needed
             bad_path_create(ROV_SETUP['split_path'])
             bad_path_create(ROV_SETUP['split_path_hold'])
             bad_path_create(ROV_SETUP['split_path_done'])
@@ -2231,6 +1771,7 @@ def main():
 
 def init_setup_dict():
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+
     logger.info('starting init_setup_dict')
 
     ROV_SETUP['setup_wb'] = load_workbook(filename=ROV_SETUP['setup_file_name'])
@@ -2247,7 +1788,6 @@ def init_setup_dict():
 
     ROV_SETUP['copy_formatfile_filelist_sheet'] = ROV_SETUP['setup_wb']["FormatCopies"]
 
-    # root_path is
     ROV_SETUP['exe_path'] = exe_path()
     ROV_SETUP['root_path'] = ROV_SETUP['setup_file_name'].parent  # dir containing the setup file
     ROV_SETUP['root_path_one_level_up'] = ROV_SETUP['root_path'].parent
@@ -2276,8 +1816,7 @@ def init_setup_dict():
                         ('E3', 'updatefilenames'),
                         ('F3', 'pull_group'),
                         ('G3', 'custom_field'),
-                        ])
-    a = 1
+                     ])
 
 
 def convert_bool(bool_val):
@@ -2301,7 +1840,7 @@ def setup_backward_compatability():
     # if use_pull_flag and max_pull_group not in file we can not set variables and continue because first row of
     # filelist sheet will be off.
 
-    # Below code doesn not work because would have to be run before init_setup_dict() (where paths are set),
+    # Below code does not work because would have to be run before init_setup_dict() (where paths are set),
     # but headers in filelist are also checked there.
     if ROV_SETUP['setup_wb']["FileList"]['A1'].value != "remove using max_pull_group":
         msg = f"Cell 'A1' in filelist must be 'remove using max_pull_group' but it " \
@@ -2355,20 +1894,6 @@ def format_setup_vars():
 
     if ROV_SETUP['run_merge_data_flag']:
         bad_path_exit(ROV_SETUP['rawdata_path'])
-
-    # if not ROV_SETUP['group_vars'] and ROV_SETUP['sortchoice'] in [1, 2, 3]:
-    #     exit_yes(f"Sort choice must be '4' if no no split field is specified"
-    #              f"\n\nSort choice is: {ROV_SETUP['sortchoice']}")
-    # else:
-    #     if ROV_SETUP['sortchoice'] == 1:
-    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
-    #     elif ROV_SETUP['sortchoice'] == 2:
-    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'randnum']
-    #     elif ROV_SETUP['sortchoice'] == 3:
-    #         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
-    #     else:
-    #         ROV_SETUP['sort_list'] = []
-
     if ROV_SETUP['sortchoice'] == 1:
         ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
     elif ROV_SETUP['sortchoice'] == 2:
@@ -2388,8 +1913,6 @@ def format_setup_vars():
         d['pivot_for_all'] = ROV_SETUP['xl_str_pivot_field' + str(piv_num) + '_all']
         ROV_SETUP['pivot_specs'].append(d)
 
-    a = 1
-
     # sort dictionary DO NOT DO THIS - creates a new object even though reference is the same! https://stackoverflow.com/questions/61645769/sort-dict-in-place
     # local_dict = dict(sorted(local_dict.items()))
 
@@ -2402,8 +1925,6 @@ def format_setup_vars():
                 del ROV_SETUP[k]
 
     logger.debug(f"in format_setup_vars - finished")
-
-    a = 1
 
 
 def read_setup_vars(field_col):
@@ -2425,7 +1946,6 @@ def read_setup_vars(field_col):
         read_setup_var(row_list)
 
 
-
 def read_setup_var(row_data):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
 
@@ -2442,10 +1962,9 @@ def read_setup_var(row_data):
     def return_func(var_type, str_case='l', str_strip='b', **kwargs):
         """ returns a function to convert a string to the passed type """
 
-
         def my_expanduser(file_str):
             """ apply path and expanduser when expanduser does not take argument"""
-            p = pathlib.Path(file_str)
+            p = Path(file_str)
             return p.expanduser()
 
         def my_python_obj(code_str):
@@ -2556,7 +2075,6 @@ def read_setup_var(row_data):
 
         return vars_list
 
-    # ROV_SETUP['rows_to_read_limit'] = ROV_SETUP['setup_sheet']['A19']
     if len(row_data) <= FIELD_DEF_COL_NUMERIC:  # no field data in field_vals column
         pass
     else:
@@ -2567,7 +2085,6 @@ def read_setup_var(row_data):
         elif str(row_data[FIELD_DEF_COL_NUMERIC - 1]).lower().strip() != 'true':
             pass
         else:
-
             # check structure and var tuples for input errors
             vars_list = check_vars_string_for_errors(vars_string)  # raises exceptions it error found
 
@@ -2586,9 +2103,7 @@ def read_setup_var(row_data):
                 for index, (field_name, field_type, *my_dict) in enumerate(list(islice(vars_list, 1, None))):
                     my_dict = ({} if my_dict == [] else my_dict[0])
                     func = return_func(field_type, **my_dict)
-                    # print(f"{index=}, {field_name=}, {field_type=}")
                     ROV_SETUP[field_name] = func(row_data[DATA_STARTS_COL_NUMERIC + index], **my_dict)
-    a = 1
 
 
 if __name__ == '__main__':
