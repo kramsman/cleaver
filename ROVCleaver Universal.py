@@ -928,9 +928,13 @@ def add_fields_to_list(base_list, new_fields):
         exit_yes(f"Field(s) '{str(same_fields)}' already exists on list.  Can not add it.")
 
 
-def split_files_for_sincere(lim):
+def split_files_for_sincere(combined_csv, lim):
     """ splits main df into files by group_vars for loading into VoterLetters/Sincere.  splits large files into subs
     with counter if larger than limit.
+
+    Parameters
+    ----------
+    combined_csv :
     """
     logger.info("split files for Sincere")
 
@@ -961,7 +965,7 @@ def split_files_for_sincere(lim):
 
     if lim == 0:
         lim = 99999999
-    ip_stem = ROV_SETUP['OPFile'].stem
+    # ip_stem = ROV_SETUP['OPFile'].stem
     op_stem = ROV_SETUP['splitfnbase'].stem
 
     # Ask if sorting by zip ok.  Assumes current sort order is how data was sorted under Combine.
@@ -970,14 +974,14 @@ def split_files_for_sincere(lim):
                     'SORT BY ZIP?',
                     display_exiting=False)
 
-    combinedfile_w_path = ROV_SETUP['combined_path'] / (ip_stem + '.csv')
+    # combined_csv = ROV_SETUP['combined_path'] / (ip_stem + '.csv')
 
     try:
-        df_combo_w_no_remove = pd.read_csv(combinedfile_w_path, header=0, keep_default_na=False)
+        df_combo_w_no_remove = pd.read_csv(combined_csv, header=0, keep_default_na=False)
     except Exception as e:
         logger.exception(e)
         exit_yes("Unable to read  the Combinedfile in the split step.  Was 'Combine' run?"
-                 f"\n\nMissing file:\n\n{combinedfile_w_path}"
+                 f"\n\nMissing file:\n\n{combined_csv}"
                  )
 
     df_combo_w_no_remove = df_combo_w_no_remove[df_combo_w_no_remove["remove"] == ""]
@@ -2220,7 +2224,7 @@ def main():
             bad_path_create(ROV_SETUP['split_path_hold'])
             bad_path_create(ROV_SETUP['split_path_done'])
 
-            split_files_for_sincere(ROV_SETUP['sub_split_limit'])
+            split_files_for_sincere(ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv'), ROV_SETUP['sub_split_limit'])
             logger.info('here')
             pymsgbox.alert("Ran split section of main", "Alert")
 
