@@ -120,6 +120,8 @@ from bekutils import find_header_row_in_file
 from bekutils import read_file_to_df
 from bekutils import get_dir_name
 from bekutils import check_ws_headers
+from bekutils import conc_addr_desc
+from bekutils import conc_addr_remove_desc
 
 
 setup_loguru("DEBUG", "DEBUG")
@@ -142,7 +144,8 @@ MULTI_COUNTY_ZIP_FILE = pathlib.Path("~/Dropbox/Postcard "
 ZIP_TO_COUNTY_LIST_FILE = pathlib.Path("~/Dropbox/Postcard Files/"
                                        "PythonPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
-PROP_CONCENTRATION = 50
+# PROP_CONCENTRATION = 50
+PROP_CONCENTRATION = 10
 ZIP_CONCENTRATION = 10
 
 ROV_SETUP = {}
@@ -709,12 +712,6 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     """
     logger.info("creating reports")
 
-    # ExcelWorkbook = py.load_workbook(FilePath)
-    # writer = pd.ExcelWriter(FilePath, engine='openpyxl')
-    # writer.book = ExcelWorkbook
-    # if not 'testSheet' in book.sheetnames:
-    #     book.create_sheet('testSheet')
-
     writer = pd.ExcelWriter(output_wks, engine='openpyxl')
     df_clean = df[df['remove'] == '']
 
@@ -740,20 +737,20 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
 
     # State by county for all including removed
     single_pivot_report(df, index_fields=['state', 'countysummed'], value_fields=['address'],
-                        sheet_name='RawData by State-County', single_piv_writer=writer, second_pivot_by_count=False)
+                        sheet_name="RawData by State-County", single_piv_writer=writer, second_pivot_by_count=False)
 
     if ROV_SETUP['add_filename_column_flag']:
         single_pivot_report(df, index_fields=['filename'], value_fields=['address'],
-                            sheet_name='RawData by Filename',
+                            sheet_name="RawData by Filename",
                             single_piv_writer=writer, second_pivot_by_count=False)
 
     single_pivot_report(df, index_fields=['remove'], value_fields=['address'],
-                        sheet_name='Removed Reasons',
+                        sheet_name="Removed Reasons",
                         single_piv_writer=writer, second_pivot_by_count=False)
 
     if ROV_SETUP['group_vars']:
         single_pivot_report(df_clean, index_fields=ROV_SETUP['group_vars'], value_fields=['address'],
-                            sheet_name='Clean by ' + ",".join(ROV_SETUP['group_vars'])[:22],
+                            sheet_name=f"Clean by {','.join(ROV_SETUP['group_vars'])[:22]}",
                             single_piv_writer=writer, second_pivot_by_count=True)
 
     # add filtered sheet w factory and campaigns for filling sincere campaign table
@@ -763,7 +760,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
                                 aggfunc='count',
                                 values="address",
                                 margins=False).reset_index()
-        df_pt.to_excel(writer, sheet_name='Campaigns by Factories', startrow=5)
+        df_pt.to_excel(writer, sheet_name="Campaigns by Factories", startrow=5)
         writer.book['Campaigns by Factories'].auto_filter.ref = 'B6'
         writer.book['Campaigns by Factories'].auto_filter.add_filter_column(0, [])
         writer.book['Campaigns by Factories']["D3"] = "Sum of Shown"
@@ -792,7 +789,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
                            values=['lastname'],
                            aggfunc='count')
-    df_from_query = df_pt.query("lastname >= " + str(PROP_CONCENTRATION))
+    df_from_query = df_pt.query(f"lastname >= {PROP_CONCENTRATION}")
     if len(df_from_query) > 0:
         df_from_query.rename(columns={'lastname': 'address_count'}, inplace=True)
         df_from_query.reset_index(inplace=True)
@@ -803,11 +800,16 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         # tried to eliminate error, "A value is trying to be set on a copy of a slice from a DataFrame", but couldn't so
         # isolated to with .copy() to show all is well
         dfq = df_from_query.copy()
-        dfq['addrdesc'] = dfq.apply(lambda lam_row: get_addr_concentration(dict_address_concentration,
-                                                                           lam_row.state, lam_row.county, lam_row.city,
-                                                                           lam_row.address)[0], axis=1)
+        # dfq['addrdesc'] = dfq.apply(lambda lam_row: get_addr_concentration(dict_address_concentration,
+        #                                                                    lam_row.state, lam_row.county, lam_row.city,
+        #                                                                    lam_row.address)[0], axis=1)
+        dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_remove_desc(ROV_SETUP['dict_concentrated_addresses'],
+                                                                           lam_row.state, lam_row.city,
+                                                                          lam_row.address), axis= 1)
 
-        dfq.to_excel(writer, sheet_name='Address GT ' + str(PROP_CONCENTRATION), startrow=5, index=False)
+        dfq.to_excel(writer, sheet_name=f"Address GT {PROP_CONCENTRATION}",
+                     columns=['state', 'city', 'address', 'addr_desc', 'remove', 'address_count', 'county'],
+                     startrow=5, index=False)
 
     # fields specific to county check - zip, county, zip/county match
     if ROV_SETUP['run_county_check_code_flag']:
@@ -822,7 +824,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
                                margins=True)
         df_pt['Pct_Mis_Matched'] = round(df_pt['mismatch_county'] / df_pt['address'] * 100, 1)
         df_pt['Pct_Matched'] = round(df_pt['match_county'] / df_pt['address'] * 100, 1)
-        df_pt.to_excel(writer, sheet_name='County Match Summary', startrow=5)
+        df_pt.to_excel(writer, sheet_name="County Match Summary", startrow=5)
 
         # zips w/ # occurrences in ZIP_CONCENTRATION, mismatch first
         df_pt = pd.pivot_table(df, index=['state', 'statecounty', 'zip_county_list', 'zip', 'mismatch_county'],
@@ -832,7 +834,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         df_from_query = df_pt.query("address >= " + str(ZIP_CONCENTRATION))
         df_from_query = df_from_query.sort_values(["mismatch_county", "address"], ascending=(False, False))
         df_from_query.rename(columns={'address': 'address_count'}, inplace=True)
-        df_from_query.reset_index().to_excel(writer, sheet_name='Zips Over ' + str(ZIP_CONCENTRATION), startrow=5,
+        df_from_query.reset_index().to_excel(writer, sheet_name=f"Zips Over {ZIP_CONCENTRATION}", startrow=5,
                                              index=False)
 
     # pivots for ad hoc fields
@@ -841,7 +843,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
             dfx = (df if specs['pivot_for_all'] else df_clean)
             universe = ('All-' if specs['pivot_for_all'] else 'Cln-')
             single_pivot_report(dfx, index_fields=specs['pivot_fields'], value_fields=['address'],
-                                sheet_name=universe + ','.join(specs['pivot_fields'])[:27],
+                                sheet_name=f"{universe} {','.join(specs['pivot_fields'])[:27]}",
                                 single_piv_writer=writer,
                                 second_pivot_by_count=(True if specs['pivot_by_cnt'] else False))
 
@@ -1022,24 +1024,24 @@ def split_files_for_sincere(lim):
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
 
 
-def get_addr_concentration(dict_addr_rem, state, county, city, address):
-    # get_addr_remove_OLD has passed dictionary which is causing problems
-    """
-    Given location for a concentrated address, return the remove reason (blank if ok) or description based on dictionary
-    Returns a tuple [0] is description, [1] is reason for removal
-    :param dict_addr_rem: given a tuple of state, county, city, address, returns a two element list of remove code or description
-    :param state, county, city, address
-    """
-    logger.info("get address concentration")
-
-    state = state.lower().strip()
-    county = county.lower().strip()
-    city = city.lower().strip()
-    address = address.lower().strip()
-    addr_desc_rem_tuple = dict_addr_rem.get(tuple([state, county, city, address]), ['missing', 'missing'])
-
-    return addr_desc_rem_tuple
-
+# def get_addr_concentration(dict_addr_rem, state, county, city, address):
+#     # get_addr_remove_OLD has passed dictionary which is causing problems
+#     """
+#     Given location for a concentrated address, return the remove reason (blank if ok) or description based on dictionary
+#     Returns a tuple [0] is description, [1] is reason for removal
+#     :param dict_addr_rem: given a tuple of state, county, city, address, returns a two element list of remove code or description
+#     :param state, county, city, address
+#     """
+#     logger.info("get address concentration")
+#
+#     state = state.lower().strip()
+#     county = county.lower().strip()
+#     city = city.lower().strip()
+#     address = address.lower().strip()
+#     addr_desc_rem_tuple = dict_addr_rem.get(tuple([state, county, city, address]), ['missing', 'missing'])
+#
+#     return addr_desc_rem_tuple
+#
 
 def check_county_to_zips(df, zipskip_list, dict_statecounty):
     """ check county by comparing it to zip lookup.  sets flag for mismatches and saves vars along the way. """
