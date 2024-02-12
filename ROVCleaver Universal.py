@@ -803,7 +803,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         # dfq['addrdesc'] = dfq.apply(lambda lam_row: get_addr_concentration(dict_address_concentration,
         #                                                                    lam_row.state, lam_row.county, lam_row.city,
         #                                                                    lam_row.address)[0], axis=1)
-        dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_remove_desc(ROV_SETUP['dict_concentrated_addresses'],
+        dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_desc(ROV_SETUP['dict_concentrated_addresses'],
                                                                            lam_row.state, lam_row.city,
                                                                           lam_row.address), axis= 1)
 
@@ -1114,7 +1114,7 @@ def get_setup_file_name(initial_campaign_dir):
 
     # Use this flag when testing - False allows hardcoding input from alternate starting directory
     # noinspection PyUnreachableCode
-    if False:
+    if True:
         # show an "Open" dialog box and return the path to the selected file
         # V13.1 parameterize start directory and remove '/Users/Denise' reference
         # ROV.setup_file_name = askopenfilename(
@@ -1947,7 +1947,7 @@ def convert_xlsx_to_csvs():
     # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
 
     str_csv_dir = get_dir_name("Select a DIRECTORY where converted CSVs will be placed",
-                                            "CSV Directory",
+                                            "CSV Directory (usually 'Rawdata')",
                                             xls_dir.parents[1])
     # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
 
