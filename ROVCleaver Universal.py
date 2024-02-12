@@ -10,9 +10,7 @@
 #   added factory_var
 # 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
 
-# TODO: put filetype in to select file and specify xlsx for Setup.
-# TODO: change all tkinter to simplegui
-#   TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
+# TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
 
 # 12/xx/23 errors in imported code are identified in popup box.  fixed: : list of imported code (first_code,
@@ -27,6 +25,7 @@
 # FIXME make sure Format merge works - which fields missing are ok?
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
+# TODO Write all split files and counts to a xlsx to use when verifying Sincere loading
 # TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
 
 
@@ -1596,6 +1595,104 @@ def convert_xlsx_to_csvs():
         logger.debug('')
 
 
+def main_format():
+    """ move format code out of main() into func"""
+
+    logger.debug("in main_format")
+
+    # check dir structure for formatted file creation. Don't create combine or split to indicate if dir is for
+    # Format files copied in.
+    bad_path_create(ROV_SETUP['format_path'])
+    bad_path_create(ROV_SETUP['format_path'] / "Summary")
+    bad_path_create(ROV_SETUP['format_path'] / "Removed")
+    bad_path_create(ROV_SETUP['format_path'] / "Duplicates")
+
+    # allow to exit if desired, eg flag not correct, imported code not right
+    check_for_unwanted_setup_options()
+
+    # Loop through all files in filelist to be formatted
+    process_format_files(ROV_SETUP['filelist_sheet'])
+
+    pymsgbox.alert("Ran format section of main", "Alert")
+
+
+def main_combine():
+    """ move combine out of main() into func """
+
+    logger.info("in main combine")
+
+    bad_path_create(os.path.expanduser(ROV_SETUP['combined_path']))
+    logger.debug("picked 'Combine'")
+
+    if ROV_SETUP['copy_other_format_files_flag']:
+        exit_yes_no("COPY FORMAT files from other directory in combine?  OK?\n\n",
+                    'COPY FORMAT FILES?')
+
+        # COPY FILES via parm 'perform_copies=True' in addition to checking files/path existence
+        formatfile_copy(ROV_SETUP['copy_formatfile_filelist_sheet'], perform_copies=True)
+
+    if ROV_SETUP['run_last_code_flag']:
+        display_imported_code(ROV_SETUP['last_code_sheet'], ROV_SETUP['last_code'])
+
+    # combine format files into combine if marked with 'x'
+    df = process_format_files_into_combine()
+
+    if ROV_SETUP['id_dupes']:
+        logger.info(f"{ROV_SETUP['dupe_key_formula']=}")
+        df['dupe_key'] = eval(ROV_SETUP['dupe_key_formula'])
+
+        df.sort_values(by=[k for k, v in ROV_SETUP['dupe_key_sort_tuples']],
+                       ascending=[v for k, v in ROV_SETUP['dupe_key_sort_tuples']], inplace=True)
+
+        identify_duplicates(df, 'dupe_key', 'dupe_id_field')
+
+        dupfile = ROV_SETUP['combined_path'] / (f"DUPLICATES in {ROV_SETUP['OPFile'].stem}.csv")
+
+        logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
+        df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
+
+        logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
+        df[df['dupe_id_field'] != '-'].to_csv(dupfile, index=False)
+
+    if ROV_SETUP['run_last_code_flag']:
+        # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
+        # assignment, random number from being overwritten.
+        # last_code can be run in combine since it's only setting remove code.
+        logger.debug('Ready to run last_code (remove code)')  # these prompts help if error in imported code
+
+        # ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
+        #                                               ROV_SETUP['expectedstate'])
+        ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP=ROV_SETUP)
+        # This is the function from the sheet with any parameters it needs
+
+        logger.debug('Ran last_code')
+
+    # set remove based on max_pull_group if use_max_pull_group is set
+    if ROV_SETUP['use_max_pull_group']:
+        df.loc[(df['remove'] == '') & (df['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
+            f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
+
+    if ROV_SETUP['sort_list']:
+        df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
+
+    # run pivot reports on combined
+    logger.debug('Ready to run pivots')  # these prompts help if error in imported code
+    file = ROV_SETUP['combined_path'] / f"Summary of {ROV_SETUP['OPFile'].stem}.xlsx"
+    pivot_and_other_reports(df,
+                            file,
+                            ROV_SETUP['OPFile'].stem + '.csv',
+                            ROV_SETUP['dict_concentrated_addresses'])
+
+    # Write out combined file
+    combine_file = ROV_SETUP['combined_path'] / f"{ROV_SETUP['OPFile'].stem}.csv"
+    df.to_csv(combine_file, index=False)
+
+    pd.set_option('display.max_columns', None)
+    logger.info("\n", df.head(5), "\n\n")
+
+    pymsgbox.alert("Ran combine section of main", "Alert")
+
+
 def main():
     """ processes multiple rawdata files using parameters set in a setup spreadsheet
     """
@@ -1611,6 +1708,7 @@ def main():
                               '',
                               ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
 
+    # PICK CHOICES
     if choice == 'xlsxs to csvs':
         logger.debug("chose 'XLSXs to CSVs'")
 
@@ -1640,13 +1738,9 @@ def main():
           for those which need remapping.'''
 
         msg = textwrap.dedent(msg)
-        exit_yes_no(msg,
-                    'Update Zip Files',
-                    display_exiting=False)
+        exit_yes_no(msg, 'Update Zip Files', display_exiting=False)
 
-        create_zip_to_county_list_dict(MAIN_ZIP_FILE,
-                                       MULTI_COUNTY_ZIP_FILE,
-                                       ZIP_TO_COUNTY_LIST_FILE)
+        create_zip_to_county_list_dict(MAIN_ZIP_FILE, MULTI_COUNTY_ZIP_FILE, ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
         pymsgbox.alert("Ran Zip Dict file update", "Update zip files")
 
@@ -1655,11 +1749,10 @@ def main():
         exit()
 
     else:
-
+        # run code common to format and combine
         ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
         logger.debug("in 'else' to pick format, combine, split")
 
-        # new for uniformat
         init_setup_dict()
         # setup_backward_compatability()
         read_setup_vars(FIELD_DEF_COL_NUMERIC)
@@ -1668,94 +1761,10 @@ def main():
         create_dicts()  # create dicts and other file set up needed to run
 
         if choice == 'format':
-            logger.debug("picked 'Format'")
-
-            # check dir structure for formatted file creation. Dont create combine or split to indicate if dir is for
-            # Format files copied in.
-            bad_path_create(ROV_SETUP['format_path'])
-            bad_path_create(ROV_SETUP['format_path'] / "Summary")
-            bad_path_create(ROV_SETUP['format_path'] / "Removed")
-            bad_path_create(ROV_SETUP['format_path'] / "Duplicates")
-
-            # allow to exit if desired, eg flag not correct, imported code not right
-            check_for_unwanted_setup_options()
-
-            # Loop through all files in filelist to be formatted
-            process_format_files(ROV_SETUP['filelist_sheet'])
-
-            pymsgbox.alert("Ran format section of main", "Alert")
+            main_format()
 
         elif choice == 'combine':
-            bad_path_create(os.path.expanduser(ROV_SETUP['combined_path']))
-            logger.debug("picked 'Combine'")
-
-            if ROV_SETUP['copy_other_format_files_flag']:
-                exit_yes_no("COPY FORMAT files from other directory in combine?  OK?\n\n",
-                            'COPY FORMAT FILES?')
-
-                # COPY FILES via parm 'perform_copies=True' in addition to checking files/path existence
-                formatfile_copy(ROV_SETUP['copy_formatfile_filelist_sheet'], perform_copies=True)
-
-            if ROV_SETUP['run_last_code_flag']:
-                display_imported_code(ROV_SETUP['last_code_sheet'], ROV_SETUP['last_code'])
-
-            # combine format files into combine if marked with 'x'
-            df = process_format_files_into_combine()
-
-            if ROV_SETUP['id_dupes']:
-                logger.info(f"{ROV_SETUP['dupe_key_formula']=}")
-                df['dupe_key'] = eval(ROV_SETUP['dupe_key_formula'])
-
-                df.sort_values(by=[k for k, v in ROV_SETUP['dupe_key_sort_tuples']],
-                               ascending=[v for k, v in ROV_SETUP['dupe_key_sort_tuples']], inplace=True)
-
-                identify_duplicates(df, 'dupe_key', 'dupe_id_field')
-
-                dupfile = ROV_SETUP['combined_path'] / ('DUPLICATES in ' + ROV_SETUP['OPFile'].stem + ".csv")
-
-                logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
-                df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
-
-                logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
-                df[df['dupe_id_field'] != 'X'].to_csv(dupfile, index=False)
-
-            if ROV_SETUP['run_last_code_flag']:
-                # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
-                # assignment, random number from being overwritten.
-                # last_code can be run in combine since it's only setting remove code.
-                logger.debug('Ready to run last_code (remove code)')  # these prompts help if error in imported code
-
-                # ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
-                #                                               ROV_SETUP['expectedstate'])
-                ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP=ROV_SETUP)
-                # This is the function from the sheet with any parameters it needs
-
-                logger.debug('Ran last_code')
-
-            # set remove based on max_pull_group if use_max_pull_group is set
-            if ROV_SETUP['use_max_pull_group']:
-                df.loc[(df['remove'] == '') & (df['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
-                    f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
-
-            if ROV_SETUP['sort_list']:
-                df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
-
-            # run pivot reports on combined
-            logger.debug('Ready to run pivots')  # these prompts help if error in imported code
-            file = ROV_SETUP['combined_path'] / ('Summary of ' + ROV_SETUP['OPFile'].stem + ".xlsx")
-            pivot_and_other_reports(df,
-                                    file,
-                                    ROV_SETUP['OPFile'].stem + '.csv',
-                                    ROV_SETUP['dict_concentrated_addresses'])
-
-            # Write out combined file
-            combine_file = ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv')
-            df.to_csv(combine_file, index=False)
-
-            pd.set_option('display.max_columns', None)
-            logger.info("\n", df.head(5), "\n\n")
-
-            pymsgbox.alert("Ran combine section of main", "Alert")
+            main_combine()
 
         elif choice == 'split':
             logger.debug("picked 'Split'")
