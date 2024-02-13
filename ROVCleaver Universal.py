@@ -10,32 +10,22 @@
 #   added factory_var
 # 12/9/23 Hardcode path to zip and concentration files so cleaver_prod and _test both find them
 
-# TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
-#    to add but skip if already in list?
-
-# 12/xx/23 errors in imported code are identified in popup box.  fixed: : list of imported code (first_code,
-# etc) doesn't print on console if error found (raises first).
-
 #  to remove unused functions used vulture.  In Pycharm terminal: vulture 'xxx.py'
 
-# TODO: put filetype in to select file and specify xlsx for Setup.
+# SKIP-put filetype in to select file and specify xlsx for Setup. CAN NOT WORK IN MAC VERSION OF TKINTER.
+#   https://stackoverflow.com/questions/57443004/pysimplegui-file-browser-specific-file-type
 
-# TODO redo formatcopy using pathlib / remove os.path.join
+
+# TODO redo formatcopy using pathlib / remove os.path.join.  Create paths from sheet using
+#   /Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/Work/formatcopy test paths.py
+
 # TODO can we skip padding variable lists?  zip will work on shortest one
 # FIXME make sure Format merge works - which fields missing are ok?
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
-# TODO Write all split files and counts to a xlsx to use when verifying Sincere loading
-# TODO: get gideon's opinion on list of vars over columns or in one cell separated by comma or mixed
-
-
-# log like this to capture stack
-# logger.add(sys.stdout, level='INFO', backtrace=True, diagnose=True)
-#
-# try:
-#     x = 1 / 0
-# except Exception as e:
-#     logger.exception(e)
+# TODO Write all split files and counts to an xlsx to use when verifying Sincere loading
+# TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
+#    to add but skip if already in list?
 
 
 import ast
@@ -85,6 +75,7 @@ from bekutils import get_dir_name
 from bekutils import check_ws_headers
 from bekutils import conc_addr_desc
 from bekutils import conc_addr_remove_desc
+from bekutils import convert_bool
 
 
 setup_loguru("DEBUG", "DEBUG")
@@ -1298,7 +1289,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
           " (H:M:S.s)")
 
     # Create summary sheet of Rawdata, Formatted and Removed
-    pivot_file = ROV_SETUP['format_path'] / "Summary" / (f"SUMMARY {Path(fn).stem}.xlsx")
+    pivot_file = ROV_SETUP['format_path'] / "Summary" / f"SUMMARY {Path(fn).stem}.xlsx"
     pivot_and_other_reports(ip, pivot_file, fn, ROV_SETUP['dict_concentrated_addresses'])
 
     logger.debug("Leaving process_format_file")
@@ -1312,6 +1303,7 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
     If perform_copies = False, paths and file existence is checked but copies do not take place.
     :return: files copied to directory
     """
+
     logger.info('In formatfile_copy')
 
     def copy_file(source, destination):
@@ -1319,7 +1311,6 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
         try:
             shutil.copy(os.path.expanduser(source), destination)
             logger.info(f"File '{source}' copied successfully to\n'{destination}'.")
-            # print("File " + source + " copied successfully to\n" + destination + ".")
         except Exception as e:
             logger.exception(e)
             exit_yes((f"File not copied:\n\n {source} \n\nto\n\n {destination}"
@@ -1328,10 +1319,10 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
     # Make sure column heading/locations are as expected and nothing was moved
     check_ws_headers(ws_copy_formatfile_filelist,
                      [('A1', 'use'),
-                        ('B1', 'fromFilePath'),
-                        ('C1', 'fromfilename'),
-                        ('D1', 'tofilepath'),
-                        ('E1', 'tofilename'),
+                      ('B1', 'fromFilePath'),
+                      ('C1', 'fromfilename'),
+                      ('D1', 'tofilepath'),
+                      ('E1', 'tofilename'),
                      ])
 
     # make sure all files and directories exist for row in ws_filelist:
@@ -1357,6 +1348,7 @@ def assign_formatcopy_vars(from_path, from_fn, to_path, to_fn):
     eg referencing variable rootPathOneUp, where rooPath is the current Format dir.
     :return: list of two variable, source file and destination file or path
     """
+
     logger.debug('here')
     # from_path, from_fn, to_path, to_fn
     src_path_expr = from_path.value
@@ -1374,7 +1366,7 @@ def assign_formatcopy_vars(from_path, from_fn, to_path, to_fn):
     src_file_w_path = os.path.join(src_path, src_file)  # FIXME test formatcopy, remove os.path.join
 
     if xl_dest_path == "" or xl_dest_path.lower() == 'none':  # no "to path" specified so use default, format dir
-        dest_path = ROV_SETUP['format_path'] / ""  # FIXME NEEDED?
+        dest_path = ROV_SETUP['format_path']
     else:
         dest_path = os.path.join(xl_dest_path, "")
 
@@ -1646,7 +1638,7 @@ def main_combine():
 
         identify_duplicates(df, 'dupe_key', 'dupe_id_field')
 
-        dupfile = ROV_SETUP['combined_path'] / (f"DUPLICATES in {ROV_SETUP['OPFile'].stem}.csv")
+        dupfile = ROV_SETUP['combined_path'] / f"DUPLICATES in {ROV_SETUP['OPFile'].stem}.csv"
 
         logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
         df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
@@ -1774,7 +1766,7 @@ def main():
             bad_path_create(ROV_SETUP['split_path_done'])
 
             split_files_for_sincere(ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv'), ROV_SETUP['sub_split_limit'])
-            logger.info('here')
+            logger.info('ran split')
             pymsgbox.alert("Ran split section of main", "Alert")
 
 
@@ -1826,21 +1818,6 @@ def init_setup_dict():
                         ('F3', 'pull_group'),
                         ('G3', 'custom_field'),
                      ])
-
-
-def convert_bool(bool_val):
-    """ bool('FALSE') return True so need better """
-    if isinstance(bool_val, bool):
-        return_val = bool_val
-    else:
-        if bool_val is None or bool_val.lower() not in ['true', 'false']:
-            raise ValueError('only allowable booleans are any case of true and false.  0/1 could be added to '
-                             'convert_bool code')
-        elif bool_val.lower() == 'true':
-            return_val = True
-        else:
-            return_val = False
-    return return_val
 
 
 def setup_backward_compatability():
