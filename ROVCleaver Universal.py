@@ -1640,11 +1640,17 @@ def main_combine():
 
         dupfile = ROV_SETUP['combined_path'] / f"DUPLICATES in {ROV_SETUP['OPFile'].stem}.csv"
 
-        logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
-        df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
+        # set remove for dupes
+        df.loc[~(df['dupe_id_field'].isin(['F','-','X'])), 'remove'] = \
+            f"Not unique and not a first duplicate; not in 'F-X'"
 
-        logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
-        df[df['dupe_id_field'] != '-'].to_csv(dupfile, index=False)
+        # This code to writeo ut duplicates now done after last_code is run so remove is set
+        # logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
+        # df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
+        #
+        # logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
+        # df[df['dupe_id_field'] != '-'].to_csv(dupfile, index=False)
+
 
     if ROV_SETUP['run_last_code_flag']:
         # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
@@ -1663,6 +1669,14 @@ def main_combine():
     if ROV_SETUP['use_max_pull_group']:
         df.loc[(df['remove'] == '') & (df['pull_group'] < ROV_SETUP['max_pull_group']), 'remove'] = \
             f"Clean but pull group less than {ROV_SETUP['max_pull_group']}"
+
+    if ROV_SETUP['id_dupes']:
+        logger.debug("Going to write out duplicaes to file")
+        logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
+        df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
+
+        logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
+        df[df['dupe_id_field'] != '-'].to_csv(dupfile, index=False)
 
     if ROV_SETUP['sort_list']:
         df.sort_values(by=ROV_SETUP['sort_list'], inplace=True)
@@ -1715,13 +1729,14 @@ def main():
           'Updating Zip File' will read data from zip files purchased from zip-codes.com.
 
           Two files are read:
-               {MAIN_ZIP_FILE}
-               {MULTI_COUNTY_ZIP_FILE}
+               '{MAIN_ZIP_FILE}' and 
+               '{MULTI_COUNTY_ZIP_FILE}'
 
-          Download the csv files.  These files are updated periodically 
-          and the newest versions should be downloaded into the same
-          directory as ROVCleaver.py before this update is run.
-          A dictionary will be created and saved to 'ZIP_TO_COUNTY_LIST_FILE'
+          These files are updated periodically
+          and the newest versions should be downloaded into
+          '~/Postcard Files/PythonPrograms/ROVCleaver_Production'
+          before this update is run. A dictionary will be created and
+          saved to 'ZIP_TO_COUNTY_LIST_FILE'
           and used in future runs of ROVCleaver.
 
           Aside: the file 'Unique_County_List.xlsx' in the ROVCleaver
@@ -1791,7 +1806,10 @@ def init_setup_dict():
 
     ROV_SETUP['exe_path'] = exe_path()
     ROV_SETUP['root_path'] = ROV_SETUP['setup_file_name'].parent  # dir containing the setup file
-    ROV_SETUP['root_path_one_level_up'] = ROV_SETUP['root_path'].parent
+
+    # use new function formatcopy test paths.py and path.parents[0]
+    # ROV_SETUP['root_path_one_level_up'] = ROV_SETUP['root_path'].parent
+
     ROV_SETUP['rawdata_path'] = ROV_SETUP['root_path'] / 'Rawdata'
     ROV_SETUP['format_path'] = ROV_SETUP['root_path'] / 'Formatted'
     ROV_SETUP['split_path'] = ROV_SETUP['root_path'] / 'Split'
