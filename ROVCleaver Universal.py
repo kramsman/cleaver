@@ -50,6 +50,7 @@ import pandas as pd
 # from pandasgui import show
 import pymsgbox
 from openpyxl import load_workbook
+from openpyxl import Workbook
 from openpyxl.styles import Font
 import PySimpleGUI as sg
 from openpyxl.utils.cell import coordinate_from_string
@@ -472,7 +473,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         sorted_df = df[[rpt_field, 'pull_group']] \
             .sort_values(['pull_group', rpt_field, ], ascending=[True, True])
         added_counties = sorted_df.drop_duplicates(subset=[rpt_field], keep='first')
-        added_counties.to_excel(writer, sheet_name=sheet_name, startrow=5)
+        added_counties.to_excel(writer, sheet_name=sheet_name, startrow=5, index=False)
 
     # Create summary sheet of Rawdata, Formatted and Removed
     # for other states, roll all counties in to one called "All Counties'
@@ -672,17 +673,30 @@ def add_fields_to_list(base_list, new_fields):
         exit_yes(f"Field(s) '{str(same_fields)}' already exists on list.  Can not add it.")
 
 
-def split_files_for_sincere(combined_csv, lim):
+def split_files_for_sincere(combined_csv, lim, op_wks):
     """ splits main df into files by group_vars for loading into VoterLetters/Sincere.  splits large files into subs
     with counter if larger than limit.
 
     Parameters
     ----------
+    op_wks :
     lim : mx number of addresses Sincerre can import in one csv file
     combined_csv : the file which contains all the addresses combined into one
     """
 
     logger.info("split files for Sincere")
+
+    try:
+        os.remove(op_wks)
+    except Exception:
+        pass
+
+    wb = Workbook()
+    ws = wb.active
+    ws['A1'] = f"{ROV_SETUP['expectedstate']} {ROV_SETUP['splitfnbase'].stem}"
+    ws['A2'] = 'Split Files to be Loaded'
+    ws['A4'] = 'File'
+    ws['B4'] = 'Address Count'
 
     def chunk_split_file(df, limit, split_path_hold, split_filename):
         """ pass a split file and needed parts and it will chunk it into sizes specified in setup as
@@ -695,17 +709,25 @@ def split_files_for_sincere(combined_csv, lim):
         addresses_to_write = len(df)  # don't use df reference to save time
 
         if addresses_to_write <= limit:  # write one file
-            split_file = split_path_hold / (split_filename + ".csv")
+            split_file = split_path_hold / f"{split_filename}.csv"
             df.to_csv(split_file, index=False, columns=ROV_SETUP['splitfile_field_list'])
+
+            ws.cell(column=1, row=ws.max_row + 1, value=f"{split_filename}.csv")
+            ws.cell(column=2, row=ws.max_row, value=len(df))
+
             logger.info(f"'{split_filename}' written, {len(df)} addresses.")
         else:  # need to create split files by looping
             for file_counter in range(1, math.ceil(addresses_to_write / limit) + 1):
                 low_record = ((file_counter - 1) * limit)
                 hi_record = (file_counter * limit) - 1
 
-                split_file = split_path_hold / (split_filename + " file-" + str(file_counter) + '.csv')
+                split_file = split_path_hold / f"{split_filename} file-{file_counter}.csv"
                 df_chunk = df[low_record: hi_record + 1]
                 df_chunk.to_csv(split_file, index=False, columns=ROV_SETUP['splitfile_field_list'])
+
+                ws.cell(column=1, row=ws.max_row + 1, value=f"{split_filename} file-{file_counter}.csv")
+                ws.cell(column=2, row=ws.max_row, value=len(df_chunk))
+
                 logger.info(f" -'{split_filename} file- {file_counter}' written, {len(df_chunk)} addresses.")
 
     if lim == 0:
@@ -764,6 +786,9 @@ def split_files_for_sincere(combined_csv, lim):
             # write out file, broken into chinks if needed
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
 
+    wb.save(op_wks)
+
+
 
 def check_county_to_zips(df, zipskip_list, dict_statecounty):
     """ check county by comparing it to zip lookup.  sets flag for mismatches and saves vars along the way. """
@@ -813,7 +838,7 @@ def get_setup_file_name(initial_campaign_dir):
 
     # Use this flag when testing - False allows hardcoding input from alternate starting directory
     # noinspection PyUnreachableCode
-    if True:
+    if False:
         # show an "Open" dialog box and return the path to the selected file
         xl_setup_file_name = get_file_name("Select Setup File",
                                            f"Select ROVCleaver setup file xlsx. Must have 'UniversalSetup' in name",
@@ -822,8 +847,9 @@ def get_setup_file_name(initial_campaign_dir):
     else:
         # Hardcode in TEST INPUT FILE directory for repetitive testing
         setup_file_name = Path(
-            "~/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/WorkCampaign/ROVCleaver UniversalSetup "
-            "import clean_field.xlsx").expanduser()
+            "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/"
+            "Test GA Primary 1-2024/ROVCleaver TEST GA Primary 1-2024 UniversalSetup.xlsx").expanduser()
+
 
         exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
                     'RUN IN TEST?',
@@ -1780,7 +1806,9 @@ def main():
             bad_path_create(ROV_SETUP['split_path_hold'])
             bad_path_create(ROV_SETUP['split_path_done'])
 
-            split_files_for_sincere(ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv'), ROV_SETUP['sub_split_limit'])
+            split_files_for_sincere(ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv'),
+                                    ROV_SETUP['sub_split_limit'],
+                                    ROV_SETUP['root_path'] / f"Split file list-{ROV_SETUP['splitfnbase'].stem}.xlsx")
             logger.info('ran split')
             pymsgbox.alert("Ran split section of main", "Alert")
 
