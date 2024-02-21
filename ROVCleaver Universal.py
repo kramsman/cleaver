@@ -23,7 +23,6 @@
 # FIXME make sure Format merge works - which fields missing are ok?
 # TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
-# TODO Write all split files and counts to an xlsx to use when verifying Sincere loading
 # TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
 
