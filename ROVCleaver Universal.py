@@ -92,7 +92,7 @@ MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
 MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard "
                                      "Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv"
                                      "").expanduser()
-
+# /Dropbox/Postcard Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
 ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
@@ -397,7 +397,7 @@ def create_zip_to_county_list_dict(unique_zips, split_zips, text_file_for_create
     df_for_dict = unique_zip_county.groupby(["ZipCode"], as_index=False).agg({'statecounty': list})
     zip_to_county_list_dict = dict(df_for_dict.values.tolist())
 
-    with open(ROV_SETUP['exe_path'] / text_file_for_created_dict, 'w') as f:
+    with open(text_file_for_created_dict, 'w') as f:
         print(zip_to_county_list_dict, file=f)
 
     return zip_to_county_list_dict
@@ -747,7 +747,7 @@ def split_files_for_sincere(combined_csv, lim):
         chunk_split_file(df_combo_w_no_remove, lim, ROV_SETUP['split_path_hold'], split_filename)
 
     else:
-        # if ROV_SETUP['campaign_vars'].lower() == 'county':
+        # if len(ROV_SETUP['campaign_vars']) == 1 and ROV_SETUP['campaign_vars'][0].lower() == 'county':
         #     splitfield = 'statecounty'
         # else:
         #     splitfield = ROV_SETUP['campaign_vars']
@@ -755,11 +755,11 @@ def split_files_for_sincere(combined_csv, lim):
         unique_split_values.sort()
 
         # for each - write out a csv file.
-        for group_vars_string_value in unique_split_values:
+        for unique_split_value in unique_split_values:
             # print("split " + splitfield_value)
-            df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove['group_vars_string'] == group_vars_string_value]
+            df_one_splifield = df_combo_w_no_remove[df_combo_w_no_remove['group_vars_string'] == unique_split_value]
 
-            split_filename = group_vars_string_value + "- " + op_stem
+            split_filename = unique_split_value + "-" + op_stem
 
             # write out file, broken into chinks if needed
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
@@ -1283,7 +1283,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
         logger.info("   Kept: " + str(len(ip[ip["remove"] == ""])))
         logger.info("   Removed: " + str(len(ip[ip["remove"] != ""])))
 
-    logger.debug("\n", ip.head(5), "\n\n")
+    logger.debug("\n", ip.head(5), "\n\n")  # TODO why does this not print??
 
     logger.debug("End time is ", datetime.now().strftime("%H:%M:%S"), "  Elapsed time is", str(datetime.now() - start_time),
           " (H:M:S.s)")
@@ -1581,7 +1581,7 @@ def convert_xlsx_to_csvs():
     # read each xlsx into dataframe with options and write out with same name
     for file_info in xls_wo_csv:
         logger.info(f"Reading {file_info['xls_name']}")
-        df = pd.read_excel(file_info['xls_w_path'])
+        df = pd.read_excel(file_info['xls_w_path'], dtype=str)
         logger.info(f"Writing {(file_info['xls_stem'] + '.csv')}")
         df.to_csv(csv_dir / (file_info['xls_stem'] + '.csv'), index=False)
         logger.debug('')
@@ -1708,7 +1708,7 @@ def main():
     # shows all cols for dataframe head instead of truncating to first and last few
     pd.set_option('display.max_columns', None)
 
-    ROV_SETUP['EXE_PATH'] = exe_path()
+    ROV_SETUP['exe_path'] = exe_path()
 
     choice = bek_text_box("What do you want to do?", "Choose an Action",
                               '',
@@ -1745,7 +1745,7 @@ def main():
           for those which need remapping.'''
 
         msg = textwrap.dedent(msg)
-        exit_yes_no(msg, 'Update Zip Files', display_exiting=False)
+        # exit_yes_no(msg, 'Update Zip Files', display_exiting=False)
 
         create_zip_to_county_list_dict(MAIN_ZIP_FILE, MULTI_COUNTY_ZIP_FILE, ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
