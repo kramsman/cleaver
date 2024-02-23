@@ -77,8 +77,12 @@ from bekutils import conc_addr_desc
 from bekutils import conc_addr_remove_desc
 from bekutils import convert_bool
 
+USE_HARDCODED_SETUP = False
+HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/"
+            "Test GA Primary 1-2024/ROVCleaver TEST GA Primary 1-2024 UniversalSetup.xlsx").expanduser()
 
-setup_loguru("DEBUG", "DEBUG")
+
+setup_loguru("INFO", "DEBUG")
 # log_level = "DEBUG"  # used for log file; screen set to INFO. TRACE, DEBUG, INFO, WARNING, ERROR
 
 INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
@@ -529,24 +533,29 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
 
     # address concentration
-    df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
+    # df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
+    #                        values=['lastname'],
+    #                        aggfunc='count')
+    # TODO add conc_Addr_desc
+    df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'conc_addr_desc', 'remove'],
                            values=['lastname'],
                            aggfunc='count')
     df_from_query = df_pt.query(f"lastname >= {PROP_CONCENTRATION}")
     if len(df_from_query) > 0:
-        df_from_query.rename(columns={'lastname': 'address_count'}, inplace=True)
         df_from_query.reset_index(inplace=True)
+        df_from_query.rename(columns={'lastname': 'address_count', 'conc_addr_desc': 'addr_desc'}, inplace=True)
 
-        # open browser windows for concentrated properties
-        address_concentration_open_browser(df_from_query)
 
         # tried to eliminate error, "A value is trying to be set on a copy of a slice from a DataFrame", but couldn't so
         # isolated to with .copy() to show all is well
         dfq = df_from_query.copy()
 
-        dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_desc(ROV_SETUP['dict_concentrated_addresses'],
-                                                                    lam_row.state, lam_row.city,
-                                                                    lam_row.address), axis=1)
+        # dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_desc(ROV_SETUP['dict_concentrated_addresses'],
+        #                                                             lam_row.state, lam_row.city,
+        #                                                             lam_row.address), axis=1)
+
+        # open browser windows for concentrated properties
+        address_concentration_open_browser(df_from_query)
 
         dfq.to_excel(writer, sheet_name=f"Address GT {PROP_CONCENTRATION}",
                      columns=['state', 'city', 'address', 'addr_desc', 'remove', 'address_count', 'county'],
@@ -633,7 +642,7 @@ def create_import_code_from_sheet(sheet_with_python_code, output_file):
 
 def address_concentration_open_browser(df):
     """ uses address fields from query on address concentration pivot and google search with params to open
-    browser windows for each address to decide if addreess should be excluded from carding.
+    browser windows for each address to decide if address should be excluded from carding.
     """
 
     logger.debug("here")
@@ -648,12 +657,8 @@ def address_concentration_open_browser(df):
         if openbrowser:
             df = df.reset_index()  # converts multi-index to columns
             for index, row in df.iterrows():
-                st = row['state']
-                cnt = row['county']
-                cit = row['city']
-                ad = row['address']
-                webbrowser.open('https://www.google.com/search?q=' + st + "+" + cnt + "+" + "+" + cit + "+" + ad,
-                                new=2)
+                if row['addr_desc'] == '':
+                    webbrowser.open(f"https://www.google.com/search?q={row['state']}+{row['city']}+{row['address']}", new=2)
         else:
             pass
     else:
@@ -833,26 +838,20 @@ def get_setup_file_name(initial_campaign_dir):
     """ use bekutils func to get setup file """
 
     logger.debug('picking setup file')
-    # Tk().withdraw()  # we don't want a full GUI, so keep the root window from appearing
 
-    # Use this flag when testing - False allows hardcoding input from alternate starting directory
-    # noinspection PyUnreachableCode
-    if False:
+    if USE_HARDCODED_SETUP:
+        # Hardcode in TEST INPUT FILE directory for repetitive testing
+        setup_file_name = Path(HARDCODED_SETUP_FILE).expanduser()
+
+        exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
+                    'RUN IN TEST?',
+                    display_exiting=False)
+    else:
         # show an "Open" dialog box and return the path to the selected file
         xl_setup_file_name = get_file_name("Select Setup File",
                                            f"Select ROVCleaver setup file xlsx. Must have 'UniversalSetup' in name",
                                             initial_campaign_dir)
         setup_file_name = Path(xl_setup_file_name).expanduser()
-    else:
-        # Hardcode in TEST INPUT FILE directory for repetitive testing
-        setup_file_name = Path(
-            "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/"
-            "Test GA Primary 1-2024/ROVCleaver TEST GA Primary 1-2024 UniversalSetup.xlsx").expanduser()
-
-
-        exit_yes_no("Running hardcoded Setup file.  OK?\n\n" + str(setup_file_name),
-                    'RUN IN TEST?',
-                    display_exiting=False)
 
     if not 'universalsetup' in str(setup_file_name).lower():
         exit_yes(("The chosen setup file does not contain 'UniversalSetup' in it's name.\n"
@@ -1014,12 +1013,12 @@ def create_dicts():
     # check headers
     check_ws_headers(ROV_SETUP['concentrated_addresses_sheet'],
                        [('A1', 'State'),
-                        ('B1', 'County'),
-                        ('C1', 'City'),
-                        ('D1', 'Address'),
+                        ('B1', 'City'),
+                        ('C1', 'Address'),
+                        ('D1', 'Desc'),
                         ('E1', 'Remove'),
                         ('F1', 'cnt'),
-                        ('G1', 'Desc'),
+                        ('G1', 'County'),
                         ])
 
     conc_addr_df = pd.read_excel(ROV_SETUP['concentrated_addresses_file'], sheet_name='Addresses', header=0, )
