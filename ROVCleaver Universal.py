@@ -532,11 +532,6 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     if ROV_SETUP['group_vars']:
         report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
 
-    # address concentration
-    # df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'remove'],
-    #                        values=['lastname'],
-    #                        aggfunc='count')
-    # TODO add conc_Addr_desc
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'conc_addr_desc', 'remove'],
                            values=['lastname'],
                            aggfunc='count')
@@ -545,14 +540,9 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
         df_from_query.reset_index(inplace=True)
         df_from_query.rename(columns={'lastname': 'address_count', 'conc_addr_desc': 'addr_desc'}, inplace=True)
 
-
         # tried to eliminate error, "A value is trying to be set on a copy of a slice from a DataFrame", but couldn't so
         # isolated to with .copy() to show all is well
         dfq = df_from_query.copy()
-
-        # dfq['addr_desc'] = dfq.apply(lambda lam_row: conc_addr_desc(ROV_SETUP['dict_concentrated_addresses'],
-        #                                                             lam_row.state, lam_row.city,
-        #                                                             lam_row.address), axis=1)
 
         # open browser windows for concentrated properties
         address_concentration_open_browser(df_from_query)
@@ -1156,8 +1146,6 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     ip_file_w_path = input_path / fn
 
     # Make sure data file exists
-    # bad_file_exit(ip_file_w_path, "Data file does not exist. Change filelist or "
-    #                               "copy into Rawdata directory.\n\n" + str(ip_file_w_path))
     bad_file_exit(input_path / fn, "Data file does not exist. Change filelist or "
                                   "copy into Rawdata directory.\n\n" + str(input_path / fn))
     # find the header row in the input file using an expected string and column.  error if > 30.  Defaults to search sheet0.
@@ -1668,13 +1656,6 @@ def main_combine():
         df.loc[~(df['dupe_id_field'].isin(['F','-','X'])), 'remove'] = \
             f"Not unique and not a first duplicate; not in 'F-X'"
 
-        # This code to writeo ut duplicates now done after last_code is run so remove is set
-        # logger.debug("Ready to sort by ['dupe_id_field','dupe_key']")  # to speed up copy to excel
-        # df.sort_values(by=['dupe_id_field', 'dupe_key'], inplace=True)
-        #
-        # logger.debug('Ready to copy dupes to CSV')  # these prompts help if error in imported code
-        # df[df['dupe_id_field'] != '-'].to_csv(dupfile, index=False)
-
 
     if ROV_SETUP['run_last_code_flag']:
         # *** Only run imported first_code and middle_code in format, not combine to keep things like remove
@@ -1682,8 +1663,6 @@ def main_combine():
         # last_code can be run in combine since it's only setting remove code.
         logger.debug('Ready to run last_code (remove code)')  # these prompts help if error in imported code
 
-        # ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP['dict_concentrated_addresses'],
-        #                                               ROV_SETUP['expectedstate'])
         ROV_SETUP['last_code_to_import_module'].last_code_func(df, ROV_SETUP=ROV_SETUP)
         # This is the function from the sheet with any parameters it needs
 
