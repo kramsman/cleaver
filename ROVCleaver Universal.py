@@ -25,6 +25,7 @@
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
 # TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
+# TODO remove concentrate property web browser and replace with prompt if props present with no description
 
 
 import ast
@@ -493,7 +494,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
 
     single_pivot_report(df, index_fields=['remove'], value_fields=['address'],
                         sheet_name="Removed Reasons",
-                        single_piv_writer=writer, second_pivot_by_count=False)
+                        single_piv_writer=writer, second_pivot_by_count=True)
 
     if ROV_SETUP['group_vars']:
         single_pivot_report(df_clean, index_fields=ROV_SETUP['group_vars'], value_fields=['address'],
@@ -781,6 +782,11 @@ def split_files_for_sincere(combined_csv, lim, op_wks):
             chunk_split_file(df_one_splifield, lim, ROV_SETUP['split_path_hold'], split_filename)
 
     wb.save(op_wks)
+
+    pymsgbox.alert(f"The split-file names and address counts produced by 'split' have been put into: \n{op_wks}"
+                    f"\n\n\nCopy this information into the 'Sincere load checklist' tab of the setup sheet: "
+                    f"\n{ROV_SETUP['setup_file_name']} \n\nto get ready to load Sincere.",
+                    f"SPLIT COMPLETE")
 
 
 
@@ -1785,7 +1791,8 @@ def main():
 
             split_files_for_sincere(ROV_SETUP['combined_path'] / (ROV_SETUP['OPFile'].stem + '.csv'),
                                     ROV_SETUP['sub_split_limit'],
-                                    ROV_SETUP['root_path'] / f"Split file list-{ROV_SETUP['splitfnbase'].stem}.xlsx")
+                                    ROV_SETUP['split_path'] / f"Split file list-{ROV_SETUP['expectedstate']}"
+                                                             f" {ROV_SETUP['splitfnbase'].stem}.xlsx")
             logger.info('ran split')
             pymsgbox.alert("Ran split section of main", "Alert")
 
@@ -2029,7 +2036,7 @@ def read_setup_var(row_data):
     def check_vars_string_for_errors(vars_string):
         """ check if var_string in proper format; raise exception if not."""
         try:
-            vars_temp = eval(vars_string)
+            vars_evaled = eval(vars_string)
         except Exception as e:
             logger.exception(e)
             logger.info(f"Field_vals '{vars_string}' is not a valid format.  check missing quotes.")
@@ -2037,8 +2044,8 @@ def read_setup_var(row_data):
             # quotes."
 
         # TODO optional/missing dicts caused problems in list comp so used loop.  way to use list comp?
-        vars_list = [vars_temp[0]]  # put boolean at front
-        for var, var_type, *other in islice(vars_temp, 1, None):
+        vars_list = [vars_evaled[0]]  # [0] is boolean which indicates if list of variables across sheet row
+        for var, var_type, *other in islice(vars_evaled, 1, None):  #
             if not other:
                 vars_list.append([var.strip(), var_type.strip()])
             else:
