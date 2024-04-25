@@ -1906,6 +1906,7 @@ def format_setup_vars():
     #  available? when are they added to list?
 
     ROV_SETUP['concentrated_addresses_wb'] = load_workbook(filename=ROV_SETUP['concentrated_addresses_file'])
+    ROV_SETUP['concentrated_addresses_wb'].name = ROV_SETUP['concentrated_addresses_file'].name
     ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
 
     if ROV_SETUP['run_merge_data_flag']:
