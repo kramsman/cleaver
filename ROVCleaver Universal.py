@@ -119,6 +119,72 @@ DATA_STARTS_COL_ALPHA = 'G'  # field_keep is assumed one column left
 DATA_STARTS_COL_NUMERIC = column_index_from_string(coordinate_from_string(DATA_STARTS_COL_ALPHA + '1')[0]) - 1  # -1 to
 
 
+def bek_load_workbook(wb_path):
+    """ load a workbook using openpyxl load_workbook but assign a path to attribute filepath that can be queried later.
+    book name can be easily extracted from path via wb.filepath.name.
+    books that worksheets belong to can be referenced via parent, eg ws.parent.filepath.name!
+    Note: should check for wb.filepath attribute before using since it may not have been set using
+    hasattr(wb, 'filepath'):
+
+    Parameters
+    ----------
+    wb_path : path location of workbook in PosixPath form
+
+    Returns
+    -------
+    wb : workbook object with filepath attribute set
+    """
+
+    from openpyxl import load_workbook
+
+    wb = load_workbook(filename=wb_path)
+    wb.filepath = wb_path
+    return wb
+
+
+def wb_path(wb):
+    """ returns the filepath attribute set (usually by using bek_load_workbook) or None.
+    can reference book name of worksheet using ws.parent.filepath.name.
+    """
+
+    # return (wb.filepath if hasattr(wb,'filepath') else None)
+    if hasattr(wb, 'filepath'):
+        return wb.filepath
+    else:
+        return None
+
+
+def wb_name(wb):
+    """ returns the name from the filepath attribute set (usually by using bek_load_workbook) as string.
+    If attribute not available return 'Unknown'.
+    """
+
+    if hasattr(wb, 'filepath'):
+        return wb.filepath.name
+    else:
+        return 'Unknown'
+
+
+# FIXME put this into bekutils once bek_load_workbook vs load_workbook solved.
+def check_ws_headers(ws, vals):
+    """
+    Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
+    eg vals = [('A1', 'use'), ('B1', 'fromFilePath'), ('C1', 'fromfilename'), ....]
+    """
+
+    def chk_header_vals(ws_to_chk, cell, val):
+        """ error if val not found in wks cell. """
+        if str(ws_to_chk[cell].value).strip().lower() != str(val).lower():
+            exit_yes((f"Column heading '{cell}' on sheet '{ws_to_chk.title}' in workbook '{wb_name(ws.parent)}' "
+                      f"not equal to literal '{val}'."
+                      f"\n\nIt is '{str(ws_to_chk[cell].value)}'."),
+                     )
+
+    print(f"'{wb_name(ROV_SETUP['setup_sheet'].parent)=}'")
+
+    for pairs in vals:
+        chk_header_vals(ws, pairs[0], pairs[1])
+
 def pad_list(my_list, to_len, pad_val=""):
     """ pad list with an element to a given length """
     list_len = len(my_list)
@@ -648,7 +714,7 @@ def address_concentration_open_browser(df):
         if openbrowser:
             df = df.reset_index()  # converts multi-index to columns
             for index, row in df.iterrows():
-                if row['addr_desc'] == '':
+                if row['addr_desc'] == '' and row['remove'] == '':
                     webbrowser.open(f"https://www.google.com/search?q={row['state']}+{row['city']}+{row['address']}", new=2)
         else:
             pass
@@ -1905,9 +1971,23 @@ def format_setup_vars():
     # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
     #  available? when are they added to list?
 
-    ROV_SETUP['concentrated_addresses_wb'] = load_workbook(filename=ROV_SETUP['concentrated_addresses_file'])
-    ROV_SETUP['concentrated_addresses_wb'].name = ROV_SETUP['concentrated_addresses_file'].name
+    ROV_SETUP['concentrated_addresses_wb'] = bek_load_workbook(ROV_SETUP['concentrated_addresses_file'])
     ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
+
+    print(f"'{ROV_SETUP['concentrated_addresses_sheet'].title=}'")
+    print(f"'{hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'path')=}'")
+    print(f"'{hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'pathx')=}'")
+    print(f"'{ROV_SETUP['concentrated_addresses_sheet'].parent.filepath.name=}'")
+
+    # wb_name = (ROV_SETUP['concentrated_addresses_sheet'].parent.path.name
+    #            if hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'path')
+    #            else "")
+
+    xx = wb_name(ROV_SETUP['concentrated_addresses_sheet'].parent)
+
+    print(f"'{wb_name(ROV_SETUP['concentrated_addresses_sheet'].parent)=}'")
+    print(f"'{wb_name(ROV_SETUP['setup_sheet'].parent)=}'")
+
 
     if ROV_SETUP['run_merge_data_flag']:
         bad_path_exit(ROV_SETUP['rawdata_path'])
