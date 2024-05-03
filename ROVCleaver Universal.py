@@ -49,7 +49,7 @@ import pandas as pd
 # os.environ["APPDATA"] = ""
 # from pandasgui import show
 import pymsgbox
-from openpyxl import load_workbook
+# from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.styles import Font
 import PySimpleGUI as sg
@@ -77,6 +77,7 @@ from bekutils import check_ws_headers
 from bekutils import conc_addr_desc
 from bekutils import conc_addr_remove_desc
 from bekutils import convert_bool
+from bekutils import load_workbook_w_filepath, wb_path, wb_name
 
 USE_HARDCODED_SETUP = False
 HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/"
@@ -119,53 +120,6 @@ DATA_STARTS_COL_ALPHA = 'G'  # field_keep is assumed one column left
 DATA_STARTS_COL_NUMERIC = column_index_from_string(coordinate_from_string(DATA_STARTS_COL_ALPHA + '1')[0]) - 1  # -1 to
 
 
-def bek_load_workbook(wb_path):
-    """ load a workbook using openpyxl load_workbook but assign a path to attribute filepath that can be queried later.
-    book name can be easily extracted from path via wb.filepath.name.
-    books that worksheets belong to can be referenced via parent, eg ws.parent.filepath.name!
-    Note: should check for wb.filepath attribute before using since it may not have been set using
-    hasattr(wb, 'filepath'):
-
-    Parameters
-    ----------
-    wb_path : path location of workbook in PosixPath form
-
-    Returns
-    -------
-    wb : workbook object with filepath attribute set
-    """
-
-    from openpyxl import load_workbook
-
-    wb = load_workbook(filename=wb_path)
-    wb.filepath = wb_path
-    return wb
-
-
-def wb_path(wb):
-    """ returns the filepath attribute set (usually by using bek_load_workbook) or None.
-    can reference book name of worksheet using ws.parent.filepath.name.
-    """
-
-    # return (wb.filepath if hasattr(wb,'filepath') else None)
-    if hasattr(wb, 'filepath'):
-        return wb.filepath
-    else:
-        return None
-
-
-def wb_name(wb):
-    """ returns the name from the filepath attribute set (usually by using bek_load_workbook) as string.
-    If attribute not available return 'Unknown'.
-    """
-
-    if hasattr(wb, 'filepath'):
-        return wb.filepath.name
-    else:
-        return 'Unknown'
-
-
-# FIXME put this into bekutils once bek_load_workbook vs load_workbook solved.
 def check_ws_headers(ws, vals):
     """
     Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
@@ -1868,7 +1822,7 @@ def init_setup_dict():
 
     logger.info('starting init_setup_dict')
 
-    ROV_SETUP['setup_wb'] = load_workbook(filename=ROV_SETUP['setup_file_name'])
+    ROV_SETUP['setup_wb'] = load_workbook_w_filepath(ROV_SETUP['setup_file_name'])
     ROV_SETUP['setup_sheet'] = ROV_SETUP['setup_wb']["Setup"]
 
     ROV_SETUP['filelist_sheet'] = ROV_SETUP['setup_wb']["FileList"]
@@ -1971,22 +1925,8 @@ def format_setup_vars():
     # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
     #  available? when are they added to list?
 
-    ROV_SETUP['concentrated_addresses_wb'] = bek_load_workbook(ROV_SETUP['concentrated_addresses_file'])
+    ROV_SETUP['concentrated_addresses_wb'] = load_workbook_w_filepath(ROV_SETUP['concentrated_addresses_file'])
     ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
-
-    print(f"'{ROV_SETUP['concentrated_addresses_sheet'].title=}'")
-    print(f"'{hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'path')=}'")
-    print(f"'{hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'pathx')=}'")
-    print(f"'{ROV_SETUP['concentrated_addresses_sheet'].parent.filepath.name=}'")
-
-    # wb_name = (ROV_SETUP['concentrated_addresses_sheet'].parent.path.name
-    #            if hasattr(ROV_SETUP['concentrated_addresses_sheet'].parent,'path')
-    #            else "")
-
-    xx = wb_name(ROV_SETUP['concentrated_addresses_sheet'].parent)
-
-    print(f"'{wb_name(ROV_SETUP['concentrated_addresses_sheet'].parent)=}'")
-    print(f"'{wb_name(ROV_SETUP['setup_sheet'].parent)=}'")
 
 
     if ROV_SETUP['run_merge_data_flag']:
