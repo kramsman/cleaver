@@ -80,8 +80,8 @@ from bekutils import convert_bool
 from bekutils import load_workbook_w_filepath, wb_path, wb_name
 
 USE_HARDCODED_SETUP = False
-HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/"
-            "Test GA Primary 1-2024/ROVCleaver TEST GA Primary 1-2024 UniversalSetup.xlsx").expanduser()
+HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/FL General GOTV 6-2024/Main - "
+                            "L2/ROVCleaver Read L2 UniversalSetup.xlsx").expanduser()
 
 
 setup_loguru("INFO", "DEBUG")
@@ -665,6 +665,7 @@ def address_concentration_open_browser(df):
                                       'Open browser windows?', ['Yes', 'No'])
             if choice == "No":
                 openbrowser = False
+
         if openbrowser:
             df = df.reset_index()  # converts multi-index to columns
             for index, row in df.iterrows():
@@ -908,7 +909,7 @@ def check_for_unwanted_setup_options():
         exit_yes_no("Copy FORMAT files listed in setup sheet 'FormatCopies' during combine?\n\n",
                     'COPY FORMAT FILES?')
 
-        formatfile_copy(ROV_SETUP['copy_formatfile_filelist_sheet'], perform_copies=False)
+        formatfile_copy(ROV_SETUP['copy_formatfile_filelist_sheet'], perform_copies=True)
 
     if ROV_SETUP['run_first_code_flag']:
         # display code and prompt if it should be run
@@ -1371,7 +1372,7 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
                 assign_formatcopy_vars(from_path, from_fn, to_path, to_fn)
 
             bad_path_exit(src_path)
-            bad_file_exit(file=src_file_w_path)
+            bad_file_exit(file=Path(src_file_w_path))
             bad_path_exit(dest_path)
             # bad_file_exit(file=dest_file_w_path)  # cant check cause doesn't exist
 
@@ -1440,9 +1441,9 @@ def combine_formatfiles(orig_df, copy_formatfile_list_sheet):
 
             # make sure file and directories exist
             bad_path_exit(src_path)
-            bad_file_exit(file=src_file_w_path)
+            bad_file_exit(file=Path(src_file_w_path))
             bad_path_exit(dest_path)
-            bad_file_exit(file=dest_file_w_path)
+            bad_file_exit(file=Path(dest_file_w_path))
 
             logger.debug("Ready to combine copied format file in combine_formatfiles: ", src_file_w_path)
 
