@@ -1619,9 +1619,9 @@ def convert_xlsx_to_csvs():
 
     # read each xlsx into dataframe with options and write out with same name
     for file_info in xls_wo_csv:
-        logger.info(f"Reading {file_info['xls_name']}")
+        logger.info(f"Reading '{file_info['xls_name']}'")
         df = pd.read_excel(file_info['xls_w_path'], dtype=str)
-        logger.info(f"Writing {(file_info['xls_stem'] + '.csv')}")
+        logger.info(f"Writing '{(file_info['xls_stem'] + '.csv')}'")
         df.to_csv(csv_dir / (file_info['xls_stem'] + '.csv'), index=False)
         logger.debug('')
 
