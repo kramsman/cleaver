@@ -15,6 +15,7 @@
 # SKIP-put filetype in to select file and specify xlsx for Setup. CAN NOT WORK IN MAC VERSION OF TKINTER.
 #   https://stackoverflow.com/questions/57443004/pysimplegui-file-browser-specific-file-type
 
+# TODO add in "compare csv columns.py".  Needs cleaning up of import, logging, select directory.
 
 # TODO redo formatcopy using pathlib / remove os.path.join.  Create paths from sheet using
 #   /Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/Work/formatcopy test paths.py
@@ -105,7 +106,7 @@ ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
                                        "PythonPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
 # PROP_CONCENTRATION = 50
-PROP_CONCENTRATION = 10
+PROP_CONCENTRATION = 15
 ZIP_CONCENTRATION = 10
 
 ROV_SETUP = {}
