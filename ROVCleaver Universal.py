@@ -15,7 +15,7 @@
 # SKIP-put filetype in to select file and specify xlsx for Setup. CAN NOT WORK IN MAC VERSION OF TKINTER.
 #   https://stackoverflow.com/questions/57443004/pysimplegui-file-browser-specific-file-type
 
-# TODO add in "compare csv columns.py".  Needs cleaning up of import, logging, select directory.
+# TODO add in "compare_csv_columns.py".  Needs cleaning up of import, logging, select directory.
 
 # TODO redo formatcopy using pathlib / remove os.path.join.  Create paths from sheet using
 #   /Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/Work/formatcopy test paths.py
@@ -28,7 +28,7 @@
 #    to add but skip if already in list?
 # TODO remove concentrate property web browser and replace with prompt if props present with no description
 
-
+from Work import compare_csv_columns
 import ast
 import collections
 import datetime
@@ -539,7 +539,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
 
     # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
     # adjusted
-    report_by_pull_group(df, 'statecounty', 'Counties by pull_group')
+    report_by_pull_group(df, 'statecounty', 'StateCounties by pull_group')
 
     # list added campaigns.  These need to be added in factory tables
     if ROV_SETUP['campaign_vars']:
@@ -1743,7 +1743,8 @@ def main():
 
     choice = bek_text_box("What do you want to do?", "Choose an Action",
                               '',
-                              ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Exit'])
+                              ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Compare CSV cols',
+                               'Exit'])
 
     # PICK CHOICES
     if choice == 'xlsxs to csvs':
@@ -1781,6 +1782,11 @@ def main():
         create_zip_to_county_list_dict(MAIN_ZIP_FILE, MULTI_COUNTY_ZIP_FILE, ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
         pymsgbox.alert("Ran Zip Dict file update", "Update zip files")
+
+    elif choice == 'compare csv cols':
+        logger.debug("chose 'Compare CSV cols'")
+        compare_csv_columns.main_compare_csv_columns(INITIAL_CAMPAIGN_DIR)
+        logger.debug("ran 'Compare CSV cols'")
 
     elif choice == 'exit':
         logger.debug("chose 'exit'")
