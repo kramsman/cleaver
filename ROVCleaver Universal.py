@@ -27,8 +27,16 @@
 # TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
 # TODO remove concentrate property web browser and replace with prompt if props present with no description
+# TODO XXXX add property concentration field automatically instead of adding to setup field list.  Is there a flag?
 
-from Work import compare_csv_columns
+# TODO make pull_group mandatory. Can it be backward compatible on filelist page?
+# TODO include pull_group on FORMAT_COPY where copied in
+# TODO include in split file list name - maybe combine and format filenames?
+# TODO Include pull_group number in remove reason, eg "Pull_group of 2 less than current of 3"
+# TODO Add note 'THIS IS A MAIN" to help with formatcopy
+
+
+import compare_csv_columns
 import ast
 import collections
 import datetime
@@ -75,10 +83,8 @@ from bekutils import find_header_row_in_file
 from bekutils import read_file_to_df
 from bekutils import get_dir_name
 from bekutils import check_ws_headers
-from bekutils import conc_addr_desc
-from bekutils import conc_addr_remove_desc
 from bekutils import convert_bool
-from bekutils import load_workbook_w_filepath, wb_path, wb_name
+from bekutils import load_workbook_w_filepath, wb_name
 
 USE_HARDCODED_SETUP = False
 HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/FL General GOTV 6-2024/Main - "
@@ -95,7 +101,6 @@ INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").exp
 MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
                              "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 
-# MULTI_COUNTY_ZIP_FILE = 'zip-codes-database-MULTI-COUNTY.csv'
 MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard "
                                      "Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv"
                                      "").expanduser()
@@ -434,7 +439,7 @@ def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_w
 
     logger.debug(f"here '{sheet_name=}'")
 
-    sheet_name2 = 'Cnt,' + sheet_name[:27]
+    sheet_name2 = 'Cnt,' + sheet_name[:26]
 
     if sheet_name in single_piv_writer.book.sheetnames or sheet_name2 in single_piv_writer.book.sheetnames:
         file_counter_max = 0
@@ -605,7 +610,7 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
             dfx = (df if specs['pivot_for_all'] else df_clean)
             universe = ('All-' if specs['pivot_for_all'] else 'Cln-')
             single_pivot_report(dfx, index_fields=specs['pivot_fields'], value_fields=['address'],
-                                sheet_name=f"{universe} {','.join(specs['pivot_fields'])[:27]}",
+                                sheet_name=f"{universe} {','.join(specs['pivot_fields'])[:26]}",
                                 single_piv_writer=writer,
                                 second_pivot_by_count=(True if specs['pivot_by_cnt'] else False))
 
@@ -1448,6 +1453,7 @@ def combine_formatfiles(orig_df, copy_formatfile_list_sheet):
 
             logger.debug("Ready to combine copied format file in combine_formatfiles: ", src_file_w_path)
 
+            # TODO somewhere in here need to set pull_group in file if we want to bring it from filelist
             df_one_file = pd.read_csv(src_file_w_path, nrows=ROV_SETUP['rows_to_read_limit'],
                                       keep_default_na=False)
 
