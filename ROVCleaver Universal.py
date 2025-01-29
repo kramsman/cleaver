@@ -51,6 +51,7 @@ import webbrowser
 from datetime import datetime
 from itertools import islice  # to skip 1st row of iterated spreadsheet
 from pathlib import Path
+from pathlib import PosixPath
 from typing import Union
 
 import numpy as np
@@ -702,7 +703,7 @@ def split_files_for_sincere(combined_csv, lim, op_wks):
     Parameters
     ----------
     op_wks :
-    lim : mx number of addresses Sincerre can import in one csv file
+    lim : mx number of addresses Sincere can import in one csv file
     combined_csv : the file which contains all the addresses combined into one
     """
 
@@ -791,6 +792,8 @@ def split_files_for_sincere(combined_csv, lim, op_wks):
         chunk_split_file(df_combo_w_no_remove, lim, ROV_SETUP['split_path_hold'], split_filename)
 
     else:
+        # Loop and create a split file for each group_var
+        #
         # if len(ROV_SETUP['campaign_vars']) == 1 and ROV_SETUP['campaign_vars'][0].lower() == 'county':
         #     splitfield = 'statecounty'
         # else:
@@ -1072,6 +1075,7 @@ def create_dicts():
     else:
         ROV_SETUP['zipskip_list'] = []  # passed to subs so need a value
 
+    # FIXME: Can we fill group_vars here and rename function to create_dicts_fill_groups?
 
 def display_imported_code(sheet_name, py_file_name):
     """ reads python code contained in a workbook sheet, writes it to a py file, displays the contents on screen,
@@ -1268,7 +1272,8 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
 
     # fill campaign, factory and group var strings with concat of var values separated by '-'; after middle so created
     # vars are set
-    ip['campaign_vars_string'] = ip[ROV_SETUP['campaign_vars']].agg('-'.join, axis=1)
+    ip['campaign_vars_string'] = ip[ROV_SETUP['campaign_vars']].agg('-'.join, axis=1)  # FIXME: df field should be
+    # filled here
     ip['factory_vars_string'] = ip[ROV_SETUP['factory_vars']].agg('-'.join, axis=1)
     ip['group_vars_string'] = ip[ROV_SETUP['group_vars']].agg('-'.join, axis=1)
 
@@ -1751,7 +1756,6 @@ def main():
                               '',
                               ['Format', 'Combine', 'Split', 'XLSXs to CSVs', 'Update Zip File', 'Compare CSV cols',
                                'Exit'])
-
     # PICK CHOICES
     if choice == 'xlsxs to csvs':
         logger.debug("chose 'XLSXs to CSVs'")
@@ -1800,9 +1804,12 @@ def main():
 
     else:
         # run code common to format and combine
-        ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
+        # ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
+        ROV_SETUP['setup_file_name'] = PosixPath('/Users/Denise/Library/CloudStorage/Dropbox/Postcard '
+                                                  'Files/InputFiles/Campaigns/WI 01-25 State General/ROVCleaver WI 01-25 State General UniversalSetup.xlsx')
         logger.debug("in 'else' to pick format, combine, split")
 
+        # FIXME: somewhere in here set campaign, factory nd group_vars?
         init_setup_dict()
         # setup_backward_compatability()
         read_setup_vars(FIELD_DEF_COL_NUMERIC)
@@ -1899,85 +1906,6 @@ def setup_backward_compatability():
         logger.error(msg)
         exit_yes(msg)
 
-
-def format_setup_vars():
-    """ reformat vars in setup_dict and erase temporary (starting with xl_)"""
-    logger.debug(f"in format_setup_vars top {id(ROV_SETUP)=}")
-    logger.info(f"starting format_setup_vars")
-
-    # put worksheet object of string in ROV_DICT
-    if ROV_SETUP['skip_selected_zip_match_flag']:
-        ROV_SETUP['skip_selected_zip_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_skip_selected_zip_sheet']]
-    ROV_SETUP['first_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_first_code_sheet']]
-    ROV_SETUP['middle_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_middle_code_sheet']]
-    ROV_SETUP['last_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_last_code_sheet']]
-
-    max_len = max(len(ROV_SETUP['xl_inputfile_orig_list']),
-                  len(ROV_SETUP['xl_inputfile_renamed_list']),
-                  len(ROV_SETUP['xl_inputfile_type_list']),
-                  )
-
-    ROV_SETUP['inputfile_orig_list'] = pad_list(ROV_SETUP['xl_inputfile_orig_list'], max_len, pad_val="")
-    ROV_SETUP['inputfile_renamed_list'] = pad_list(ROV_SETUP['xl_inputfile_renamed_list'], max_len, pad_val="")
-    ROV_SETUP['inputfile_type_list'] = pad_list(ROV_SETUP['xl_inputfile_type_list'], max_len, pad_val="")
-
-    ROV_SETUP['campaign_vars'] = [fld.strip() for fld
-                                 in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
-    ROV_SETUP['factory_vars'] = [fld.strip() for fld
-                         in ROV_SETUP['xl_factory_vars'].split(',') if fld != '']
-
-    # check if overlapping variables
-    overlap_fields = set(ROV_SETUP['campaign_vars']).intersection(set(ROV_SETUP['factory_vars']))
-    if overlap_fields:
-        msg = (f"The following variable(s) overlap between the factory and campaign splits:"
-               f"\n\n{', '.join(overlap_fields)}"
-              )
-        logger.error(msg)
-        exit_yes(msg)
-
-    ROV_SETUP['group_vars'] = ROV_SETUP['campaign_vars'] + ROV_SETUP['factory_vars']
-    # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
-    #  available? when are they added to list?
-
-    ROV_SETUP['concentrated_addresses_wb'] = load_workbook_w_filepath(ROV_SETUP['concentrated_addresses_file'])
-    ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
-
-
-    if ROV_SETUP['run_merge_data_flag']:
-        bad_path_exit(ROV_SETUP['rawdata_path'])
-    if ROV_SETUP['sortchoice'] == 1:
-        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
-    elif ROV_SETUP['sortchoice'] == 2:
-        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'randnum']
-    elif ROV_SETUP['sortchoice'] == 3:
-        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
-    else:
-        ROV_SETUP['sort_list'] = []
-
-    # combine pivot info into an object we can loop through
-    ROV_SETUP['pivot_specs'] = []
-    for piv_num in islice(range(6), 1, None):
-        d = dict()
-        d['pivot_fields'] = [fld.strip() for fld
-                             in ROV_SETUP['xl_str_pivot_field' + str(piv_num)].split(',') if fld != '']
-        d['pivot_by_cnt'] = ROV_SETUP['xl_str_pivot_field' + str(piv_num) + '_by_cnt']
-        d['pivot_for_all'] = ROV_SETUP['xl_str_pivot_field' + str(piv_num) + '_all']
-        ROV_SETUP['pivot_specs'].append(d)
-
-    # sort dictionary DO NOT DO THIS - creates a new object even though reference is the same! https://stackoverflow.com/questions/61645769/sort-dict-in-place
-    # local_dict = dict(sorted(local_dict.items()))
-
-    # delete entries for master_dict that are temporary (begin with xl_)
-    logger.info(f"{id(ROV_SETUP)=}")
-    if REMOVE_XL_FROM_SETUP:
-        # noinspection PyUnreachableCode
-        for k, v in list(ROV_SETUP.items()):
-            if k.startswith('xl_'):
-                del ROV_SETUP[k]
-
-    logger.debug(f"in format_setup_vars - finished")
-
-
 def read_setup_vars(field_col):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
     logger.info('starting read_setup_vars')
@@ -1995,7 +1923,6 @@ def read_setup_vars(field_col):
         # print(f"{row[1].value=}")
         row_list = row_to_list(row)
         read_setup_var(row_list)
-
 
 def read_setup_var(row_data):
     """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
@@ -2155,6 +2082,85 @@ def read_setup_var(row_data):
                     my_dict = ({} if my_dict == [] else my_dict[0])
                     func = return_func(field_type, **my_dict)
                     ROV_SETUP[field_name] = func(row_data[DATA_STARTS_COL_NUMERIC + index], **my_dict)
+
+
+
+def format_setup_vars():
+    """ reformat vars in setup_dict and erase temporary (starting with xl_)"""
+    logger.debug(f"in format_setup_vars top {id(ROV_SETUP)=}")
+    logger.info(f"starting format_setup_vars")
+
+    # put worksheet object of string in ROV_DICT
+    if ROV_SETUP['skip_selected_zip_match_flag']:
+        ROV_SETUP['skip_selected_zip_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_skip_selected_zip_sheet']]
+    ROV_SETUP['first_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_first_code_sheet']]
+    ROV_SETUP['middle_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_middle_code_sheet']]
+    ROV_SETUP['last_code_sheet'] = ROV_SETUP['setup_wb'][ROV_SETUP['xl_last_code_sheet']]
+
+    max_len = max(len(ROV_SETUP['xl_inputfile_orig_list']),
+                  len(ROV_SETUP['xl_inputfile_renamed_list']),
+                  len(ROV_SETUP['xl_inputfile_type_list']),
+                  )
+
+    ROV_SETUP['inputfile_orig_list'] = pad_list(ROV_SETUP['xl_inputfile_orig_list'], max_len, pad_val="")
+    ROV_SETUP['inputfile_renamed_list'] = pad_list(ROV_SETUP['xl_inputfile_renamed_list'], max_len, pad_val="")
+    ROV_SETUP['inputfile_type_list'] = pad_list(ROV_SETUP['xl_inputfile_type_list'], max_len, pad_val="")
+
+    ROV_SETUP['campaign_vars'] = [fld.strip() for fld
+                                 in ROV_SETUP['xl_campaign_vars'].split(',') if fld != '']
+    ROV_SETUP['factory_vars'] = [fld.strip() for fld
+                         in ROV_SETUP['xl_factory_vars'].split(',') if fld != '']
+
+    # check if overlapping variables
+    overlap_fields = set(ROV_SETUP['campaign_vars']).intersection(set(ROV_SETUP['factory_vars']))
+    if overlap_fields:
+        msg = (f"The following variable(s) overlap between the factory and campaign splits:"
+               f"\n\n{', '.join(overlap_fields)}"
+              )
+        logger.error(msg)
+        exit_yes(msg)
+
+    ROV_SETUP['group_vars'] = ROV_SETUP['campaign_vars'] + ROV_SETUP['factory_vars']
+    # TODO can we check if group_vars are in fieldlist?  What if some are created in middle_code - are they
+    #  available? when are they added to list?
+
+    ROV_SETUP['concentrated_addresses_wb'] = load_workbook_w_filepath(ROV_SETUP['concentrated_addresses_file'])
+    ROV_SETUP['concentrated_addresses_sheet'] = ROV_SETUP['concentrated_addresses_wb']["Addresses"]  # sheet "Addresses" hardcoded
+
+
+    if ROV_SETUP['run_merge_data_flag']:
+        bad_path_exit(ROV_SETUP['rawdata_path'])
+    if ROV_SETUP['sortchoice'] == 1:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'address', 'randnum']
+    elif ROV_SETUP['sortchoice'] == 2:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'zip', 'randnum']
+    elif ROV_SETUP['sortchoice'] == 3:
+        ROV_SETUP['sort_list'] = ROV_SETUP['group_vars'] + ['remove', 'randnum']
+    else:
+        ROV_SETUP['sort_list'] = []
+
+    # combine pivot info into an object we can loop through
+    ROV_SETUP['pivot_specs'] = []
+    for piv_num in islice(range(6), 1, None):
+        d = dict()
+        d['pivot_fields'] = [fld.strip() for fld
+                             in ROV_SETUP['xl_str_pivot_field' + str(piv_num)].split(',') if fld != '']
+        d['pivot_by_cnt'] = ROV_SETUP['xl_str_pivot_field' + str(piv_num) + '_by_cnt']
+        d['pivot_for_all'] = ROV_SETUP['xl_str_pivot_field' + str(piv_num) + '_all']
+        ROV_SETUP['pivot_specs'].append(d)
+
+    # sort dictionary DO NOT DO THIS - creates a new object even though reference is the same! https://stackoverflow.com/questions/61645769/sort-dict-in-place
+    # local_dict = dict(sorted(local_dict.items()))
+
+    # delete entries for master_dict that are temporary (begin with xl_)
+    logger.info(f"{id(ROV_SETUP)=}")
+    if REMOVE_XL_FROM_SETUP:
+        # noinspection PyUnreachableCode
+        for k, v in list(ROV_SETUP.items()):
+            if k.startswith('xl_'):
+                del ROV_SETUP[k]
+
+    logger.debug(f"in format_setup_vars - finished")
 
 
 if __name__ == '__main__':
