@@ -88,8 +88,8 @@ from bekutils import convert_bool
 from bekutils import load_workbook_w_filepath, wb_name
 
 USE_HARDCODED_SETUP = False
-HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/FL General GOTV 6-2024/Main - "
-                            "L2/ROVCleaver Read L2 UniversalSetup.xlsx").expanduser()
+HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns/VA General 7-2025 test 500 black voter group/ROVCleaver VA General 7-2025 UniversalSetup.xlsx"
+                            "").expanduser()
 
 
 setup_loguru("INFO", "DEBUG")
@@ -1188,7 +1188,7 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     # find the header row in the input file using an expected string and column.  error if > 30.  Defaults to search sheet0.
     header_row = find_header_row_in_file(ip_file_w_path, ROV_SETUP['check_header_string'], ROV_SETUP['strcheck_header_col'])
 
-    ip = read_file_to_df(ip_file_w_path, **{'header': header_row, 'sheet_name': 0, 'nrows': ROV_SETUP['rows_to_read_limit'],
+    ip = read_file_to_df(ip_file_w_path, {'header': header_row, 'sheet_name': 0, 'nrows': ROV_SETUP['rows_to_read_limit'],
                                             'keep_default_na': False, 'dtype': str})
 
     # convert column names to lower case
@@ -1804,9 +1804,9 @@ def main():
 
     else:
         # run code common to format and combine
-        # ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
-        ROV_SETUP['setup_file_name'] = PosixPath('/Users/Denise/Library/CloudStorage/Dropbox/Postcard '
-                                                  'Files/InputFiles/Campaigns/WI 01-25 State General/ROVCleaver WI 01-25 State General UniversalSetup.xlsx')
+        ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
+        # ROV_SETUP['setup_file_name'] = PosixPath('/Users/Denise/Library/CloudStorage/Dropbox/Postcard '
+        #                                           'Files/InputFiles/Campaigns/WI 01-25 State General/ROVCleaver WI 01-25 State General UniversalSetup.xlsx')
         logger.debug("in 'else' to pick format, combine, split")
 
         # FIXME: somewhere in here set campaign, factory nd group_vars?
