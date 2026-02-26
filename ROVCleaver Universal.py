@@ -52,7 +52,9 @@ from datetime import datetime
 from itertools import islice  # to skip 1st row of iterated spreadsheet
 from pathlib import Path
 from pathlib import PosixPath
-from typing import Union
+from typing import Any, Callable, Optional, TextIO, Union
+from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl.cell.cell import Cell
 
 import numpy as np
 import pandas as pd
@@ -127,35 +129,51 @@ DATA_STARTS_COL_ALPHA = 'G'  # field_keep is assumed one column left
 DATA_STARTS_COL_NUMERIC = column_index_from_string(coordinate_from_string(DATA_STARTS_COL_ALPHA + '1')[0]) - 1  # -1 to
 
 
-def check_ws_headers(ws, vals):
+# def check_ws_headers(ws, vals):
+#     """
+#     Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
+#     eg vals = [('A1', 'use'), ('B1', 'fromFilePath'), ('C1', 'fromfilename'), ....]
+#     """
+#
+#     def chk_header_vals(ws_to_chk, cell, val):
+#         """ error if val not found in wks cell. """
+#         if str(ws_to_chk[cell].value).strip().lower() != str(val).lower():
+#             exit_yes((f"Column heading '{cell}' on sheet '{ws_to_chk.title}' in workbook '{wb_name(ws.parent)}' "
+#                       f"not equal to literal '{val}'."
+#                       f"\n\nIt is '{str(ws_to_chk[cell].value)}'."),
+#                      )
+#
+#     print(f"'{wb_name(ROV_SETUP['setup_sheet'].parent)=}'")
+#
+#     for pairs in vals:
+#         chk_header_vals(ws, pairs[0], pairs[1])
+
+def pad_list(my_list: list, to_len: int, pad_val: Any = "") -> list:
+    """Pad a list with a value to reach a specified length.
+
+    Args:
+        my_list (list): The list to pad.
+        to_len (int): The target length of the padded list.
+        pad_val (Any): The value used for padding. Defaults to "".
+
+    Returns:
+        list: A new list of length ``to_len`` padded with ``pad_val``.
     """
-    Check list of (cell, val) tuples representing header labels in ws_to_chk and error if val not found in cell.
-    eg vals = [('A1', 'use'), ('B1', 'fromFilePath'), ('C1', 'fromfilename'), ....]
-    """
-
-    def chk_header_vals(ws_to_chk, cell, val):
-        """ error if val not found in wks cell. """
-        if str(ws_to_chk[cell].value).strip().lower() != str(val).lower():
-            exit_yes((f"Column heading '{cell}' on sheet '{ws_to_chk.title}' in workbook '{wb_name(ws.parent)}' "
-                      f"not equal to literal '{val}'."
-                      f"\n\nIt is '{str(ws_to_chk[cell].value)}'."),
-                     )
-
-    print(f"'{wb_name(ROV_SETUP['setup_sheet'].parent)=}'")
-
-    for pairs in vals:
-        chk_header_vals(ws, pairs[0], pairs[1])
-
-def pad_list(my_list, to_len, pad_val=""):
-    """ pad list with an element to a given length """
     list_len = len(my_list)
     elem_needed = to_len - list_len
     padded_list = my_list + [pad_val] * elem_needed
     return padded_list
 
 
-def row_to_list(row):
-    """ Returns the column number (1 indexed) maximum non-none column in the input row of a sheet. """
+def row_to_list(row: tuple) -> list:
+    """Return cell values from a worksheet row up to the last non-None cell.
+
+    Args:
+        row (tuple): A tuple of openpyxl Cell objects representing one worksheet row.
+
+    Returns:
+        list: Cell values from column 1 through the last column containing a non-None value.
+    """
     for index, cell in enumerate(reversed(row)):
         if cell.value is not None:
             break
@@ -163,9 +181,24 @@ def row_to_list(row):
     return row_list
 
 
-def range_to_list(ws, start_row, end_row, start_col, end_col):
-    """ converts range of cells to a list of values
-    V2.0 Worksheet to list. if one col, multi lists in list rather than one list of elements.  Best?
+def range_to_list(ws: Worksheet, start_row: int, end_row: int,
+                  start_col: int, end_col: int) -> Union[list[str], list[list[str]]]:
+    """Convert a rectangular range of worksheet cells to a list of string values.
+
+    Non-None cell values are lowercased and stripped; None values become "".
+    When ``start_row == end_row``, returns a flat ``list[str]`` instead of
+    a list of lists.
+
+    Args:
+        ws (Worksheet): The openpyxl worksheet to read from.
+        start_row (int): First row number (1-indexed).
+        end_row (int): Last row number (1-indexed, inclusive).
+        start_col (int): First column number (1-indexed).
+        end_col (int): Last column number (1-indexed, inclusive).
+
+    Returns:
+        Union[list[str], list[list[str]]]: Flat list when a single row is
+        requested; list of row lists when multiple rows are requested.
     """
 
     # tried using openpyl's cells = setup['A18': 'E19'] but parsing letter cols would be ugly so iterate rows.
@@ -185,22 +218,36 @@ def range_to_list(ws, start_row, end_row, start_col, end_col):
     return final_list
 
 
-def replace_boolean_column_vals(df, field_list):
-    """ Check field in list for literal TRUE or FALSE because it gets converted to boolean and kills the program"""
+def replace_boolean_column_vals(df: pd.DataFrame, field_list: list[str]) -> None:
+    """Replace literal 'TRUE' or 'FALSE' string values in specified columns with an empty string.
+
+    Prevents pandas from converting these strings to booleans, which would
+    cause downstream errors.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to modify in place.
+        field_list (list[str]): Column names to check for boolean literals.
+    """
 
     for field in field_list:
         if field in df.columns:
             df.loc[(df[field].str.upper() == "TRUE") | (df[field].str.upper() == "FALSE"), field] = ''
 
 
-def identify_duplicates(df, key, dupe_id_field):
-    """
-    creates a field in input df identifying duplicates as: X:not dupe;F:first,L:Last;D:other dupe;O:Other
-    Parameters
-    ----------
-    df : input dataframe
-    key : field checked as duplicate
-    dupe_id_field : field in df filled with identifiers above
+def identify_duplicates(df: pd.DataFrame, key: str, dupe_id_field: str) -> None:
+    """Add a duplicate-identifier field to a DataFrame.
+
+    Each row is labelled with one of:
+        ``-`` not a duplicate, ``F`` first occurrence, ``L`` last occurrence,
+        ``D`` intermediate duplicate, ``O`` other.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to modify in place.
+        key (str): Column name used to detect duplicates.
+        dupe_id_field (str): Name of the new column to fill with identifiers.
+
+    Raises:
+        Exception: If the length of the identifier list does not match the DataFrame.
     """
 
     logger.info("Identifying duplicates")
@@ -229,8 +276,18 @@ def identify_duplicates(df, key, dupe_id_field):
     return
 
 
-def merge_into_format_file(orig_df, update_file, cur_path):
-    """ updates fields in format file from update file"""
+def merge_into_format_file(orig_df: pd.DataFrame, update_file: str,
+                           cur_path: Union[str, Path]) -> None:
+    """Merge fields from an update file into the original format DataFrame.
+
+    Reads ``update_file`` from ``cur_path``, aligns on configured key fields,
+    and left-joins updated columns into ``orig_df``.
+
+    Args:
+        orig_df (pd.DataFrame): The master DataFrame to update in place.
+        update_file (str): File name of the update source (CSV or XLSX).
+        cur_path (Union[str, Path]): Directory containing ``update_file``.
+    """
 
     # TODO:  THIS NEEDS TO BE RE-WRITTEN AND CHECKED.  Copied and some refactoring but no logi or working checked.
 
@@ -336,22 +393,22 @@ def merge_into_format_file(orig_df, update_file, cur_path):
                     display_exiting=False)
 
 
-def zip_file_to_county_dict(zip_csv_path: Union[str, os.PathLike], xlsx_path: Union[str, os.PathLike]) -> dict:
-    """
-    Reads zip data from csv
-    1.  writes an xlsx of unique state/county from purchased county data
-    https://www.zip-codes.com/.
-    2. returns a dictionary keying state/county to county_filename, countyToPrint, stateMixedCounty
+def zip_file_to_county_dict(zip_csv_path: Union[str, os.PathLike],
+                            xlsx_path: Union[str, os.PathLike]) -> dict:
+    """Build a state-county lookup dictionary from purchased zip data and write a summary XLSX.
 
-    Parameters
-    ----------
-    zip_csv_path : csv of zip data: 80K rows with 93 fields, 'zip-codes-database-DELUXE-BUSINESS.csv'
-    xlsx_path : path to xlsx 
+    Reads the zip-codes.com DELUXE CSV, removes military states, derives
+    filename-safe county names, and writes a deduplicated state/county list to
+    ``xlsx_path``.
 
-    Returns
-    -------
-    dict : dictionary keying state/county to county_filename, countyToPrint, stateMixedCounty writes xlsx of unique
-    states-counties
+    Args:
+        zip_csv_path (Union[str, os.PathLike]): Path to the zip data CSV
+            (e.g. ``zip-codes-database-DELUXE-BUSINESS.csv``), ~80 K rows.
+        xlsx_path (Union[str, os.PathLike]): Destination path for the
+            unique county XLSX summary.
+
+    Returns:
+        dict: Mapping of ``"STATE-COUNTY"`` -> ``[county_filename, countyToPrint, stateMixedCounty]``.
     """
 
     logger.debug("creating dictionary of zip to county")
@@ -395,16 +452,23 @@ def zip_file_to_county_dict(zip_csv_path: Union[str, os.PathLike], xlsx_path: Un
     return county_dict
 
 
-def create_zip_to_county_list_dict(unique_zips, split_zips, text_file_for_created_dict):
-    """
-    Creates a dictionary with zip as key, list of counties as values using purchased zip data.
-    Also writes the dictionary to a text file.
-    Two input files: one-to-one zip/county and split zips.
+def create_zip_to_county_list_dict(unique_zips: Union[str, Path],
+                                   split_zips: Union[str, Path],
+                                   text_file_for_created_dict: Union[str, Path]) -> dict:
+    """Build a zip-to-county-list dictionary from purchased zip data and persist it to a text file.
 
-    Data purchased from https://www.zip-codes.com/.
-    Multi county and unique files are merged.
-    Multi county does not contain unique zips.
-    Unique contains multiple records for the same county for multiple cities in zip.
+    Merges the one-to-one zip/county CSV with the multi-county CSV, deduplicates,
+    groups by zip code, and writes the resulting dict as text.
+
+    Args:
+        unique_zips (Union[str, Path]): Path to the primary zip CSV
+            (one-to-one zip/county, may contain multiple cities per zip).
+        split_zips (Union[str, Path]): Path to the multi-county zip CSV.
+        text_file_for_created_dict (Union[str, Path]): Output path where the
+            dictionary is written as a Python literal string.
+
+    Returns:
+        dict: Mapping of zip code (int) -> list of ``"STATE-COUNTY"`` strings.
     """
     logger.info("creating zip to county lists")
     zip_rows_to_read = 999_999
@@ -435,8 +499,28 @@ def create_zip_to_county_list_dict(unique_zips, split_zips, text_file_for_create
     return zip_to_county_list_dict
 
 
-def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_writer, second_pivot_by_count=False):
-    """ run one pivot report and write out to worksheet leaving room for titles to be added later """
+def single_pivot_report(df: pd.DataFrame,
+                        index_fields: Union[str, list[str]],
+                        value_fields: str,
+                        sheet_name: str,
+                        single_piv_writer: pd.ExcelWriter,
+                        second_pivot_by_count: bool = False) -> None:
+    """Run a single pivot-table report and write it to an Excel worksheet.
+
+    Writes the pivot starting at row 6, leaving rows 1-5 for titles added later.
+    Appends a numeric suffix to ``sheet_name`` if a sheet with that name already
+    exists. Optionally writes a second sheet sorted by count descending.
+
+    Args:
+        df (pd.DataFrame): Source data to pivot.
+        index_fields (Union[str, list[str]]): Field(s) used as pivot index rows.
+            A bare string is automatically wrapped in a list.
+        value_fields (str): Field used for the count aggregation.
+        sheet_name (str): Target Excel sheet name (max ~30 chars before suffix).
+        single_piv_writer (pd.ExcelWriter): Open ExcelWriter to write into.
+        second_pivot_by_count (bool): If True, write a second sheet sorted by
+            count descending. Defaults to False.
+    """
 
     logger.debug(f"here '{sheet_name=}'")
 
@@ -477,12 +561,22 @@ def single_pivot_report(df, index_fields, value_fields, sheet_name, single_piv_w
             df_pt.to_excel(single_piv_writer, sheet_name=sheet_name2, startrow=5)
 
 
-def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration):
-    """
-    :param df: input dataframe
-    :param output_wks: output spreadsheet
-    :param input_fn: name of file report is being run on, goes in title3 only
-    :param dict_address_concentration report concentrated prop description and removal reason
+def pivot_and_other_reports(df: pd.DataFrame,
+                            output_wks: Union[str, Path],
+                            input_fn: str,
+                            dict_address_concentration: dict) -> None:
+    """Generate all pivot-table and summary reports for a formatted data file.
+
+    Creates an Excel workbook at ``output_wks`` containing county summaries,
+    removal reasons, group/factory/campaign breakdowns, address-concentration
+    analysis, and optional county-zip mismatch reports.
+
+    Args:
+        df (pd.DataFrame): Formatted (and optionally removed) voter data.
+        output_wks (Union[str, Path]): Full path for the output XLSX report file.
+        input_fn (str): Source file name, included in report title row 3.
+        dict_address_concentration (dict): Mapping of (state, city, address) ->
+            ``{'desc': str, 'remove': str}`` for concentrated-address lookup.
     """
 
     logger.info("creating reports")
@@ -491,14 +585,12 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     df_clean = df[df['remove'] == '']
 
     def report_by_pull_group(df: pd.DataFrame, rpt_field: str, sheet_name: str) -> None:
-        """ list the new rpt_field occurrences in each pull_group, so we can address/include them in reporting.
-        Output is written to the previously defined excel 'writer'.
+        """Write a deduplicated listing of a grouped field by pull_group to the report workbook.
 
-        Parameters
-        ----------
-        df : input df.  extract will be sorted in function.
-        rpt_field :  A 'grouped' variablecolumn in df we are reporting on.
-        sheet_name : output sheetname put in report worksbook, usually 'SUMMARY...'
+        Args:
+            df (pd.DataFrame): Source DataFrame; sorted internally by pull_group and rpt_field.
+            rpt_field (str): Column name of the grouped variable to report on.
+            sheet_name (str): Excel sheet name for this report (e.g. 'SUMMARY...').
         """
 
         sorted_df = df[[rpt_field, 'pull_group']] \
@@ -632,13 +724,21 @@ def pivot_and_other_reports(df, output_wks, input_fn, dict_address_concentration
     writer.close()
 
 
-def create_import_code_from_sheet(sheet_with_python_code, output_file):
-    """ Imports a spreadsheet sheet and creates properly indented python code from it based on sheet columns
+def create_import_code_from_sheet(sheet_with_python_code: Worksheet,
+                                  output_file: Union[str, Path]) -> TextIO:
+    """Write Python code stored in a worksheet to a ``.py`` text file.
 
-    Parameters
-    ----------
-    sheet_with_python_code : the sheet containing the python code
-    output_file : the .py that will receive the text python code
+    Iterates rows in ``sheet_with_python_code``; for each row, the first
+    non-None, non-comment cell determines indentation (4 spaces x column index).
+
+    Args:
+        sheet_with_python_code (Worksheet): Worksheet whose cells contain
+            indented Python source lines.
+        output_file (Union[str, Path]): File name (relative to ``ROV_SETUP['exe_path']``)
+            of the output ``.py`` file.
+
+    Returns:
+        TextIO: The (closed) file object of the written ``.py`` file.
     """
 
     logger.debug("here")
@@ -658,9 +758,16 @@ def create_import_code_from_sheet(sheet_with_python_code, output_file):
     return new_code_text
 
 
-def address_concentration_open_browser(df):
-    """ uses address fields from query on address concentration pivot and google search with params to open
-    browser windows for each address to decide if address should be excluded from carding.
+def address_concentration_open_browser(df: pd.DataFrame) -> None:
+    """Open browser search tabs for addresses flagged as highly concentrated.
+
+    Behaviour is controlled by ``ROV_SETUP['concentrated_address_browser_prompt_freq']``:
+    ``1`` opens without prompting, ``2`` prompts for confirmation first.
+    Only opens tabs for rows where ``addr_desc`` and ``remove`` are both empty.
+
+    Args:
+        df (pd.DataFrame): Concentrated-address DataFrame with columns
+            ``state``, ``city``, ``address``, ``addr_desc``, and ``remove``.
     """
 
     logger.debug("here")
@@ -684,8 +791,17 @@ def address_concentration_open_browser(df):
         pass
 
 
-def add_fields_to_list(base_list, new_fields):
-    """ adds new fields to base lists.  exits if already in list."""
+def add_fields_to_list(base_list: list[str], new_fields: str) -> None:
+    """Append comma-separated field names to a list, exiting if any already exist.
+
+    Args:
+        base_list (list[str]): The existing list of field names to extend in place.
+        new_fields (str): Comma-separated string of field names to add.
+
+    Raises:
+        SystemExit: Via ``exit_yes`` if any field in ``new_fields`` is already
+            present in ``base_list``.
+    """
 
     new_fields_lst = [field.strip().lower() for field in new_fields.split(",")]
     same_fields = [field.strip().lower() for field in new_fields_lst if field in base_list]
@@ -696,15 +812,18 @@ def add_fields_to_list(base_list, new_fields):
         exit_yes(f"Field(s) '{str(same_fields)}' already exists on list.  Can not add it.")
 
 
-def split_files_for_sincere(combined_csv, lim, op_wks):
-    """ splits main df into files by group_vars for loading into VoterLetters/Sincere.  splits large files into subs
-    with counter if larger than limit.
+def split_files_for_sincere(combined_csv: Union[str, Path],
+                            lim: int,
+                            op_wks: Union[str, Path]) -> None:
+    """Split the combined CSV into per-group_var CSV files for Sincere/VoterLetters import.
 
-    Parameters
-    ----------
-    op_wks :
-    lim : mx number of addresses Sincere can import in one csv file
-    combined_csv : the file which contains all the addresses combined into one
+    Large groups are further chunked into sub-files if they exceed ``lim`` rows.
+    A summary XLSX listing each output file and its address count is written to ``op_wks``.
+
+    Args:
+        combined_csv (Union[str, Path]): Path to the combined CSV produced by the Combine step.
+        lim (int): Maximum addresses per Sincere import file; 0 means no limit.
+        op_wks (Union[str, Path]): Path for the output split-file-list XLSX.
     """
 
     logger.info("split files for Sincere")
@@ -721,10 +840,19 @@ def split_files_for_sincere(combined_csv, lim, op_wks):
     ws['A4'] = 'File'
     ws['B4'] = 'Address Count'
 
-    def chunk_split_file(df, limit, split_path_hold, split_filename):
-        """ pass a split file and needed parts and it will chunk it into sizes specified in setup as
-        ROV_SETUP['sub_split_limit'] and postfix name with file-counter.
-        split_filename is the root which csv and 'file x' is postfixed to
+    def chunk_split_file(df: pd.DataFrame, limit: int,
+                         split_path_hold: Path, split_filename: str) -> None:
+        """Write a DataFrame to one or more chunked CSV files under ``split_path_hold``.
+
+        If ``len(df) <= limit``, writes a single file. Otherwise splits into
+        numbered sub-files (``split_filename file-1.csv``, ``file-2.csv``, ...).
+
+        Args:
+            df (pd.DataFrame): Address records for one split group.
+            limit (int): Maximum rows per output file.
+            split_path_hold (Path): Directory where split CSV files are written.
+            split_filename (str): Root file name (without extension); used as-is
+                for a single file or with a numeric suffix for chunks.
         """
 
         logger.trace("here")
@@ -820,8 +948,21 @@ def split_files_for_sincere(combined_csv, lim, op_wks):
 
 
 
-def check_county_to_zips(df, zipskip_list, dict_statecounty):
-    """ check county by comparing it to zip lookup.  sets flag for mismatches and saves vars along the way. """
+def check_county_to_zips(df: pd.DataFrame,
+                         zipskip_list: list[tuple],
+                         dict_statecounty: dict) -> None:
+    """Validate voter county values against the zip-code lookup and flag mismatches.
+
+    Adds/updates in-place: ``orig_county``, ``clean_county``, ``statecounty``,
+    ``numzip``, ``zip_county_list``, and ``mismatch_county`` columns.
+
+    Args:
+        df (pd.DataFrame): Formatted voter DataFrame to annotate in place.
+        zipskip_list (list[tuple]): List of ``(county_lower, zip_int)`` tuples
+            that should not be flagged as mismatches.
+        dict_statecounty (dict): State-county lookup mapping ``"STATE-COUNTY"`` ->
+            ``[county_filename, countyToPrint, stateMixedCounty]``.
+    """
 
     logger.info("check county to zip file")
 
@@ -860,8 +1001,20 @@ def check_county_to_zips(df, zipskip_list, dict_statecounty):
     logger.debug("Done filling zip and county info")
 
 
-def get_setup_file_name(initial_campaign_dir):
-    """ use bekutils func to get setup file """
+def get_setup_file_name(initial_campaign_dir: Union[str, Path]) -> Path:
+    """Prompt the user to select an ROVCleaver setup XLSX file and return its path.
+
+    In test mode (``USE_HARDCODED_SETUP = True``), skips the dialog and returns
+    ``HARDCODED_SETUP_FILE`` after a confirmation prompt. Exits if the selected
+    file name does not contain ``'UniversalSetup'``.
+
+    Args:
+        initial_campaign_dir (Union[str, Path]): Starting directory for the file
+            picker dialog.
+
+    Returns:
+        Path: Resolved path to the selected setup XLSX file.
+    """
 
     logger.debug('picking setup file')
 
@@ -887,8 +1040,12 @@ def get_setup_file_name(initial_campaign_dir):
     return setup_file_name
 
 
-def check_for_unwanted_setup_options():
-    """ verifies setup options when program is run allowing to exit and edit setup
+def check_for_unwanted_setup_options() -> None:
+    """Validate setup options and prompt the user to confirm or abort before processing.
+
+    Checks for potentially unintended combinations such as running county/zip
+    validation without a county split field, unusual sort orders, format-file
+    copies, and imported code blocks. Reads options from ``ROV_SETUP``.
     """
 
     logger.info('Checking setup options')
@@ -931,8 +1088,14 @@ def check_for_unwanted_setup_options():
         display_imported_code(ROV_SETUP['last_code_sheet'], ROV_SETUP['last_code'])
 
 
-def create_field_lists():
-    """ fill array with default field names of ' ' and add fields required by options selected"""
+def create_field_lists() -> None:
+    """Build all derived field-name lists in ``ROV_SETUP`` based on setup options.
+
+    Populates ``formatfile_field_list``, ``formatfile_field_list_to_zip``,
+    ``inputfile_delete_field_list``, ``inputfile_rename_fields_dict``,
+    ``combinefile_field_list``, and related lists. Exits on duplicate field
+    names, missing group_var fields, or factory/campaign misconfigurations.
+    """
 
     logger.info('Creating field lists')
 
@@ -1018,8 +1181,14 @@ def create_field_lists():
                   ))
 
 
-def create_dicts():
-    """ create dicts, lists, need to run """
+def create_dicts() -> None:
+    """Build runtime lookup dictionaries and load supporting data into ``ROV_SETUP``.
+
+    Creates: ``dict_statecounty_to_alt_formats`` (state-county -> format variants),
+    optionally ``dict_zip_to_countylist`` (zip -> county list), and
+    ``dict_concentrated_addresses`` (address tuple -> description/remove reason).
+    Also populates ``zipskip_list``.
+    """
 
     logger.info('Creating dictionaries')
 
@@ -1077,14 +1246,20 @@ def create_dicts():
 
     # FIXME: Can we fill group_vars here and rename function to create_dicts_fill_groups?
 
-def display_imported_code(sheet_name, py_file_name):
-    """ reads python code contained in a workbook sheet, writes it to a py file, displays the contents on screen,
-    and writes it to console for fixing program mistakes
+def display_imported_code(sheet_name: Worksheet, py_file_name: str) -> None:
+    """Extract Python code from a setup worksheet, compile it, display it, and prompt to run.
 
-    Parameters
-    ----------
-    sheet_name : the sheet in the setup.xlxs where code is found
-    py_file_name : the .py text python file where the code is saved
+    Writes the code to a ``.py`` file, compiles it for syntax checking,
+    displays up to 40 lines in a message box, and loads the module into
+    ``ROV_SETUP`` for later invocation.
+
+    Args:
+        sheet_name (Worksheet): The worksheet object containing Python source lines.
+        py_file_name (str): Name of the output ``.py`` file
+            (e.g. ``'first_code_to_import.py'``).
+
+    Raises:
+        Exception: If the Python code fails to compile (syntax error).
     """
 
     logger.debug('here')
@@ -1131,8 +1306,16 @@ def display_imported_code(sheet_name, py_file_name):
                 display_exiting=False)
 
 
-def process_format_files(filelist_wks):
-    """ loops through filelist sheet and creates format for specified x """
+def process_format_files(filelist_wks: Worksheet) -> None:
+    """Iterate the FileList sheet and format each row flagged with 'x'.
+
+    Calls ``process_format_file`` for each flagged row and optionally
+    ``merge_into_format_file`` when an update file is specified. Collects
+    missing-county names across all files and alerts the user at the end.
+
+    Args:
+        filelist_wks (Worksheet): The 'FileList' sheet from the setup workbook.
+    """
     logger.info('process format files')
 
     cumulative_missing_counties_list = []
@@ -1163,18 +1346,30 @@ def process_format_files(filelist_wks):
             myfile.write('\n'.join(cumulative_missing_counties_list))
 
 
-def process_format_file(fn, pull_group, custom_field, input_path, op_path,
-                        missing_counties_list_all_formatfiles):
-    """
-    Given a rawdata csv or xlsx with filename fn and path input_path, places a transformed csv file with the same
-    name prefixed with 'FORMATTED' to the directory output_path, and returns a dataframe of the info.  The list
-    missing_counties_list_all_formatfiles accumulates all counties not found in
-    dictionary ROV_SETUP['dict_statecounty_to_alt_formats'] so they can be recoded in first_code.
+def process_format_file(fn: str,
+                        pull_group: int,
+                        custom_field: str,
+                        input_path: Path,
+                        op_path: Path,
+                        missing_counties_list_all_formatfiles: list) -> pd.DataFrame:
+    """Read a raw data file, apply all transformations, and write a FORMATTED CSV.
 
-    Parameters
-    ----------
-    pull_group :
-    custom_field :
+    Reads ``fn`` from ``input_path``, renames/prefixes fields per setup, runs
+    first/middle/last code blocks, optionally checks county-zip consistency,
+    writes a FORMATTED CSV and a REMOVED CSV to ``op_path``, and writes pivot
+    summary reports.
+
+    Args:
+        fn (str): File name of the raw data file (CSV or XLSX).
+        pull_group (int): Pull-group identifier assigned to all rows in this file.
+        custom_field (str): Custom field value assigned to all rows in this file.
+        input_path (Path): Directory containing the raw data file.
+        op_path (Path): Directory where FORMATTED and REMOVED output files are written.
+        missing_counties_list_all_formatfiles (list): Accumulator list; counties
+            not found in the state-county dictionary are appended here.
+
+    Returns:
+        pd.DataFrame: The formatted DataFrame (including removed rows).
     """
     logger.info(f"Creating formatted file for: '{fn}'")
 
@@ -1346,18 +1541,29 @@ def process_format_file(fn, pull_group, custom_field, input_path, op_path,
     return ip
 
 
-def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
-    """
-    Copies FORMATed files from a separate directory (likely came in a different format so needed their own read) into the current format directory
-    :param ws_copy_formatfile_filelist: sheet containing rows of fromFile, toFile, processFlag
-    If perform_copies = False, paths and file existence is checked but copies do not take place.
-    :return: files copied to directory
+def formatfile_copy(ws_copy_formatfile_filelist: Worksheet,
+                    perform_copies: bool = True) -> None:
+    """Copy FORMATTED files listed in the FormatCopies sheet to their destination directories.
+
+    Validates paths and file existence for all rows flagged with 'x'. When
+    ``perform_copies`` is False, performs validation only without copying.
+
+    Args:
+        ws_copy_formatfile_filelist (Worksheet): The 'FormatCopies' worksheet
+            with columns: use, fromFilePath, fromfilename, tofilepath, tofilename.
+        perform_copies (bool): If True, execute the file copies. If False,
+            only validate paths and files. Defaults to True.
     """
 
     logger.info('In formatfile_copy')
 
-    def copy_file(source, destination):
-        """ func to copy  with error handling pymsgbox"""
+    def copy_file(source: Union[str, Path], destination: Union[str, Path]) -> None:
+        """Copy a single file to a destination, exiting with a message on failure.
+
+        Args:
+            source (Union[str, Path]): Full path to the source file.
+            destination (Union[str, Path]): Destination directory or file path.
+        """
         try:
             shutil.copy(os.path.expanduser(source), destination)
             logger.info(f"File '{source}' copied successfully to\n'{destination}'.")
@@ -1392,11 +1598,23 @@ def formatfile_copy(ws_copy_formatfile_filelist, perform_copies=True):
                 copy_file(src_file_w_path, dest_path)
 
 
-def assign_formatcopy_vars(from_path, from_fn, to_path, to_fn):
-    """
-    Takes to and from paths and filenames and converts to simple files w path. Paths can be code to be evaluated,
-    eg referencing variable rootPathOneUp, where rooPath is the current Format dir.
-    :return: list of two variable, source file and destination file or path
+def assign_formatcopy_vars(from_path: Cell, from_fn: Cell,
+                           to_path: Cell, to_fn: Cell) -> list:
+    """Resolve openpyxl cell values for source/destination paths into usable filesystem paths.
+
+    Source path may be a Python expression (evaluated if it contains ``','``,
+    ``'('``, or ``' / '``), a literal path string, or a ``~``-expandable path.
+    A blank or ``'none'`` destination path defaults to ``ROV_SETUP['format_path']``.
+
+    Args:
+        from_path (Cell): Cell whose value is the source directory expression or path.
+        from_fn (Cell): Cell whose value is the source file name.
+        to_path (Cell): Cell whose value is the destination directory (or blank/none).
+        to_fn (Cell): Cell whose value is the destination file name (or blank/none).
+
+    Returns:
+        list: ``[src_path, src_file_w_path, dest_path, dest_file_w_path]``
+            where each element is a resolved path string or Path object.
     """
 
     logger.debug('here')
@@ -1428,11 +1646,20 @@ def assign_formatcopy_vars(from_path, from_fn, to_path, to_fn):
     return [src_path, src_file_w_path, dest_path, dest_file_w_path]
 
 
-def combine_formatfiles(orig_df, copy_formatfile_list_sheet):
-    """
-    gets files from FormatCopy sheet and puts contents into combined dataframe
-    :param copy_formatfile_list_sheet: sheet containing rows of fromFile, toFile, processFlag
-    :return: dataframe with data loaded
+def combine_formatfiles(orig_df: pd.DataFrame,
+                        copy_formatfile_list_sheet: Worksheet) -> pd.DataFrame:
+    """Append records from externally copied FORMAT files into the combined DataFrame.
+
+    Reads each file flagged with 'x' in ``copy_formatfile_list_sheet``, validates
+    that required split fields are present, and concatenates the records.
+
+    Args:
+        orig_df (pd.DataFrame): The current combined DataFrame to extend.
+        copy_formatfile_list_sheet (Worksheet): The 'FormatCopies' worksheet with
+            columns: use, fromFilePath, fromfilename, tofilepath, tofilename.
+
+    Returns:
+        pd.DataFrame: Extended DataFrame with copied format-file records appended.
     """
     logger.info('combining format files')
 
@@ -1476,8 +1703,17 @@ def combine_formatfiles(orig_df, copy_formatfile_list_sheet):
     return orig_df
 
 
-def process_format_files_into_combine():
-    """ combines all files specified in Setup > filelist into one and runs pivots """
+def process_format_files_into_combine() -> pd.DataFrame:
+    """Concatenate all FORMATTED files marked for combine into a single DataFrame.
+
+    Iterates the FileList sheet for rows flagged with 'x' in the combine column,
+    reads each corresponding FORMATTED CSV, validates field order, and concatenates.
+    Optionally appends externally copied format files via ``combine_formatfiles``.
+    Removes fields listed in ``ROV_SETUP['combinefile_fields_to_delete_list']``.
+
+    Returns:
+        pd.DataFrame: Combined DataFrame of all flagged formatted files.
+    """
     logger.info('starting process_format_files_into_combine')
 
     df_combined = pd.DataFrame()  # empty dataframe
@@ -1519,16 +1755,23 @@ def process_format_files_into_combine():
     return df_combined
 
 
-def bek_text_box(txt, title='', box_title="", buttons=None):
-    """ Display text block with lines separated by \n and choice of buttons at bottom.
+def bek_text_box(txt: str, title: str = '', box_title: str = "",
+                 buttons: Optional[list[str]] = None) -> Optional[str]:
+    """Display a scrollable text block with selectable buttons using PySimpleGUI.
 
-    Parameters
-    ----------
-    box_title :
-    title :
-    txt :
-    buttons :
+    Window width and height are auto-scaled to the text content within
+    configured min/max limits. Scrolling is enabled when lines exceed 80.
 
+    Args:
+        txt (str): The body text to display, with lines separated by ``\\n``.
+        title (str): Large heading displayed above the text body. Defaults to "".
+        box_title (str): Title bar caption for the window. Defaults to "".
+        buttons (Optional[list[str]]): Button labels to show at the bottom.
+            Defaults to ``["OK", "Exit"]``.
+
+    Returns:
+        Optional[str]: The lowercased label of the button clicked, or None if
+            the window was closed without a selection.
     """
 
 # window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
@@ -1578,7 +1821,13 @@ def bek_text_box(txt, title='', box_title="", buttons=None):
     return event
 
 
-def convert_xlsx_to_csvs():
+def convert_xlsx_to_csvs() -> None:
+    """Interactively convert XLSX files in a selected directory to CSV files.
+
+    Prompts the user to select a source directory of XLSX files and a
+    destination directory for CSVs. Skips any XLSX that already has a
+    matching CSV. Prompts for confirmation before converting.
+    """
     logger.info('starting convert_xlsx_to_csv')
 
     str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
@@ -1638,8 +1887,12 @@ def convert_xlsx_to_csvs():
         logger.debug('')
 
 
-def main_format():
-    """ move format code out of main() into func"""
+def main_format() -> None:
+    """Run the Format phase: create required directories, validate setup options, and format all flagged raw files.
+
+    Reads setup from ``ROV_SETUP``, creates output directories under
+    ``format_path``, confirms setup options, and calls ``process_format_files``.
+    """
 
     logger.debug("in main_format")
 
@@ -1659,8 +1912,13 @@ def main_format():
     pymsgbox.alert("Ran format section of main", "Alert")
 
 
-def main_combine():
-    """ move combine out of main() into func """
+def main_combine() -> None:
+    """Run the Combine phase: merge formatted files, identify duplicates, run last code, and write the combined CSV.
+
+    Reads setup from ``ROV_SETUP``, optionally copies external format files,
+    runs the last-code block, identifies duplicates, sorts, runs pivot reports,
+    and writes the final combined CSV.
+    """
 
     logger.info("in main combine")
 
@@ -1741,8 +1999,13 @@ def main_combine():
     pymsgbox.alert("Ran combine section of main", "Alert")
 
 
-def main():
-    """ processes multiple rawdata files using parameters set in a setup spreadsheet
+def main() -> None:
+    """Entry point: display the action menu and dispatch to the selected workflow.
+
+    Presents a PySimpleGUI menu with choices: Format, Combine, Split,
+    XLSXs to CSVs, Update Zip File, Compare CSV cols, Exit. For Format/Combine/Split,
+    loads the setup file, initialises all setup dictionaries, and calls the
+    appropriate workflow function.
     """
 
     logger.info("starting main")
@@ -1838,8 +2101,13 @@ def main():
             pymsgbox.alert("Ran split section of main", "Alert")
 
 
-def init_setup_dict():
-    """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+def init_setup_dict() -> None:
+    """Initialise ``ROV_SETUP`` with workbook objects, fixed paths, and file names from the setup XLSX.
+
+    Opens the setup workbook, assigns sheet objects (Setup, FileList, FormatCopies),
+    derives all standard directory paths (rawdata, formatted, split, combined),
+    reads pull-group settings, and validates FileList column headers.
+    """
 
     logger.info('starting init_setup_dict')
 
@@ -1891,8 +2159,12 @@ def init_setup_dict():
                      ])
 
 
-def setup_backward_compatability():
-    """ check for missing values in the setup file and set/msg user accordingly"""
+def setup_backward_compatability() -> None:
+    """Verify that the setup file meets minimum version requirements.
+
+    Checks that the FileList sheet contains expected header text indicating a
+    compatible setup file version. Exits with an informative message if not.
+    """
 
     # if use_pull_flag and max_pull_group not in file we can not set variables and continue because first row of
     # filelist sheet will be off.
@@ -1906,8 +2178,16 @@ def setup_backward_compatability():
         logger.error(msg)
         exit_yes(msg)
 
-def read_setup_vars(field_col):
-    """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+def read_setup_vars(field_col: int) -> None:
+    """Iterate all setup-sheet rows and populate ``ROV_SETUP`` with parsed variable values.
+
+    Skips the header row (row 1). For each subsequent row, calls ``read_setup_var``
+    with the row converted to a list via ``row_to_list``.
+
+    Args:
+        field_col (int): Zero-indexed column number of the field-definition column
+            (e.g. ``FIELD_DEF_COL_NUMERIC``).
+    """
     logger.info('starting read_setup_vars')
 
     # for testing read one row
@@ -1924,36 +2204,104 @@ def read_setup_vars(field_col):
         row_list = row_to_list(row)
         read_setup_var(row_list)
 
-def read_setup_var(row_data):
-    """ assigns variables from cells in setup sheet and places them in global dictionary.  set some global variables"""
+def read_setup_var(row_data: list) -> None:
+    """Parse one setup-sheet row and store its variable(s) in ``ROV_SETUP``.
+
+    Reads the field-definition string from the column at ``FIELD_DEF_COL_NUMERIC``,
+    validates its format, determines whether the row defines a list or scalar
+    variable(s), converts each value using the declared type, and assigns the
+    result(s) to ``ROV_SETUP``.
+
+    Args:
+        row_data (list): Cell values for one setup-sheet row, zero-indexed.
+    """
 
     logger.debug(f"starting read_setup_var {row_data[ min(len(row_data)-1,FIELD_DEF_COL_NUMERIC) ]}")
 
-    def len_tuple(tuple):
-        """ check len of tuple where single value might not have a len and throw error (like bool)"""
+    def len_tuple(tuple: Any) -> int:
+        """Return the length of an object, or -99 if ``len()`` raises a TypeError.
+
+        Args:
+            tuple (Any): Any object to measure.
+
+        Returns:
+            int: ``len(tuple)``, or ``-99`` if the object has no length.
+        """
         try:
             len(tuple)
         except:
             return -99
         return len(tuple)
 
-    def return_func(var_type, str_case='l', str_strip='b', **kwargs):
-        """ returns a function to convert a string to the passed type """
+    def return_func(var_type: str, str_case: str = 'l',
+                    str_strip: str = 'b', **kwargs) -> Callable:
+        """Return a conversion function corresponding to a setup variable type string.
 
-        def my_expanduser(file_str):
-            """ apply path and expanduser when expanduser does not take argument"""
+        Args:
+            var_type (str): Type identifier; one of ``'str'``, ``'int'``,
+                ``'bool'``, ``'float'``, ``'file'``, ``'pythobj'``.
+            str_case (str): Case conversion for ``'str'`` type - ``'l'`` lower,
+                ``'u'`` upper, ``'k'`` keep. Defaults to ``'l'``.
+            str_strip (str): Strip mode for ``'str'`` type - ``'b'`` both,
+                ``'l'`` left, ``'r'`` right. Defaults to ``'b'``.
+            **kwargs: Additional keyword arguments forwarded to the returned function.
+
+        Returns:
+            Callable: A function that converts a raw cell string to the target type.
+
+        Raises:
+            ValueError: If ``var_type`` is not one of the recognised type strings.
+        """
+
+        def my_expanduser(file_str: str) -> Path:
+            """Convert a file path string to a Path and expand ``~`` to the home directory.
+
+            Args:
+                file_str (str): File path string, possibly starting with ``~``.
+
+            Returns:
+                Path: Resolved Path with home directory expanded.
+            """
             p = Path(file_str)
             return p.expanduser()
 
-        def my_python_obj(code_str):
-            """ takes string of code and returns python object.
-            Note: double quotes, tuples not supported - must be lists, multi items must be in list/[], bool must be
-            true not True """
+        def my_python_obj(code_str: str) -> Any:
+            """Parse a JSON-formatted string into a Python object.
+
+            Limitations: double quotes are not supported; tuples must be expressed as
+            lists; boolean literals must be lowercase (``true``/``false``).
+
+            Args:
+                code_str (str): A JSON-compatible string representing a Python object.
+
+            Returns:
+                Any: The parsed Python object (list, dict, int, bool, etc.).
+            """
             python_object = json.loads(code_str)
             return python_object
 
-        def my_lower_strip(valx, *extra_args, str_case='l', str_strip='b', **extra_kwargs):
-            """ chain them together """
+        def my_lower_strip(valx: Optional[str], *extra_args,
+                           str_case: str = 'l', str_strip: str = 'b',
+                           **extra_kwargs) -> str:
+            """Apply strip and case conversion to a string value.
+
+            None input is treated as an empty string.
+
+            Args:
+                valx (Optional[str]): The string to process, or None.
+                *extra_args: Ignored positional arguments (for signature compatibility).
+                str_case (str): Case conversion - ``'l'`` lower, ``'u'`` upper,
+                    ``'k'`` keep original. Defaults to ``'l'``.
+                str_strip (str): Strip mode - ``'b'`` both ends, ``'l'`` left,
+                    ``'r'`` right. Defaults to ``'b'``.
+                **extra_kwargs: Ignored keyword arguments (for signature compatibility).
+
+            Returns:
+                str: Processed string value.
+
+            Raises:
+                Exception: If ``str_strip`` or ``str_case`` is not a recognised option.
+            """
             val = valx
             if val is None:
                 val = ''  # TODO is this better None?
@@ -1995,8 +2343,26 @@ def read_setup_var(row_data):
             raise ValueError
         return return_fnc
 
-    def check_vars_string_for_errors(vars_string):
-        """ check if var_string in proper format; raise exception if not."""
+    def check_vars_string_for_errors(vars_string: str) -> list:
+        """Validate and parse the field-definition string from a setup-sheet cell.
+
+        The string must evaluate to a list whose first element is a bool (True for
+        a list-valued variable, False for one or more scalars), followed by
+        ``(var_name, var_type[, options_dict])`` tuples. Recognised type strings:
+        ``'str'``, ``'int'``, ``'float'``, ``'bool'``, ``'file'``, ``'pythobj'``.
+
+        Args:
+            vars_string (str): Raw cell text from the field-definition column.
+
+        Returns:
+            list: Validated variable specification list with the bool flag as
+                element 0 and ``[var_name, var_type, ...]`` sublists for each variable.
+
+        Raises:
+            Exception: If the string fails to eval, is not a list, lacks a bool
+                first element, has fewer than two elements, has conflicting list/multi
+                specification, or contains unrecognised type strings.
+        """
         try:
             vars_evaled = eval(vars_string)
         except Exception as e:
@@ -2085,8 +2451,14 @@ def read_setup_var(row_data):
 
 
 
-def format_setup_vars():
-    """ reformat vars in setup_dict and erase temporary (starting with xl_)"""
+def format_setup_vars() -> None:
+    """Post-process raw ``xl_*`` setup values into typed, derived ``ROV_SETUP`` entries.
+
+    Assigns worksheet objects, pads field lists to equal length, parses
+    campaign/factory/group variable lists, validates for overlap, loads the
+    concentrated-addresses workbook, determines the sort list from ``sortchoice``,
+    compiles pivot specifications, and optionally removes ``xl_`` prefixed keys.
+    """
     logger.debug(f"in format_setup_vars top {id(ROV_SETUP)=}")
     logger.info(f"starting format_setup_vars")
 
