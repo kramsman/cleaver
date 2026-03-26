@@ -1,0 +1,13 @@
+__pycache__/
+cleaver/Archive/
+build/
+!/*.log
+!/zip-codes-database*.*
+!/Archive/ROVCleaver V16-3dev
+first_code_to_import.py
+
+last_code_to_import.py
+middle_code_to_import.py
+Work/check for bektp availability.py
+!/Work/check for bektp availability.py
+!/temp.xlsx

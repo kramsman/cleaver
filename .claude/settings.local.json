@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cfcg-an-webhook\" rev-parse --git-dir)",
+      "Read(//Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cfcg-an-webhook/**)"
+    ]
+  }
+}
