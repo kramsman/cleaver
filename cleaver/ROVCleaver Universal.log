@@ -1,0 +1,256 @@
+2025-07-17 11:47:43.584 | INFO     | __main__:main:1748 - starting main
+2025-07-17 11:47:45.584 | DEBUG    | __main__:get_setup_file_name:866 - picking setup file
+2025-07-17 11:47:45.585 | DEBUG    | bekutils.bek_funcs:get_file_name:627 - in get_file_name
+2025-07-17 11:47:52.729 | DEBUG    | __main__:main:1810 - in 'else' to pick format, combine, split
+2025-07-17 11:47:52.729 | INFO     | __main__:init_setup_dict:1844 - starting init_setup_dict
+2025-07-17 11:47:52.800 | INFO     | __main__:read_setup_vars:1911 - starting read_setup_vars
+2025-07-17 11:47:52.812 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 2
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("campaign_note","str",{'str_case':'k'})
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("expectedstate","str",{'str_case':'u'})
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 9
+2025-07-17 11:47:52.813 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("OPFile","file")
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 12
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("splitfnbase","file")
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 15
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_campaign_vars","str",{'str_case':'l'})
+2025-07-17 11:47:52.814 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 18
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_factory_vars","str",{'str_case':'l'})
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("rows_to_read_limit", "int")
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 21
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("id_dupes", "bool")
+2025-07-17 11:47:52.815 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 24
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 25
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("xl_inputfile_orig_list","str")
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("xl_inputfile_renamed_list","str")
+2025-07-17 11:47:52.816 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("xl_inputfile_type_list","str")
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("combinefile_fields_to_delete_list","str")
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 36
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("splitfile_field_list","str")
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.817 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("check_header_string","str")
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 42
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("strcheck_header_col","str")
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 45
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("copy_other_format_files_flag", "bool")
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 48
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.818 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_str_pivot_field1","str"), ("xl_str_pivot_field1_by_cnt","bool"), ("xl_str_pivot_field1_all","bool")
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_str_pivot_field2","str"), ("xl_str_pivot_field2_by_cnt","bool"), ("xl_str_pivot_field2_all","bool")
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_str_pivot_field3","str"), ("xl_str_pivot_field3_by_cnt","bool"), ("xl_str_pivot_field3_all","bool")
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_str_pivot_field4","str"), ("xl_str_pivot_field4_by_cnt","bool"), ("xl_str_pivot_field4_all","bool")
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_str_pivot_field5","str"), ("xl_str_pivot_field5_by_cnt","bool"), ("xl_str_pivot_field5_all","bool")
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 56
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 57
+2025-07-17 11:47:52.819 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("concentrated_addresses_file", "file")
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 61
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("concentrated_address_browser_prompt_freq", "int")
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 64
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("dupe_key_formula","str",{'str_case':'k'})
+2025-07-17 11:47:52.820 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 67
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("dupe_key_sort_tuples", "pythobj")
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 70
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("run_county_check_code_flag", "bool")
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 73
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.821 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("skip_selected_zip_match_flag", "bool")
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 76
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_skip_selected_zip_sheet", "str",{'str_case':'k'})
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 79
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 80
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("add_filename_column_flag", "bool")
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 84
+2025-07-17 11:47:52.822 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("add_random_number_column_flag", "bool")
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 87
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("sortchoice", "int")
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 90
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 91
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("sub_split_limit","int")
+2025-07-17 11:47:52.823 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 94
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 95
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("run_first_code_flag", "bool")
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 99
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_first_code_sheet", "str",{'str_case':'k'})
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 102
+2025-07-17 11:47:52.824 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("run_middle_code_flag", "bool")
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 105
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_middle_code_sheet", "str",{'str_case':'k'})
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 108
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("run_last_code_flag", "bool")
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 111
+2025-07-17 11:47:52.825 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("xl_last_code_sheet", "str",{'str_case':'k'})
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 114
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 115
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("run_merge_data_flag", "bool")
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 119
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.826 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("orig_file_key_formula", "str",{'str_case':'k'})
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 122
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var False,("update_file_key_formula", "str",{'str_case':'k'})
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 125
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var True,("update_field_list", "str")
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.827 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 31
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 32
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 40
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 44
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 58
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 59
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 64
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 91
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.828 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 96
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 107
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 108
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 112
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 137
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 138
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 144
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 145
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 146
+2025-07-17 11:47:52.829 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 147
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 148
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 153
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 154
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 158
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 184
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 185
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var None
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 190
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 197
+2025-07-17 11:47:52.830 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 198
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 202
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 203
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 208
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 209
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 213
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 217
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 218
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 222
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 226
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 227
+2025-07-17 11:47:52.831 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 231
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 235
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 236
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 240
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 245
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 246
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 250
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 251
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 255
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 286
+2025-07-17 11:47:52.832 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 291
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 292
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 296
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 297
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 301
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 302
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 305
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 306
+2025-07-17 11:47:52.833 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 307
+2025-07-17 11:47:52.834 | DEBUG    | __main__:read_setup_var:1930 - starting read_setup_var 308
+2025-07-17 11:47:52.834 | DEBUG    | __main__:format_setup_vars:2090 - in format_setup_vars top id(ROV_SETUP)=4570654912
+2025-07-17 11:47:52.834 | INFO     | __main__:format_setup_vars:2091 - starting format_setup_vars
+2025-07-17 11:47:52.922 | INFO     | __main__:format_setup_vars:2156 - id(ROV_SETUP)=4570654912
+2025-07-17 11:47:52.922 | DEBUG    | __main__:format_setup_vars:2163 - in format_setup_vars - finished
+2025-07-17 11:47:52.922 | INFO     | __main__:create_field_lists:937 - Creating field lists
+2025-07-17 11:47:52.923 | INFO     | __main__:create_dicts:1024 - Creating dictionaries
+2025-07-17 11:47:52.923 | DEBUG    | __main__:zip_file_to_county_dict:357 - creating dictionary of zip to county
+2025-07-17 11:47:53.754 | DEBUG    | __main__:create_dicts:1032 - Ran Counties_to_xls
+2025-07-17 11:47:54.307 | DEBUG    | __main__:create_dicts:1037 - Imported Zip_To_County_List_dict.py
+2025-07-17 11:47:54.376 | DEBUG    | __main__:main_format:1644 - in main_format
+2025-07-17 11:47:54.378 | INFO     | __main__:check_for_unwanted_setup_options:894 - Checking setup options
+2025-07-17 11:47:56.037 | DEBUG    | __main__:display_imported_code:1090 - here
+2025-07-17 11:47:56.037 | DEBUG    | __main__:create_import_code_from_sheet:644 - here
+2025-07-17 11:47:56.039 | DEBUG    | __main__:display_imported_code:1096 - compiling middle_code_to_import.py - taken from sheet: <Worksheet "middle_code">
+2025-07-17 11:47:56.045 | INFO     | __main__:display_imported_code:1118 - 
+middle_code_to_import.py to be run - taken from sheet: <Worksheet "middle_code">
+2025-07-17 11:47:56.318 | DEBUG    | __main__:display_imported_code:1090 - here
+2025-07-17 11:47:56.318 | DEBUG    | __main__:create_import_code_from_sheet:644 - here
+2025-07-17 11:47:56.320 | DEBUG    | __main__:display_imported_code:1096 - compiling last_code_to_import.py - taken from sheet: <Worksheet "last_code">
+2025-07-17 11:47:56.328 | INFO     | __main__:display_imported_code:1118 - 
+last_code_to_import.py to be run - taken from sheet: <Worksheet "last_code">
+2025-07-17 11:47:56.570 | INFO     | __main__:process_format_files:1136 - process format files
+2025-07-17 11:47:56.571 | INFO     | __main__:process_format_file:1179 - Creating formatted file for: 'Part of 2025 Black Voters.csv'
+2025-07-17 11:47:56.571 | INFO     | bekutils.bek_funcs:read_file_to_df:437 - reading file to dataframe 'Part of 2025 Black Voters'
+2025-07-17 11:47:56.581 | INFO     | bekutils.bek_funcs:read_file_to_df:437 - reading file to dataframe 'Part of 2025 Black Voters'
+2025-07-17 11:47:56.615 | DEBUG    | __main__:process_format_file:1212 - Done reading in one file in process_format_file, csv or xlsx
+2025-07-17 11:47:56.615 | DEBUG    | __main__:process_format_file:1215 - Ready to prefix fields to with '_'
+2025-07-17 11:47:56.624 | DEBUG    | __main__:process_format_file:1226 - Done fill rownum
+2025-07-17 11:47:56.625 | DEBUG    | __main__:process_format_file:1229 - Ready to fill firstname true/false
+2025-07-17 11:47:56.668 | DEBUG    | __main__:process_format_file:1232 - Done filling specified fields true/false with blank
+2025-07-17 11:47:56.669 | INFO     | __main__:check_county_to_zips:826 - check county to zip file
+2025-07-17 11:47:57.010 | DEBUG    | __main__:check_county_to_zips:860 - Done filling zip and county info
+2025-07-17 11:47:57.011 | DEBUG    | __main__:process_format_file:1266 - Ready to run middle_code
+2025-07-17 11:47:57.126 | DEBUG    | __main__:process_format_file:1271 - Ran middle_code
+2025-07-17 11:47:57.208 | DEBUG    | __main__:process_format_file:1285 - Ready to run last_code (remove code)
+2025-07-17 11:47:57.546 | DEBUG    | __main__:process_format_file:1297 - Ran last_code
+2025-07-17 11:47:57.690 | INFO     | __main__:process_format_file:1330 - 
+Formatted file: Part of 2025 Black Voters.csv
+2025-07-17 11:47:57.691 | INFO     | __main__:process_format_file:1331 -    Input records: 9999
+2025-07-17 11:47:57.697 | INFO     | __main__:process_format_file:1333 -    Kept: 9159
+2025-07-17 11:47:57.698 | INFO     | __main__:process_format_file:1334 -    Removed: 840
+2025-07-17 11:47:57.698 | DEBUG    | __main__:process_format_file:1336 - 
+
+2025-07-17 11:47:57.699 | DEBUG    | __main__:process_format_file:1338 - End time is 
+2025-07-17 11:47:57.699 | INFO     | __main__:pivot_and_other_reports:488 - creating reports
+2025-07-17 11:47:57.705 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='RawData by State-County''
+2025-07-17 11:47:57.754 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='RawData by Filename''
+2025-07-17 11:47:57.764 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='Removed Reasons''
+2025-07-17 11:47:57.777 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='Clean by county''
+2025-07-17 11:47:57.857 | DEBUG    | __main__:pivot_and_other_reports:584 - running countyCheck pivots
+2025-07-17 11:47:57.973 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='Cln- county,sex''
+2025-07-17 11:47:58.102 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='All- county,sex,remove''
+2025-07-17 11:47:58.347 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='Cln- filename,county''
+2025-07-17 11:47:58.401 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='All- filename,county''
+2025-07-17 11:47:58.454 | DEBUG    | __main__:single_pivot_report:441 - here 'sheet_name='Cln- sex,remove''
+2025-07-17 11:47:58.489 | DEBUG    | __main__:pivot_and_other_reports:630 - out of pivots and other reports
+2025-07-17 11:47:58.626 | DEBUG    | __main__:process_format_file:1345 - Leaving process_format_file

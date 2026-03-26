@@ -1,4 +1,4 @@
-""" ROVCleaver UniCode is a complete redo under the hood!  Taken from working V16.3
+""" cleaver UniCode is a complete redo under the hood!  Taken from working V16.3
     Setup file drastically changed - variable definitions and documentation are contained in setup - no hardcoded rows!
     ROV. structure replace with dictionary for ease in adding and removing entries
     Allows moving and sorting rows.
@@ -18,11 +18,11 @@
 # TODO add in "compare_csv_columns.py".  Needs cleaning up of import, logging, select directory.
 
 # TODO redo formatcopy using pathlib / remove os.path.join.  Create paths from sheet using
-#   /Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/PythonPrograms/Development/ROVCleaver/Work/formatcopy test paths.py
+#   /Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/PythonPrograms/Development/cleaver/Work/formatcopy test paths.py
 
 # TODO can we skip padding variable lists?  zip will work on shortest one
 # FIXME make sure Format merge works - which fields missing are ok?
-# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (ROVCleaver)
+# TODO put .py code created from first, middle, last sheets in root dir (with setup) rather than exe dir (cleaver)
 #   so different runs of Cleaver don't collide.  Problem is compiled object goes to exe so is not found when moved.
 # TODO do we need to be able to change order of grouping variables or can campaign always be added to front? Or try
 #    to add but skip if already in list?
@@ -51,7 +51,6 @@ import webbrowser
 from datetime import datetime
 from itertools import islice  # to skip 1st row of iterated spreadsheet
 from pathlib import Path
-from pathlib import PosixPath
 from typing import Any, Callable, Optional, TextIO, Union
 from openpyxl.worksheet.worksheet import Worksheet
 from openpyxl.cell.cell import Cell
@@ -1002,7 +1001,7 @@ def check_county_to_zips(df: pd.DataFrame,
 
 
 def get_setup_file_name(initial_campaign_dir: Union[str, Path]) -> Path:
-    """Prompt the user to select an ROVCleaver setup XLSX file and return its path.
+    """Prompt the user to select an cleaver setup XLSX file and return its path.
 
     In test mode (``USE_HARDCODED_SETUP = True``), skips the dialog and returns
     ``HARDCODED_SETUP_FILE`` after a confirmation prompt. Exits if the selected
@@ -1028,7 +1027,7 @@ def get_setup_file_name(initial_campaign_dir: Union[str, Path]) -> Path:
     else:
         # show an "Open" dialog box and return the path to the selected file
         xl_setup_file_name = get_file_name("Select Setup File",
-                                           f"Select ROVCleaver setup file xlsx. Must have 'UniversalSetup' in name",
+                                           f"Select cleaver setup file xlsx. Must have 'UniversalSetup' in name",
                                             initial_campaign_dir)
         setup_file_name = Path(xl_setup_file_name).expanduser()
 
@@ -2042,10 +2041,10 @@ def main() -> None:
           '~/Postcard Files/PythonPrograms/ROVCleaver_Production'
           before this update is run. A dictionary will be created and
           saved to 'ZIP_TO_COUNTY_LIST_FILE'
-          and used in future runs of ROVCleaver.
+          and used in future runs of cleaver.
 
-          Aside: the file 'Unique_County_List.xlsx' in the ROVCleaver
-          directory is updated every time ROVCleaver is run
+          Aside: the file 'Unique_County_List.xlsx' in the cleaver
+          directory is updated every time cleaver is run
           and can be used to get the required county names
           for those which need remapping.'''
 
@@ -2069,7 +2068,7 @@ def main() -> None:
         # run code common to format and combine
         ROV_SETUP['setup_file_name'] = get_setup_file_name(INITIAL_CAMPAIGN_DIR)  # use TKInter to get the file/path of setup in campaign
         # ROV_SETUP['setup_file_name'] = PosixPath('/Users/Denise/Library/CloudStorage/Dropbox/Postcard '
-        #                                           'Files/InputFiles/Campaigns/WI 01-25 State General/ROVCleaver WI 01-25 State General UniversalSetup.xlsx')
+        #                                           'Files/InputFiles/Campaigns/WI 01-25 State General/cleaver WI 01-25 State General UniversalSetup.xlsx')
         logger.debug("in 'else' to pick format, combine, split")
 
         # FIXME: somewhere in here set campaign, factory nd group_vars?
