@@ -35,6 +35,12 @@
 # TODO Include pull_group number in remove reason, eg "Pull_group of 2 less than current of 3"
 # TODO Add note 'THIS IS A MAIN" to help with formatcopy
 
+# run gitupdater to make sure uvbekutils and bekgoogle utility libraries are updated
+import sys
+import os
+sys.path.append(os.path.expanduser("~/Dropbox/Postcard Files/"))
+if True:
+   import gitupdater
 
 import compare_csv_columns
 import ast
@@ -69,24 +75,24 @@ from openpyxl.utils.cell import column_index_from_string
 import json
 from loguru import logger
 
-from bekutils import exe_path
-from bekutils import get_file_name
-from bekutils import setup_loguru
-from bekutils import is_number
-from bekutils import exit_yes
-from bekutils import exit_yes_no
-from bekutils import clean_field
-from bekutils import autosize_xls_cols
-from bekutils import bad_file_exit
-from bekutils import bad_path_exit
-from bekutils import bad_path_create
-# from bekutils import calling_func
-from bekutils import find_header_row_in_file
-from bekutils import read_file_to_df
-from bekutils import get_dir_name
-from bekutils import check_ws_headers
-from bekutils import convert_bool
-from bekutils import load_workbook_w_filepath, wb_name
+from uvbekutils import exe_path
+from uvbekutils import get_file_name
+from uvbekutils import setup_loguru
+from uvbekutils import is_number
+from uvbekutils import exit_yes
+from uvbekutils import exit_yes_no
+from uvbekutils import clean_field
+from uvbekutils import autosize_xls_cols
+from uvbekutils import bad_file_exit
+from uvbekutils import bad_path_exit
+from uvbekutils import bad_path_create
+# from uvbekutils import calling_func
+from uvbekutils import find_header_row_in_file
+from uvbekutils import read_file_to_df
+from uvbekutils import get_dir_name
+from uvbekutils import check_ws_headers
+from uvbekutils import convert_bool
+from uvbekutils import load_workbook_w_filepath, wb_name
 
 USE_HARDCODED_SETUP = False
 HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns/VA General 7-2025 test 500 black voter group/ROVCleaver VA General 7-2025 UniversalSetup.xlsx"

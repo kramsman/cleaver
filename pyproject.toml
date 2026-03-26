@@ -1,0 +1,19 @@
+[project]
+name = "cleaver-root"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "bekgoogle",
+    "loguru>=0.7.3",
+    "numpy>=2.4.3",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.1",
+    "pymsgbox>=2.0.1",
+    "pysimplegui>=5.0.8.3",
+    "uvbekutils",
+]
+
+[tool.uv.sources]
+uvbekutils = { git = "https://github.com/kramsman/uvbekutils.git" }
+bekgoogle = { git = "https://github.com/kramsman/bekgoogle.git" }
