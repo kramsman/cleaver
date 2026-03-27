@@ -3,7 +3,10 @@
     "allow": [
       "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cfcg-an-webhook\" rev-parse --git-dir)",
       "Read(//Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cfcg-an-webhook/**)",
-      "Bash(uv add:*)"
+      "Bash(uv add:*)",
+      "Bash(brew list:*)",
+      "Bash(python3 -m pip show git-filter-repo)",
+      "Bash(bfg --strip-blobs-bigger-than 500K --no-blob-protection)"
     ]
   }
 }
