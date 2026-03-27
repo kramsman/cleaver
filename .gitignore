@@ -1,12 +1,12 @@
 __pycache__/
 cleaver/Archive/
 build/
-!/*.log
-!/zip-codes-database*.*
+/*.log
+/zip-codes-database*.*
 first_code_to_import.py
 last_code_to_import.py
 middle_code_to_import.py
-!/temp.xlsx
+temp.xlsx
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -173,3 +173,4 @@ cython_debug/
 
 /cleaver/Work/
 /cleaver/WorkCampaign/
+/cleaver/Archive/
