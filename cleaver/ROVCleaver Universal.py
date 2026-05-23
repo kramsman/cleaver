@@ -71,7 +71,6 @@ import numpy as np
 import pandas as pd
 # os.environ["APPDATA"] = ""
 # from pandasgui import show
-import pymsgbox
 # from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -82,7 +81,7 @@ import json
 from loguru import logger
 
 from uvbekutils import exe_path
-from uvbekutils import get_file_name
+from uvbekutils import select_file
 from uvbekutils import setup_loguru
 from uvbekutils import is_number
 from uvbekutils import exit_yes
@@ -95,10 +94,10 @@ from uvbekutils import bad_path_create
 # from uvbekutils import calling_func
 from uvbekutils import find_header_row_in_file
 from uvbekutils import read_file_to_df
-from uvbekutils import get_dir_name
 from uvbekutils import check_ws_headers
 from uvbekutils import convert_bool
 from uvbekutils import load_workbook_w_filepath, wb_name
+from uvbekutils import confirm, alert
 
 USE_HARDCODED_SETUP = False
 HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns/VA General 7-2025 test 500 black voter group/ROVCleaver VA General 7-2025 UniversalSetup.xlsx"
@@ -553,9 +552,9 @@ def single_pivot_report(df: pd.DataFrame,
         index_fields = [index_fields]  # to generalize to list and not force user to enter []s
     fields_not_in_file = set(index_fields) - set(df.columns)  # some fields not in df
     if fields_not_in_file:
-        pymsgbox.alert(f"Specified index field on pivot not in dataframe:\n{','.join(fields_not_in_file)}"
-                       f"\n\nAvailable fields are:\n{', '.join(set(df.columns))}",
-                       'Warning:Tabulate field not on file, continuing')
+        alert(f"Specified index field on pivot not in dataframe:\n{','.join(fields_not_in_file)}"
+              f"\n\nAvailable fields are:\n{', '.join(set(df.columns))}",
+              'Warning:Tabulate field not on file, continuing')
     else:
         df_pt = pd.pivot_table(df,
                                index=index_fields,
@@ -786,9 +785,9 @@ def address_concentration_open_browser(df: pd.DataFrame) -> None:
     openbrowser = True
     if ROV_SETUP['concentrated_address_browser_prompt_freq'] in [1, 2]:
         if ROV_SETUP['concentrated_address_browser_prompt_freq'] == 2:
-            choice = pymsgbox.confirm("Open " + str(len(df)) + " tabs in browser?.  OK?\n\n",
-                                      'Open browser windows?', ['Yes', 'No'])
-            if choice == "No":
+            choice = confirm("Open " + str(len(df)) + " tabs in browser?.  OK?\n\n",
+                             'Open browser windows?', ['Yes', 'No'])
+            if choice == "no":
                 openbrowser = False
 
         if openbrowser:
@@ -952,10 +951,10 @@ def split_files_for_sincere(combined_csv: Union[str, Path],
 
     wb.save(op_wks)
 
-    pymsgbox.alert(f"The split-file names and address counts produced by 'split' have been put into: \n{op_wks}"
-                    f"\n\n\nCopy this information into the 'Sincere load checklist' tab of the setup sheet: "
-                    f"\n{ROV_SETUP['setup_file_name']} \n\nto get ready to load Sincere.",
-                    f"SPLIT COMPLETE")
+    alert(f"The split-file names and address counts produced by 'split' have been put into: \n{op_wks}"
+          f"\n\n\nCopy this information into the 'Sincere load checklist' tab of the setup sheet: "
+          f"\n{ROV_SETUP['setup_file_name']} \n\nto get ready to load Sincere.",
+          f"SPLIT COMPLETE")
 
 
 
@@ -1038,9 +1037,13 @@ def get_setup_file_name(initial_campaign_dir: Union[str, Path]) -> Path:
                     display_exiting=False)
     else:
         # show an "Open" dialog box and return the path to the selected file
-        xl_setup_file_name = get_file_name("Select Setup File",
-                                           f"Select cleaver setup file xlsx. Must have 'UniversalSetup' in name",
-                                            initial_campaign_dir)
+        xl_setup_file_name = select_file("Select Setup File",
+                                         start_dir=str(initial_campaign_dir),
+                                         files_like="*UniversalSetup*.xlsx",
+                                         mode="file",
+                                         title2="Select cleaver setup file xlsx. Must have 'UniversalSetup' in name")
+        if xl_setup_file_name is None:
+            exit_yes("No setup file selected.")
         setup_file_name = Path(xl_setup_file_name).expanduser()
 
     if not 'universalsetup' in str(setup_file_name).lower():
@@ -1350,9 +1353,9 @@ def process_format_files(filelist_wks: Worksheet) -> None:
         os.remove(missing_counties_file)
 
     if cumulative_missing_counties_list:
-        pymsgbox.alert("The following counties are not in the lookup file, written to 'missing_counties.csv':\n\n" +
-                       ",".join(cumulative_missing_counties_list),
-                       "Alert")
+        alert("The following counties are not in the lookup file, written to 'missing_counties.csv':\n\n" +
+              ",".join(cumulative_missing_counties_list),
+              "Alert")
         with open(ROV_SETUP['exe_path'] / missing_counties_file, mode='wt', encoding='utf-8') as myfile:
             myfile.write('\n'.join(cumulative_missing_counties_list))
 
@@ -1785,51 +1788,9 @@ def bek_text_box(txt: str, title: str = '', box_title: str = "",
             the window was closed without a selection.
     """
 
-# window = sg.Window('Virus Simulation', layout, background_color='hex_color_code')
-
     if buttons is None:
         buttons = ["OK", "Exit"]
-
-    col_factor = 3  # to scale window equally
-    row_factor = 30  # to scale window equally
-    max_cols = len(max(txt.split("\n"), key=len)) * col_factor
-    cols = max_cols
-    # v_scroll = False
-    col_limit = 80 * col_factor
-    col_min = 50 * col_factor
-    if cols > col_limit:
-        # v_scroll = True
-        cols = col_limit
-    elif cols < col_min:
-        cols = col_min
-
-    noscroll = True
-    row_limit = 80
-    row_min = 6
-    # max_rows = len(txt.split("\n"))
-    # rows = max_rows
-    rows = len(txt.split("\n"))
-    if rows > row_limit:
-        noscroll = False
-        rows = row_limit
-    elif rows < row_min:
-        rows = row_min
-# horizontal_scroll=h_scroll,
-    # sg.theme('SystemDefault1')
-    sg.theme('Default1')
-    layout = [
-        [sg.Text(title, font=("Arial", 18))],
-        [sg.Multiline(txt, autoscroll=False, expand_x=True, no_scrollbar=noscroll,
-                      expand_y=True, enable_events=True)],
-        [sg.Button(text) for text in buttons],
-    ]
-
-    event, values = sg.Window(box_title, layout, titlebar_font=("Arial", 20), font=("Arial", 14),
-                              use_custom_titlebar=True, size=(600, rows*row_factor), disable_close=True,
-                              resizable=True, grab_anywhere=True).read(close=True)
-    if event is not None:
-        event = event.lower()
-    return event
+    return confirm(txt, title=title or box_title, buttons=buttons)
 
 
 def convert_xlsx_to_csvs() -> None:
@@ -1841,16 +1802,24 @@ def convert_xlsx_to_csvs() -> None:
     """
     logger.info('starting convert_xlsx_to_csv')
 
-    str_xls_dir = get_dir_name("Select a DIRECTORY containing XLSX files to convert to CSVs",
-                                            "XLSX Directory",
-                                            INITIAL_CAMPAIGN_DIR)
+    str_xls_dir = select_file("Select a DIRECTORY containing XLSX files to convert to CSVs",
+                              start_dir=str(INITIAL_CAMPAIGN_DIR),
+                              files_like="*",
+                              mode="dir",
+                              title2="XLSX Directory")
+    if str_xls_dir is None:
+        exit_yes("No directory selected.")
     xls_dir = Path(str_xls_dir)
 
     # str_xls_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/Rawdata"
 
-    str_csv_dir = get_dir_name("Select a DIRECTORY where converted CSVs will be placed",
-                                            "CSV Directory (usually 'Rawdata')",
-                                            xls_dir.parents[1])
+    str_csv_dir = select_file("Select a DIRECTORY where converted CSVs will be placed",
+                              start_dir=str(xls_dir.parents[1]),
+                              files_like="*",
+                              mode="dir",
+                              title2="CSV Directory (usually 'Rawdata')")
+    if str_csv_dir is None:
+        exit_yes("No directory selected.")
     # str_csv_dir = "/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/TestInputFiles/TestCampaigns/TestXlsToCsv/csv"
 
     xls_dir = Path(str_xls_dir)
@@ -1920,7 +1889,7 @@ def main_format() -> None:
     # Loop through all files in filelist to be formatted
     process_format_files(ROV_SETUP['filelist_sheet'])
 
-    pymsgbox.alert("Ran format section of main", "Alert")
+    alert("Ran format section of main", "Alert")
 
 
 def main_combine() -> None:
@@ -2007,7 +1976,7 @@ def main_combine() -> None:
     pd.set_option('display.max_columns', None)
     logger.info("\n", df.head(5), "\n\n")
 
-    pymsgbox.alert("Ran combine section of main", "Alert")
+    alert("Ran combine section of main", "Alert")
 
 
 def main() -> None:
@@ -2035,7 +2004,7 @@ def main() -> None:
         logger.debug("chose 'XLSXs to CSVs'")
 
         convert_xlsx_to_csvs()
-        pymsgbox.alert("Ran convert_xlsx to csv", "Convert Xlsxs to CSVs")
+        alert("Ran convert_xlsx to csv", "Convert Xlsxs to CSVs")
 
     elif choice == 'update zip file':
         logger.debug("chose 'Update Zip File'")
@@ -2065,7 +2034,7 @@ def main() -> None:
 
         create_zip_to_county_list_dict(MAIN_ZIP_FILE, MULTI_COUNTY_ZIP_FILE, ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
-        pymsgbox.alert("Ran Zip Dict file update", "Update zip files")
+        alert("Ran Zip Dict file update", "Update zip files")
 
     elif choice == 'compare csv cols':
         logger.debug("chose 'Compare CSV cols'")
@@ -2109,7 +2078,7 @@ def main() -> None:
                                     ROV_SETUP['split_path'] / f"Split file list-{ROV_SETUP['expectedstate']}"
                                                              f" {ROV_SETUP['splitfnbase'].stem}.xlsx")
             logger.info('ran split')
-            pymsgbox.alert("Ran split section of main", "Alert")
+            alert("Ran split section of main", "Alert")
 
 
 def init_setup_dict() -> None:
