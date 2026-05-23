@@ -3,6 +3,12 @@
     ROV. structure replace with dictionary for ease in adding and removing entries
     Allows moving and sorting rows.
     Some repetitious code - like pivot tables 1-5 - are looped.
+
+If you get an error "Gitupdater not found:
+  1. go into terminal
+  2. copy and enter: source .venv/bin/activate
+  3. then enter: uv pip install git+https://github.com/kramsman/gitupdater.git
+
 """
 # 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
 # group_split
@@ -69,7 +75,7 @@ import pymsgbox
 # from openpyxl import load_workbook
 from openpyxl import Workbook
 from openpyxl.styles import Font
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
 from openpyxl.utils.cell import coordinate_from_string
 from openpyxl.utils.cell import column_index_from_string
 import json
