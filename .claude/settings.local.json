@@ -6,7 +6,9 @@
       "Bash(uv add:*)",
       "Bash(brew list:*)",
       "Bash(python3 -m pip show git-filter-repo)",
-      "Bash(bfg --strip-blobs-bigger-than 500K --no-blob-protection)"
+      "Bash(bfg --strip-blobs-bigger-than 500K --no-blob-protection)",
+      "Bash(/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python *)",
+      "Bash(\"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python\" -c \"import pandas as pd; help\\(pd.to_numeric\\)\")"
     ]
   }
 }

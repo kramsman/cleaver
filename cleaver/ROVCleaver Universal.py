@@ -45,7 +45,7 @@ If you get an error "Gitupdater not found:
 import sys
 import os
 sys.path.append(os.path.expanduser("~/Dropbox/Postcard Files/"))
-if True:
+if False:
    import gitupdater
 
 import compare_csv_columns
@@ -111,17 +111,18 @@ INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").exp
 # INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
 
 # MAIN_ZIP_FILE = 'zip-codes-database-DELUXE-BUSINESS.csv'
-MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
-                             "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
-
-MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard "
-                                     "Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv"
-                                     "").expanduser()
+# MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
+#                              "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
+#'/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv'
+MAIN_ZIP_FILE = Path('~/Library/CloudStorage/Dropbox/Postcard '
+                     'Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv').expanduser()
+# MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
+MULTI_COUNTY_ZIP_FILE = Path("~/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
 # /Dropbox/Postcard Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
 ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
-                                       "PythonPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
+                                       "ROVPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
 # PROP_CONCENTRATION = 50
 PROP_CONCENTRATION = 15
@@ -1230,7 +1231,7 @@ def create_dicts() -> None:
                         ('G1', 'County'),
                         ])
 
-    conc_addr_df = pd.read_excel(ROV_SETUP['concentrated_addresses_file'], sheet_name='Addresses', header=0, )
+    conc_addr_df = pd.read_excel(ROV_SETUP['concentrated_addresses_file'], sheet_name='Addresses', header=0, dtype=str)
     conc_addr_df.columns = [str(col).lower() for col in conc_addr_df.columns]
     conc_addr_df.fillna("", inplace=True)
 
@@ -1397,8 +1398,7 @@ def process_format_file(fn: str,
     # find the header row in the input file using an expected string and column.  error if > 30.  Defaults to search sheet0.
     header_row = find_header_row_in_file(ip_file_w_path, ROV_SETUP['check_header_string'], ROV_SETUP['strcheck_header_col'])
 
-    ip = read_file_to_df(ip_file_w_path, {'header': header_row, 'sheet_name': 0, 'nrows': ROV_SETUP['rows_to_read_limit'],
-                                            'keep_default_na': False, 'dtype': str})
+    ip = read_file_to_df(ip_file_w_path, **{'header': header_row, 'sheet_name': 0, 'nrows': ROV_SETUP['rows_to_read_limit'], 'keep_default_na': False, 'dtype': str})
 
     # convert column names to lower case
     ip.columns = [field.strip().lower() for field in ip.columns.values]
@@ -1519,7 +1519,7 @@ def process_format_file(fn: str,
         unique_statecounties = ip.loc[ip['remove'] == '', 'statecounty'].unique()
         # unique_statecounties = ip['statecounty'].unique()
 
-        unique_statecounties.sort()
+        # unique_statecounties.sort()
         missing_counties_this_formatfile = [chkfield
                                             for chkfield in unique_statecounties
                                             if chkfield.upper() not in ROV_SETUP['dict_statecounty_to_alt_formats']]

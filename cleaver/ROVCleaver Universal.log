@@ -1,6 +1,240 @@
-2026-05-23 14:37:15.856 | INFO     | __main__:main:1991 - starting main
-2026-05-23 14:37:17.680 | DEBUG    | __main__:main:2004 - chose 'XLSXs to CSVs'
-2026-05-23 14:37:17.680 | INFO     | __main__:convert_xlsx_to_csvs:1803 - starting convert_xlsx_to_csv
-2026-05-23 14:37:28.089 | INFO     | __main__:convert_xlsx_to_csvs:1863 - Reading '2026 Duplin.xlsx'
-2026-05-23 14:37:28.976 | INFO     | __main__:convert_xlsx_to_csvs:1865 - Writing '2026 Duplin.csv'
-2026-05-23 14:37:29.000 | DEBUG    | __main__:convert_xlsx_to_csvs:1867 - 
+2026-05-26 09:34:18.871 | INFO     | __main__:main:1991 - starting main
+2026-05-26 09:34:20.571 | DEBUG    | __main__:get_setup_file_name:1030 - picking setup file
+2026-05-26 09:34:23.819 | DEBUG    | __main__:main:2053 - in 'else' to pick format, combine, split
+2026-05-26 09:34:23.819 | INFO     | __main__:init_setup_dict:2092 - starting init_setup_dict
+2026-05-26 09:34:23.851 | INFO     | __main__:read_setup_vars:2171 - starting read_setup_vars
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 2
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("campaign_note","str",{'str_case':'k'})
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("expectedstate","str",{'str_case':'u'})
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 9
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("OPFile","file")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 12
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("splitfnbase","file")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 15
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_campaign_vars","str",{'str_case':'l'})
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 18
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_factory_vars","str",{'str_case':'l'})
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("rows_to_read_limit", "int")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 21
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("id_dupes", "bool")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 24
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 25
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("xl_inputfile_orig_list","str")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("xl_inputfile_renamed_list","str")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("xl_inputfile_type_list","str")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("combinefile_fields_to_delete_list","str")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 36
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("splitfile_field_list","str")
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.857 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("check_header_string","str")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 42
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("strcheck_header_col","str")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 45
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("copy_other_format_files_flag", "bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 48
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_str_pivot_field1","str"), ("xl_str_pivot_field1_by_cnt","bool"), ("xl_str_pivot_field1_all","bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_str_pivot_field2","str"), ("xl_str_pivot_field2_by_cnt","bool"), ("xl_str_pivot_field2_all","bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_str_pivot_field3","str"), ("xl_str_pivot_field3_by_cnt","bool"), ("xl_str_pivot_field3_all","bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_str_pivot_field4","str"), ("xl_str_pivot_field4_by_cnt","bool"), ("xl_str_pivot_field4_all","bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_str_pivot_field5","str"), ("xl_str_pivot_field5_by_cnt","bool"), ("xl_str_pivot_field5_all","bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 56
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 57
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("concentrated_addresses_file", "file")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 61
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("concentrated_address_browser_prompt_freq", "int")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 64
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("dupe_key_formula","str",{'str_case':'k'})
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 67
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("dupe_key_sort_tuples", "pythobj")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 70
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("run_county_check_code_flag", "bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 73
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("skip_selected_zip_match_flag", "bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 76
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_skip_selected_zip_sheet", "str",{'str_case':'k'})
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 79
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 80
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("add_filename_column_flag", "bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 84
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("add_random_number_column_flag", "bool")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 87
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("sortchoice", "int")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 90
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 91
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("sub_split_limit","int")
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 94
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 95
+2026-05-26 09:34:23.858 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("run_first_code_flag", "bool")
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 99
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_first_code_sheet", "str",{'str_case':'k'})
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 102
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("run_middle_code_flag", "bool")
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 105
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_middle_code_sheet", "str",{'str_case':'k'})
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 108
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("run_last_code_flag", "bool")
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 111
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("xl_last_code_sheet", "str",{'str_case':'k'})
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 114
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 115
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("run_merge_data_flag", "bool")
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 119
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("orig_file_key_formula", "str",{'str_case':'k'})
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 122
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var False,("update_file_key_formula", "str",{'str_case':'k'})
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 125
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var True,("update_field_list", "str")
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 31
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 32
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 40
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 44
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 58
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 59
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 64
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 91
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 96
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 107
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 108
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 112
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 137
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 138
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 144
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 145
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 146
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 147
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 148
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 153
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 154
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 158
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 184
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 185
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var None
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 190
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 197
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 198
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 202
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 203
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 208
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 209
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 213
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 217
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 218
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 222
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 226
+2026-05-26 09:34:23.859 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 227
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 231
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 235
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 236
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 240
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 245
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 246
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 250
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 251
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 255
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 286
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 291
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 292
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 296
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 297
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 301
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 302
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 305
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 306
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 307
+2026-05-26 09:34:23.860 | DEBUG    | __main__:read_setup_var:2199 - starting read_setup_var 308
+2026-05-26 09:34:23.860 | DEBUG    | __main__:format_setup_vars:2442 - in format_setup_vars top id(ROV_SETUP)=4453677632
+2026-05-26 09:34:23.860 | INFO     | __main__:format_setup_vars:2443 - starting format_setup_vars
+2026-05-26 09:34:23.881 | INFO     | __main__:format_setup_vars:2508 - id(ROV_SETUP)=4453677632
+2026-05-26 09:34:23.881 | DEBUG    | __main__:format_setup_vars:2515 - in format_setup_vars - finished
+2026-05-26 09:34:23.881 | INFO     | __main__:create_field_lists:1115 - Creating field lists
+2026-05-26 09:34:23.881 | INFO     | __main__:create_dicts:1208 - Creating dictionaries
+2026-05-26 09:34:23.881 | DEBUG    | __main__:zip_file_to_county_dict:425 - creating dictionary of zip to county
+2026-05-26 09:34:24.249 | DEBUG    | __main__:create_dicts:1216 - Ran Counties_to_xls
+2026-05-26 09:34:24.393 | DEBUG    | __main__:create_dicts:1221 - Imported Zip_To_County_List_dict.py
+2026-05-26 09:34:24.420 | INFO     | __main__:main_combine:1903 - in main combine
+2026-05-26 09:34:24.446 | DEBUG    | __main__:main_combine:1906 - picked 'Combine'
+2026-05-26 09:34:24.446 | DEBUG    | __main__:display_imported_code:1280 - here
+2026-05-26 09:34:24.446 | DEBUG    | __main__:create_import_code_from_sheet:755 - here
+2026-05-26 09:34:24.446 | DEBUG    | __main__:display_imported_code:1286 - compiling last_code_to_import.py - taken from sheet: <Worksheet "last_code">
+2026-05-26 09:34:24.447 | INFO     | __main__:display_imported_code:1308 - 
+last_code_to_import.py to be run - taken from sheet: <Worksheet "last_code">
+2026-05-26 09:34:25.899 | INFO     | __main__:process_format_files_into_combine:1731 - starting process_format_files_into_combine
+2026-05-26 09:34:25.900 | DEBUG    | __main__:process_format_files_into_combine:1740 - Ready to combine file '2026 Mecklenburg.csv'
+2026-05-26 09:34:26.125 | DEBUG    | __main__:process_format_files_into_combine:1740 - Ready to combine file '2026 Duplin.csv'
+2026-05-26 09:34:26.145 | INFO     | __main__:main_combine:1922 - ROV_SETUP['dupe_key_formula']="df['firstname'] +'#'+ df['lastname'] +'#'+ df['age'].astype(str) +'#'+ df['address'].str.replace('[ .,-]', '', regex=True)  +'#'+ df['city'].str.replace(r'[ .,-]', '', regex=True)"
+2026-05-26 09:34:26.392 | INFO     | __main__:identify_duplicates:264 - Identifying duplicates
+2026-05-26 09:34:26.433 | DEBUG    | __main__:main_combine:1941 - Ready to run last_code (remove code)
+2026-05-26 09:34:28.256 | DEBUG    | __main__:main_combine:1946 - Ran last_code
+2026-05-26 09:34:28.260 | DEBUG    | __main__:main_combine:1954 - Going to write out duplicaes to file
+2026-05-26 09:34:28.260 | DEBUG    | __main__:main_combine:1955 - Ready to sort by ['dupe_id_field','dupe_key']
+2026-05-26 09:34:28.330 | DEBUG    | __main__:main_combine:1958 - Ready to copy dupes to CSV
+2026-05-26 09:34:28.394 | DEBUG    | __main__:main_combine:1965 - Ready to run pivots
+2026-05-26 09:34:28.394 | INFO     | __main__:pivot_and_other_reports:593 - creating reports
+2026-05-26 09:34:28.417 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='RawData by State-County''
+2026-05-26 09:34:28.445 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='RawData by Filename''
+2026-05-26 09:34:28.464 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='Removed Reasons''
+2026-05-26 09:34:28.481 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='Clean by county''
+2026-05-26 09:34:28.632 | DEBUG    | __main__:address_concentration_open_browser:784 - here
+2026-05-26 09:34:28.633 | DEBUG    | __main__:pivot_and_other_reports:687 - running countyCheck pivots
+2026-05-26 09:34:28.685 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='Cln- suffix''
+2026-05-26 09:34:29.881 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='All- dupe_id_field''
+2026-05-26 09:34:29.914 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='Cln- filename,county''
+2026-05-26 09:34:29.944 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='All- sex''
+2026-05-26 09:34:29.958 | DEBUG    | __main__:single_pivot_report:536 - here 'sheet_name='Cln- county,countycode''
+2026-05-26 09:34:29.981 | DEBUG    | __main__:pivot_and_other_reports:733 - out of pivots and other reports
+2026-05-26 09:34:30.659 | INFO     | __main__:main_combine:1977 - 
+
