@@ -115,10 +115,12 @@ INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").exp
 # MAIN_ZIP_FILE = Path("~/Dropbox/Postcard Files/"
 #                              "PythonPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv").expanduser()
 #'/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv'
-MAIN_ZIP_FILE = Path('~/Library/CloudStorage/Dropbox/Postcard '
-                     'Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv').expanduser()
+# MAIN_ZIP_FILE = Path('~/Library/CloudStorage/Dropbox/Postcard '
+#                      'Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv').expanduser()
+MAIN_ZIP_FILE = Path('~/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-DELUXE-BUSINESS.csv').expanduser()
 # MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
-MULTI_COUNTY_ZIP_FILE = Path("~/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
+# MULTI_COUNTY_ZIP_FILE = Path("~/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
+MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv").expanduser()
 # /Dropbox/Postcard Files/PythonPrograms/ROVCleaver_Production/zip-codes-database-MULTI-COUNTY.csv
 # ZIP_TO_COUNTY_LIST_FILE = 'Zip_To_County_List_dict.py'  # file where the numeric zip to county list is stored (ie
 # file where the numeric zip to county list is stored (ie 1011: ['hampden', 'hampshire'])
