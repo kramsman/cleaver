@@ -937,8 +937,7 @@ def split_files_for_sincere(combined_csv: Union[str, Path],
         #     splitfield = 'statecounty'
         # else:
         #     splitfield = ROV_SETUP['campaign_vars']
-        unique_split_values = df_combo_w_no_remove['group_vars_string'].unique()
-        unique_split_values.sort()
+        unique_split_values = sorted(df_combo_w_no_remove['group_vars_string'].unique())
 
         # for each - write out a csv file.
         for unique_split_value in unique_split_values:
@@ -1517,9 +1516,7 @@ def process_format_file(fn: str,
             exit_yes("'CHECK COUNTY INFO FLAG' option is specified as 'TRUE' but 'county' field is not present.")
 
         unique_statecounties = ip.loc[ip['remove'] == '', 'statecounty'].unique()
-        # unique_statecounties = ip['statecounty'].unique()
-
-        # unique_statecounties.sort()
+        unique_statecounties = sorted(ip['statecounty'].unique())
         missing_counties_this_formatfile = [chkfield
                                             for chkfield in unique_statecounties
                                             if chkfield.upper() not in ROV_SETUP['dict_statecounty_to_alt_formats']]
