@@ -9,6 +9,7 @@ If you get an error "Gitupdater not found:
   2. copy and enter: source .venv/bin/activate
   3. then enter: uv pip install git+https://github.com/kramsman/gitupdater.git
 
+test push
 """
 # 12/6/23 Add ability to split by a group variable in addition to county for multi scripts.  Try git branch with
 # group_split
