@@ -8,13 +8,14 @@ def main_compare_csv_columns(initial_campaign_dir):
     """ compare columns across csvs in a directory
     """
 
-    from bekutils import get_dir_name
+    # from uvbekutils import get_dir_name
+    from uvbekutils import select_file
     from loguru import logger
     import pandas as pd
     from pathlib import Path
 
     # from bekutils import setup_loguru
-    from bekutils import get_dir_name
+    # from uvbekutils import get_dir_name
 
     USE_HARDCODED_SETUP = False
 
@@ -31,9 +32,14 @@ def main_compare_csv_columns(initial_campaign_dir):
         csv_dir = Path("~/Dropbox/Postcard Files/"
                          "/InputFiles/Campaigns/FL General GOTV 6-2024/Update - Odd PDI format/Rawdata").expanduser()
     else:
-        str_csv_dir = get_dir_name("Select a DIRECTORY containing CSVs files to compare columns (usually 'Rawdata')",
-                                   "CSVs Directory",
-                                   initial_campaign_dir)
+        # str_csv_dir = get_dir_name("Select a DIRECTORY containing CSVs files to compare columns (usually 'Rawdata')",
+        #                            "CSVs Directory",
+        #                            initial_campaign_dir)
+        str_csv_dir = select_file("Select a DIRECTORY containing CSVs files to compare columns (usually 'Rawdata')",
+                                  start_dir=str(initial_campaign_dir),
+                                  files_like="*",
+                                  mode="dir",
+                                  title2="CSVs Directory")
         csv_dir = Path(str_csv_dir)
 
     # get list of files with xls or csv
@@ -111,8 +117,8 @@ def main_compare_csv_columns(initial_campaign_dir):
 
 if __name__ == '__main__':
     from loguru import logger
-    from bekutils import setup_loguru
-    from bekutils import get_dir_name
+    from uvbekutils import setup_loguru
+    from uvbekutils import get_dir_name
     from pathlib import Path
 
     setup_loguru("INFO", "DEBUG")
