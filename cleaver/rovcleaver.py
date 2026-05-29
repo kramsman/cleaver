@@ -42,12 +42,12 @@ test push
 # TODO Include pull_group number in remove reason, eg "Pull_group of 2 less than current of 3"
 # TODO Add note 'THIS IS A MAIN" to help with formatcopy
 
-# run gitupdater to make sure uvbekutils and bekgoogle utility libraries are updated
-import sys
-import os
-sys.path.append(os.path.expanduser("~/Dropbox/Postcard Files/"))
-if False:
-   import gitupdater
+# run gitupdater to make sure uvbekutils and bekgoogle utility libraries are updated  NOT NEEDED PER CLAUDE CHANGE
+# import sys
+# import os
+# sys.path.append(os.path.expanduser("~/Dropbox/Postcard Files/"))
+# if False:
+#    import gitupdater
 
 import compare_csv_columns
 import ast
