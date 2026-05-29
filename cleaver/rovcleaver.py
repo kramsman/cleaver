@@ -49,7 +49,7 @@ test push
 # if False:
 #    import gitupdater
 
-import compare_csv_columns
+from cleaver import compare_csv_columns
 import ast
 import collections
 import datetime

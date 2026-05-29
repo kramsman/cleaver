@@ -8,7 +8,15 @@
       "Bash(python3 -m pip show git-filter-repo)",
       "Bash(bfg --strip-blobs-bigger-than 500K --no-blob-protection)",
       "Bash(/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python *)",
-      "Bash(\"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python\" -c \"import pandas as pd; help\\(pd.to_numeric\\)\")"
+      "Bash(\"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python\" -c \"import pandas as pd; help\\(pd.to_numeric\\)\")",
+      "Bash(~/.venvs/rovprogs/bin/python --version)",
+      "Bash(uv python *)",
+      "Bash(uv --version)",
+      "Bash(rm -rf ~/.venvs/rovprogs)",
+      "Bash(uv venv *)",
+      "Bash(bash -n \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/rovprogs.sh\")",
+      "Bash(~/.venvs/rovprogs/bin/python -c \"import cleaver; print\\('cleaver pkg at', cleaver.__file__\\)\")",
+      "Bash(~/.venvs/rovprogs/bin/python -c \"import ast; src=open\\('cleaver/rovcleaver.py'\\).read\\(\\); ast.parse\\(src\\); print\\('OK: rovcleaver.py parses, import line fixed'\\)\")"
     ]
   }
 }
