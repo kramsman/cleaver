@@ -54,7 +54,6 @@ import ast
 import collections
 import datetime
 import importlib
-import inspect
 import itertools
 import math  # for ceil function
 import os
@@ -1286,8 +1285,9 @@ def display_imported_code(sheet_name: Worksheet, py_file_name: str) -> None:
 
     with open(ROV_SETUP['exe_path'] / py_file_name, "r") as myfile:  # this copies in the code but does not execute it
         logger.debug(f"compiling {py_file_name} - taken from sheet: {sheet_name}")
+        source_text = myfile.read()
         try:
-            codeobj = compile(myfile.read(), py_file_name, 'exec')
+            codeobj = compile(source_text, py_file_name, 'exec')
         except Exception as e:
             msg = (f"There was an error compiling '{py_file_name}', line number {e.lineno}, from sheet: "
                         f"'{sheet_name.title}'.  "
@@ -1298,17 +1298,17 @@ def display_imported_code(sheet_name: Worksheet, py_file_name: str) -> None:
             bek_text_box(msg, 'Import Code Error', '')
             raise Exception
 
-        # create a compiled object to list the lines to be executed for debugging with ine nums and comments/blanks
-        # removed
+        # list the lines to be executed for debugging, with line nums and comments/blanks
+        source_lines = source_text.splitlines(keepends=True)
         code_lines = [f"{index + 1:<4}  {line}"
-                      for index, line in enumerate(inspect.getsourcelines(codeobj)[0])]
+                      for index, line in enumerate(source_lines)]
         if len(code_lines) > 40:  # too many to display on screen, disables the 'ok' box
             skipped = len(code_lines) - 40
             code_lines = code_lines[:40]
             code_lines.append(f"<{skipped} lines not shown>")
         code_lines = ' '.join(code_lines)
         logger.info(f"\n{py_file_name} to be run - taken from sheet: {sheet_name}")
-        [print(f"{index + 1:<4}  {line}", end=' ') for index, line in enumerate(inspect.getsourcelines(codeobj)[0])]
+        [print(f"{index + 1:<4}  {line}", end=' ') for index, line in enumerate(source_lines)]
 
         # Below names module based on py code name, eg 'first_code_to_be_run_module'; puts pointer to module in
         # ROV_SETUP
