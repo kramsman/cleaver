@@ -23,7 +23,9 @@
       "Bash(rm -rf .venv)",
       "Bash(uv sync *)",
       "Read(//Library/Frameworks/Python.framework/Versions/3.12/bin/**)",
-      "Bash(.venv/bin/python -c \"import cleaver.rovcleaver; print\\('imports OK'\\)\")"
+      "Bash(.venv/bin/python -c \"import cleaver.rovcleaver; print\\('imports OK'\\)\")",
+      "Bash(python -)",
+      "Bash(.venv/bin/python -m py_compile cleaver/rovcleaver.py)"
     ]
   }
 }

@@ -131,6 +131,28 @@ ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
 # the missing-county check or it always shows up as a false mismatch.
 ROLLUP_STATECOUNTY = "All_Counties"
 
+
+def home_tilde(path: Union[str, os.PathLike]) -> str:
+    """Return ``path`` with the user's home directory replaced by ``~``.
+
+    Inverse of ``Path.expanduser()``: paths built with ``expanduser()`` contain the
+    current login (e.g. ``/Users/Denise/...``), which is noise in user-facing messages.
+    The returned string round-trips back through ``expanduser()``.  Paths that are not
+    under the home directory are returned unchanged.
+
+    Args:
+        path (Union[str, os.PathLike]): The (usually absolute) path to shorten.
+
+    Returns:
+        str: The path with a leading ``~/`` in place of the home directory, or the
+            original path string if it is not inside the home directory.
+    """
+    path = Path(path)
+    try:
+        return "~/" + path.relative_to(Path.home()).as_posix()
+    except ValueError:
+        return str(path)
+
 # PROP_CONCENTRATION = 50
 PROP_CONCENTRATION = 15
 ZIP_CONCENTRATION = 10
@@ -2018,28 +2040,34 @@ def main() -> None:
     elif choice == 'update zip file':
         logger.debug("chose 'Update Zip File'")
 
-        import textwrap
-        msg = f'''\
-          'Updating Zip File' will read data from zip files purchased from zip-codes.com.
+        # Remind the user what must be downloaded from the vendor and where it must be
+        # placed BEFORE the update runs.  'Continue' proceeds; 'Exit' quits so the files
+        # can be put in place first.
+        zip_dir = home_tilde(MAIN_ZIP_FILE.parent)
+        dict_file = home_tilde(ZIP_TO_COUNTY_LIST_FILE)
+        msg = (
+            f"\n'Update Zip File' rebuilds the zip-to-county lookup from data purchased "
+            f"from the vendor (Zip-Codes.com).\n\n"
+            f"You will be updating two files:\n"
+            f"  1. The main zip/county database:  '{MAIN_ZIP_FILE.name}'\n"
+            f"  2. The multi-county (split-zip) database:  '{MULTI_COUNTY_ZIP_FILE.name}'\n\n"
+            f"BEFORE continuing, log in to Zip-Codes.com and click 'dowload' under Subscriptions, then type 'csv'. "
+            f"This will download a zip file containing a bunch of files, though you will only be concerned with the "
+            f"two above.\n\n"
+            f"Extract the zip (ususally to your 'downloads' directory).\n\n"
+            f"In the destination directory\n\n"
+            f"   '{zip_dir}'\n\n"
+            f"move the old files '{MAIN_ZIP_FILE.name}' and '{MULTI_COUNTY_ZIP_FILE.name}' to '/old_zip_files' "
+            f"for temporary holding in case things go amuck.\n\n"
+            f"Move the two new files of the same name to '{zip_dir}'.\n\n"
+            f"When you continue, these two files are read and a dictionary is written to:  '{dict_file}'  "
+            f"which is used in future runs of cleaver.\n\n"
+            f"Aside: 'Unique_County_List.xlsx' in the cleaver directory is refreshed every "
+            f"time cleaver runs and lists the county names available for remapping.\n\n"
+            f"Have both files been downloaded and placed in the folder above?\n\n"
+        )
 
-          Two files are read:
-               '{MAIN_ZIP_FILE}' and 
-               '{MULTI_COUNTY_ZIP_FILE}'
-
-          These files are updated periodically
-          and the newest versions should be downloaded into
-          '~/Postcard Files/PythonPrograms/ROVCleaver_Production'
-          before this update is run. A dictionary will be created and
-          saved to 'ZIP_TO_COUNTY_LIST_FILE'
-          and used in future runs of cleaver.
-
-          Aside: the file 'Unique_County_List.xlsx' in the cleaver
-          directory is updated every time cleaver is run
-          and can be used to get the required county names
-          for those which need remapping.'''
-
-        msg = textwrap.dedent(msg)
-        # exit_yes_no(msg, 'Update Zip Files', display_exiting=False)
+        exit_yes_no(msg, 'Update Zip Files')
 
         create_zip_to_county_list_dict(MAIN_ZIP_FILE, MULTI_COUNTY_ZIP_FILE, ZIP_TO_COUNTY_LIST_FILE)
         logger.debug("done 'Update Zip File'")
