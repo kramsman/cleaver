@@ -126,6 +126,11 @@ MULTI_COUNTY_ZIP_FILE = Path("~/Dropbox/Postcard Files/ROVPrograms/ROVCleaver_Pr
 ZIP_TO_COUNTY_LIST_FILE = Path("~/Dropbox/Postcard Files/"
                                        "ROVPrograms/ROVCleaver_Production/Zip_To_County_List_dict.py").expanduser()
 
+# Sentinel statecounty that all out-of-state counties are rolled up into so they don't
+# clutter reports.  It is not a real key in the zip lookup, so it must be excluded from
+# the missing-county check or it always shows up as a false mismatch.
+ROLLUP_STATECOUNTY = "All_Counties"
+
 # PROP_CONCENTRATION = 50
 PROP_CONCENTRATION = 15
 ZIP_CONCENTRATION = 10
@@ -612,8 +617,8 @@ def pivot_and_other_reports(df: pd.DataFrame,
         added_counties.to_excel(writer, sheet_name=sheet_name, startrow=5, index=False)
 
     # Create summary sheet of Rawdata, Formatted and Removed
-    # for other states, roll all counties in to one called "All Counties'
-    df['countysummed'] = np.where(df['state'] == ROV_SETUP['expectedstate'], df['statecounty'], "All Counties")
+    # for other states, roll all counties in to the single rollup sentinel
+    df['countysummed'] = np.where(df['state'] == ROV_SETUP['expectedstate'], df['statecounty'], ROLLUP_STATECOUNTY)
 
     # State by county for all including removed
     single_pivot_report(df, index_fields=['state', 'countysummed'], value_fields=['address'],
@@ -985,8 +990,8 @@ def check_county_to_zips(df: pd.DataFrame,
         .apply(lambda row: (row['state'] + "-" + row['clean_county']).upper(),
                axis="columns")
 
-    # collapse all statecounty into "all_counties" for bad states
-    df.loc[(df['state'] != ROV_SETUP['expectedstate']), 'statecounty'] = "All_Counties"
+    # collapse all statecounty into the rollup sentinel for bad states
+    df.loc[(df['state'] != ROV_SETUP['expectedstate']), 'statecounty'] = ROLLUP_STATECOUNTY
 
     df['numzip'] = df['zip'].map(lambda x: (int(float(x)) if is_number(x) else 0))
 
@@ -1520,9 +1525,13 @@ def process_format_file(fn: str,
 
         unique_statecounties = ip.loc[ip['remove'] == '', 'statecounty'].unique()
         unique_statecounties = sorted(ip['statecounty'].unique())
+        # The rollup sentinel for out-of-state rows is never a real zip-lookup key, so ignore
+        # it here.  Otherwise it always appears as a missing county and fires the alert popup
+        # even when the only "mismatch" is the rollup.
         missing_counties_this_formatfile = [chkfield
                                             for chkfield in unique_statecounties
-                                            if chkfield.upper() not in ROV_SETUP['dict_statecounty_to_alt_formats']]
+                                            if chkfield.upper() != ROLLUP_STATECOUNTY.upper()
+                                            and chkfield.upper() not in ROV_SETUP['dict_statecounty_to_alt_formats']]
 
         missing_counties_list_all_formatfiles.extend(missing_counties_this_formatfile)
 

@@ -17,7 +17,13 @@
       "Bash(bash -n \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/rovprogs.sh\")",
       "Bash(~/.venvs/rovprogs/bin/python -c \"import cleaver; print\\('cleaver pkg at', cleaver.__file__\\)\")",
       "Bash(~/.venvs/rovprogs/bin/python -c \"import ast; src=open\\('cleaver/rovcleaver.py'\\).read\\(\\); ast.parse\\(src\\); print\\('OK: rovcleaver.py parses, import line fixed'\\)\")",
-      "Bash(~/.venvs/rovprogs/bin/python *)"
+      "Bash(~/.venvs/rovprogs/bin/python *)",
+      "Bash(python -m py_compile cleaver/rovcleaver.py)",
+      "Bash(.venv/bin/python --version)",
+      "Bash(rm -rf .venv)",
+      "Bash(uv sync *)",
+      "Read(//Library/Frameworks/Python.framework/Versions/3.12/bin/**)",
+      "Bash(.venv/bin/python -c \"import cleaver.rovcleaver; print\\('imports OK'\\)\")"
     ]
   }
 }

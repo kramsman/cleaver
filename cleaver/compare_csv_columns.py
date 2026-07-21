@@ -26,6 +26,7 @@ def main_compare_csv_columns(initial_campaign_dir):
     # INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns").expanduser()
     # INITIAL_CAMPAIGN_DIR = Path("~/Dropbox/Postcard Files/TestInputFiles/").expanduser()
 
+
     logger.info('compare_csv_columns.py')
 
     if USE_HARDCODED_SETUP:
