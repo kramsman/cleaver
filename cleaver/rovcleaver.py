@@ -675,23 +675,6 @@ def pivot_and_other_reports(df: pd.DataFrame,
         writer.book['Campaigns by Factories']["E3"] = "Sum of All"
         writer.book['Campaigns by Factories']["E4"] = "=SUM(D6:D999)"
 
-    # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
-    # adjusted
-    report_by_pull_group(df, 'statecounty', 'StateCounties by pull_group')
-
-    # list added campaigns.  These need to be added in factory tables
-    if ROV_SETUP['campaign_vars']:
-        report_by_pull_group(df, 'campaign_vars_string', 'campaign_vars by pull_group')
-
-    # list added factories.  These will need to be added as new factories in Sincere.
-    if ROV_SETUP['factory_vars']:
-        report_by_pull_group(df, 'factory_vars_string', 'Factory_vars by pull_group')
-
-    # list added groups (factory + county).  These will be the split files produced.  May need to be added to
-    # old factories.
-    if ROV_SETUP['group_vars']:
-        report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
-
     df_pt = pd.pivot_table(df, index=['state', 'county', 'city', 'address', 'conc_addr_desc', 'remove'],
                            values=['lastname'],
                            aggfunc='count')
@@ -746,6 +729,23 @@ def pivot_and_other_reports(df: pd.DataFrame,
                                 sheet_name=f"{universe} {','.join(specs['pivot_fields'])[:26]}",
                                 single_piv_writer=writer,
                                 second_pivot_by_count=(True if specs['pivot_by_cnt'] else False))
+
+    # create reports showing added county, factory and campaign_vars by pull_group so Sincere and BOE data can be
+    # adjusted
+    report_by_pull_group(df, 'statecounty', 'StateCounties by pull_group')
+
+    # list added campaigns.  These need to be added in factory tables
+    if ROV_SETUP['campaign_vars']:
+        report_by_pull_group(df, 'campaign_vars_string', 'campaign_vars by pull_group')
+
+    # list added factories.  These will need to be added as new factories in Sincere.
+    if ROV_SETUP['factory_vars']:
+        report_by_pull_group(df, 'factory_vars_string', 'Factory_vars by pull_group')
+
+    # list added groups (factory + county).  These will be the split files produced.  May need to be added to
+    # old factories.
+    if ROV_SETUP['group_vars']:
+        report_by_pull_group(df, 'group_vars_string', 'Group_vars by pull_group')
 
     piv_wb = writer.book
     for ws in piv_wb.worksheets:
