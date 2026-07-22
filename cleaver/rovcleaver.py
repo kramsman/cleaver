@@ -50,6 +50,7 @@ test push
 #    import gitupdater
 
 from cleaver import compare_csv_columns
+from cleaver import county_extractor
 import ast
 import collections
 import datetime
@@ -98,6 +99,7 @@ from uvbekutils import check_ws_headers
 from uvbekutils import convert_bool
 from uvbekutils import load_workbook_w_filepath, wb_name
 from uvbekutils import confirm, alert
+from uvbekutils.pyautobek import alert_with_file_link  # not re-exported by uvbekutils __init__
 
 USE_HARDCODED_SETUP = False
 HARDCODED_SETUP_FILE = Path("~/Dropbox/Postcard Files/InputFiles/Campaigns/VA General 7-2025 test 500 black voter group/ROVCleaver VA General 7-2025 UniversalSetup.xlsx"
@@ -158,6 +160,17 @@ PROP_CONCENTRATION = 15
 ZIP_CONCENTRATION = 10
 
 ROV_SETUP = {}
+
+# Backward compatibility: default values for parameters that newer code reads but older
+# setup files may not contain.  Register every NEW setup parameter here with its fallback
+# value; long-standing parameters stay required (missing = error, as before).  Use the
+# final typed value (or the raw 'xl_' value if format_setup_vars() derives it further).
+# Applied by apply_setup_defaults() at the end of read_setup_vars().
+# Example: SETUP_DEFAULTS = {'new_param_flag': False}
+SETUP_DEFAULTS = {
+    'extract_counties': False,  # extract county names from filenames via county_extractor
+}
+
 # Following for reading variables from setup sheet
 REMOVE_XL_FROM_SETUP = False  # remove or keep the temporary 'wor' variables prefixed with 'XL_'
 # column in setup where fields are defined
@@ -1350,6 +1363,47 @@ def display_imported_code(sheet_name: Worksheet, py_file_name: str) -> None:
                 display_exiting=False)
 
 
+def extract_counties_for_format_files(filelist_wks: Worksheet) -> None:
+    """Up-front pass: extract a county from every filename flagged for format.
+
+    Runs before any file processing so a bad filename aborts the whole run.
+    Writes 'county_extraction_report.csv' to root_path, logs one line per file,
+    and stores results in ``ROV_SETUP['extracted_counties']`` ({filename: county}).
+    If any filename has a NO_MATCH or AMBIGUOUS extraction error, pops up an
+    alert with a link to the report file and exits.
+    """
+    logger.info("extracting counties from filenames (extract_counties option)")
+
+    # same row selection as process_format_files so both passes see identical files
+    fns = [str(fn).strip()
+           for fn, format_flag, *_ in filelist_wks.iter_rows(min_row=4, values_only=True)
+           if str(format_flag).strip().lower() == 'x']
+
+    try:
+        counties = county_extractor.load_counties(ROV_SETUP['expectedstate'])
+    except (ValueError, FileNotFoundError, KeyError) as err:
+        exit_yes(f"Could not load county list for state "
+                 f"'{ROV_SETUP['expectedstate']}':\n\n{err}")
+
+    report_file = ROV_SETUP['root_path'] / 'county_extraction_report.csv'
+    if os.path.isfile(report_file):
+        os.remove(report_file)
+
+    extracted, error_count = county_extractor.extract_counties_with_report(
+        fns, counties, report_file, log=logger.info)
+
+    if error_count:
+        msg = (f"County extraction from filenames failed for {error_count} of "
+               f"{len(fns)} file(s) marked for format.\n\n"
+               f"Fix the filenames (or turn off 'extract_counties') and rerun.\n\n"
+               f"Details in the report file below.")
+        logger.error(msg.replace("\n", " "))
+        alert_with_file_link(msg, str(report_file), title="County Extraction Errors")
+        exit()
+
+    ROV_SETUP['extracted_counties'] = extracted
+
+
 def process_format_files(filelist_wks: Worksheet) -> None:
     """Iterate the FileList sheet and format each row flagged with 'x'.
 
@@ -1492,6 +1546,13 @@ def process_format_file(fn: str,
 
         # This is the function from the sheet with any parameters it needs
         logger.debug('Ran first_code')  # these prompts help if error in imported code
+
+    # extract_counties option: county extracted from filename (up-front pass in
+    # extract_counties_for_format_files) overrides any legacy first_code filename-slice
+    # derivation; runs before check_county_to_zips so the value is normalized/validated
+    # like any other county.
+    if ROV_SETUP['extract_counties']:
+        ip['county'] = ROV_SETUP['extracted_counties'][str(fn).strip()]
 
     if ROV_SETUP['run_county_check_code_flag']:
         check_county_to_zips(ip, ROV_SETUP['zipskip_list'], ROV_SETUP['dict_statecounty_to_alt_formats'])
@@ -1917,6 +1978,10 @@ def main_format() -> None:
     # allow to exit if desired, eg flag not correct, imported code not right
     check_for_unwanted_setup_options()
 
+    # extract counties from filenames up front so any bad filename aborts before processing
+    if ROV_SETUP['extract_counties']:
+        extract_counties_for_format_files(ROV_SETUP['filelist_sheet'])
+
     # Loop through all files in filelist to be formatted
     process_format_files(ROV_SETUP['filelist_sheet'])
 
@@ -2195,6 +2260,20 @@ def setup_backward_compatability() -> None:
         logger.error(msg)
         exit_yes(msg)
 
+def apply_setup_defaults() -> None:
+    """Fill ``ROV_SETUP`` with defaults for parameters missing from an older setup file.
+
+    For each entry in ``SETUP_DEFAULTS`` not already read from the setup sheet,
+    assigns the default value and logs a warning so it is visible that the
+    campaign is running on a setup file older than the code.
+    """
+    for key, val in SETUP_DEFAULTS.items():
+        if key not in ROV_SETUP:
+            ROV_SETUP[key] = val
+            logger.warning(f"Setup file has no '{key}' - using default {val!r}. "
+                           f"Add it to the setup sheet to remove this warning.")
+
+
 def read_setup_vars(field_col: int) -> None:
     """Iterate all setup-sheet rows and populate ``ROV_SETUP`` with parsed variable values.
 
@@ -2220,6 +2299,9 @@ def read_setup_vars(field_col: int) -> None:
         # print(f"{row[1].value=}")
         row_list = row_to_list(row)
         read_setup_var(row_list)
+
+    # backward compatibility: fill in defaults for params added after this setup file was made
+    apply_setup_defaults()
 
 def read_setup_var(row_data: list) -> None:
     """Parse one setup-sheet row and store its variable(s) in ``ROV_SETUP``.

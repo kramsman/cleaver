@@ -29,7 +29,15 @@
       "Bash(python3 -c ' *)",
       "Bash(.venv/bin/python -c ' *)",
       "Bash(.venv/bin/python Work/county_extractor.py VA)",
-      "Bash(.venv/bin/python Work/county_extractor.py)"
+      "Bash(.venv/bin/python Work/county_extractor.py)",
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root\" log --oneline -5)",
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root\" status --short)",
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root\" diff -- cleaver/rovcleaver.py)",
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root\" show HEAD:cleaver/rovcleaver.py)",
+      "Bash(git -C \"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root\" log -3 --oneline -L 1249,1256:cleaver/rovcleaver.py)",
+      "Bash(python3 -c \"import uvbekutils, inspect; print\\(uvbekutils.__file__\\)\")",
+      "Bash(pip3 show *)",
+      "Bash(\"/Users/Denise/Library/CloudStorage/Dropbox/Postcard Files/ROVPrograms/cleaver-root/.venv/bin/python\" -c \"import cleaver; print\\(cleaver.__file__\\)\")"
     ]
   }
 }

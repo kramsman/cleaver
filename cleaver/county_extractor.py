@@ -22,8 +22,14 @@ Reusable API (import from other programs, e.g. rovcleaver):
     else:
         ...  # county == "ROANOKE CITY"
 
+    # Batch: log one line per file + summary, write a CSV report, and get
+    # back ({filename: county_or_None}, error_count):
+    results, errors = extract_counties_with_report(
+        filenames, counties, report_file, log=logger.info)
+
 Standalone: reads filenames from the FileList tab of Test_setup.xlsx
-(column A, starting row 4) and prints one line per file.
+(column A, starting row 4), prints one line per file, and writes
+county_extraction_report.csv next to the xlsx.
 
     python3 county_extractor.py VA
 """
@@ -106,6 +112,46 @@ def extract_county(filename, counties):
     return None, "AMBIGUOUS: " + " / ".join(found)
 
 
+def extract_counties_with_report(filenames, counties, report_file, log=print):
+    """Extract a county from every filename, log each result, and write a CSV report.
+
+    filenames:   iterable of filenames to process.
+    counties:    iterable of county names for the target state (see load_counties).
+    report_file: path of the CSV report to write (overwritten). Columns:
+                 Status, Filename, County_or_Error; a summary row at the end.
+    log:         callable for one line per file plus the summary
+                 (print for CLI use, logger.info from other programs).
+
+    Returns (results, error_count) where results is {filename: county_or_None}.
+    """
+    results = {}
+    rows = []
+    errors = 0
+    for filename in filenames:
+        county, error = extract_county(filename, counties)
+        results[filename] = county
+        if error:
+            errors += 1
+            log(f"ERROR  {filename}  ->  {error}")
+            rows.append(("ERROR", filename, error))
+        else:
+            log(f"OK     {filename}  ->  {county}")
+            rows.append(("OK", filename, county))
+
+    summary = (f"{len(results)} files, {len(results) - errors} matched, "
+               f"{errors} error(s)")
+    log(summary)
+
+    with open(report_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Status", "Filename", "County_or_Error"])
+        writer.writerows(rows)
+        writer.writerow([])
+        writer.writerow([summary])
+
+    return results, errors
+
+
 def read_filelist(xlsx_path=DEFAULT_XLSX, sheet=FILELIST_SHEET,
                   first_row=FILELIST_FIRST_ROW):
     """Read filenames from column A of the FileList tab, stopping at the
@@ -136,17 +182,9 @@ def main(argv):
     counties = load_counties(state)
     filenames = read_filelist(xlsx_path)
 
-    errors = 0
-    for filename in filenames:
-        county, error = extract_county(filename, counties)
-        if error:
-            errors += 1
-            print(f"ERROR  {filename}  ->  {error}")
-        else:
-            print(f"OK     {filename}  ->  {county}")
-
-    print(f"\n{len(filenames)} files, {len(filenames) - errors} matched, "
-          f"{errors} error(s)")
+    report_file = Path(xlsx_path).parent / "county_extraction_report.csv"
+    _, errors = extract_counties_with_report(filenames, counties, report_file)
+    print(f"Report written to {report_file}")
     return 1 if errors else 0
 
 
