@@ -25,7 +25,11 @@
       "Read(//Library/Frameworks/Python.framework/Versions/3.12/bin/**)",
       "Bash(.venv/bin/python -c \"import cleaver.rovcleaver; print\\('imports OK'\\)\")",
       "Bash(python -)",
-      "Bash(.venv/bin/python -m py_compile cleaver/rovcleaver.py)"
+      "Bash(.venv/bin/python -m py_compile cleaver/rovcleaver.py)",
+      "Bash(python3 -c ' *)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(.venv/bin/python Work/county_extractor.py VA)",
+      "Bash(.venv/bin/python Work/county_extractor.py)"
     ]
   }
 }
