@@ -2264,14 +2264,26 @@ def apply_setup_defaults() -> None:
     """Fill ``ROV_SETUP`` with defaults for parameters missing from an older setup file.
 
     For each entry in ``SETUP_DEFAULTS`` not already read from the setup sheet,
-    assigns the default value and logs a warning so it is visible that the
-    campaign is running on a setup file older than the code.
+    assigns the default value and logs a warning.  If any defaults were applied,
+    pops up one Continue/Exit confirm listing every defaulted variable and its
+    value, so running on a setup file older than the code cannot be missed.
+    Choosing Exit stops the program before any processing.
     """
+    applied = []
     for key, val in SETUP_DEFAULTS.items():
         if key not in ROV_SETUP:
             ROV_SETUP[key] = val
+            applied.append((key, val))
             logger.warning(f"Setup file has no '{key}' - using default {val!r}. "
                            f"Add it to the setup sheet to remove this warning.")
+
+    if applied:
+        var_lines = "\n".join(f"    {key} = {val!r}" for key, val in applied)
+        exit_yes_no(f"The setup file is missing {len(applied)} newer parameter(s).\n"
+                    f"Default value(s) will be used:\n\n{var_lines}\n\n"
+                    f"Add the parameter(s) to the setup sheet to remove this popup.\n\n"
+                    f"Continue with these defaults, or Exit?",
+                    "Setup Defaults Applied")
 
 
 def read_setup_vars(field_col: int) -> None:
