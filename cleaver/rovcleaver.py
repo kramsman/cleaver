@@ -1890,7 +1890,8 @@ def convert_xlsx_to_csvs() -> None:
 
     Prompts the user to select a source directory of XLSX files and a
     destination directory for CSVs. Skips any XLSX that already has a
-    matching CSV. Prompts for confirmation before converting.
+    matching CSV. Prompts for confirmation before converting, and logs the
+    record count of each file as it is converted.
     """
     logger.info('starting convert_xlsx_to_csv')
 
@@ -1954,9 +1955,10 @@ def convert_xlsx_to_csvs() -> None:
     for file_info in xls_wo_csv:
         logger.info(f"Reading '{file_info['xls_name']}'")
         df = pd.read_excel(file_info['xls_w_path'], dtype=str)
+        logger.info(f"'{file_info['xls_name']}' contains {len(df):,} records")
         logger.info(f"Writing '{(file_info['xls_stem'] + '.csv')}'")
         df.to_csv(csv_dir / (file_info['xls_stem'] + '.csv'), index=False)
-        logger.debug('')
+        logger.info('')
 
 
 def main_format() -> None:
